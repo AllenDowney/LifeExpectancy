@@ -1,0 +1,86 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Life Expectancy Gender Gap Analysis",
+    "section": "",
+    "text": "This project analyzes the gender gap in life expectancy across OECD countries, identifying which mortality factors explain the most variation in the life expectancy gap between men and women."
+  },
+  {
+    "objectID": "index.html#overview",
+    "href": "index.html#overview",
+    "title": "Life Expectancy Gender Gap Analysis",
+    "section": "",
+    "text": "This project analyzes the gender gap in life expectancy across OECD countries, identifying which mortality factors explain the most variation in the life expectancy gap between men and women."
+  },
+  {
+    "objectID": "index.html#key-findings",
+    "href": "index.html#key-findings",
+    "title": "Life Expectancy Gender Gap Analysis",
+    "section": "Key Findings",
+    "text": "Key Findings\n[To be populated with results]"
+  },
+  {
+    "objectID": "index.html#methodology",
+    "href": "index.html#methodology",
+    "title": "Life Expectancy Gender Gap Analysis",
+    "section": "Methodology",
+    "text": "Methodology\nThe analysis uses: - Bayesian hierarchical panel models (implemented in both PyMC and brms) - Panel data from 37 OECD countries over 24 years (2000-2023) - Gender gap indicators for 12 mortality causes (cardiovascular disease, alcohol, suicide, etc.)"
+  },
+  {
+    "objectID": "index.html#technical-report",
+    "href": "index.html#technical-report",
+    "title": "Life Expectancy Gender Gap Analysis",
+    "section": "Technical Report",
+    "text": "Technical Report\nSee the Technical Report for detailed methodology, results, and analysis."
+  },
+  {
+    "objectID": "tech_report.html",
+    "href": "tech_report.html",
+    "title": "Technical Report",
+    "section": "",
+    "text": "[Placeholder - to be populated with executive summary]"
+  },
+  {
+    "objectID": "tech_report.html#executive-summary",
+    "href": "tech_report.html#executive-summary",
+    "title": "Technical Report",
+    "section": "",
+    "text": "[Placeholder - to be populated with executive summary]"
+  },
+  {
+    "objectID": "tech_report.html#data-processing",
+    "href": "tech_report.html#data-processing",
+    "title": "Technical Report",
+    "section": "Data Processing",
+    "text": "Data Processing\n[Placeholder - to be populated with data processing details from process.md]"
+  },
+  {
+    "objectID": "tech_report.html#bayesian-model-specification",
+    "href": "tech_report.html#bayesian-model-specification",
+    "title": "Technical Report",
+    "section": "Bayesian Model Specification",
+    "text": "Bayesian Model Specification\n\nPyMC Model\n[Placeholder - to be populated with PyMC model details from bayesian_model_py.md]\n\n\nbrms Model\n[Placeholder - to be populated with brms model details from bayesian_model_r.Rmd]"
+  },
+  {
+    "objectID": "tech_report.html#results-and-diagnostics",
+    "href": "tech_report.html#results-and-diagnostics",
+    "title": "Technical Report",
+    "section": "Results and Diagnostics",
+    "text": "Results and Diagnostics\n[Placeholder - to be populated with results and diagnostics]"
+  },
+  {
+    "objectID": "tech_report.html#model-comparison",
+    "href": "tech_report.html#model-comparison",
+    "title": "Technical Report",
+    "section": "Model Comparison",
+    "text": "Model Comparison\n[Placeholder - to be populated with comparison results from COMPARISON_RESULTS.md]"
+  },
+  {
+    "objectID": "tech_report.html#counterfactual-analysis",
+    "href": "tech_report.html#counterfactual-analysis",
+    "title": "Technical Report",
+    "section": "Counterfactual Analysis",
+    "text": "Counterfactual Analysis\n[Placeholder - to be populated with counterfactual analysis]"
+  }
+]
