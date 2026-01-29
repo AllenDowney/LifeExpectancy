@@ -109,7 +109,7 @@
     "href": "tech_report.html#results",
     "title": "Technical Report",
     "section": "Results",
-    "text": "Results\n\nKey Findings\nTop predictors (standardized coefficients, posterior means):\n\nRoad Traffic (β = 0.45): Strongest predictor\nHomicide (β = 0.44): Substantial contributor\nSuicide (β = 0.36): Second strongest\nCancer/Neoplasms (β = 0.31): Moderate contributor\nChronic Respiratory Disease (β = 0.30): Significant contributor\n\nCompeting risk effects (negative coefficients): - Cardiovascular Disease (β = -0.19): Negative effect reflects competing risks - Diabetes (β = -0.11): Similar competing risk pattern\nCOVID-19: Small positive effect (β = 0.11), impact largely resolved by 2023.\n\n\nModel Comparison: PyMC vs brms\nStatus: ✅ Excellent Agreement\nBoth models produce essentially identical results:\n\nBeta coefficients: Correlation r = 0.999993, all differences &lt; 0.8%\nCountry intercepts: Correlation r = 0.999991, largest difference &lt; 0.009\nHyperparameters: Mean differences &lt; 0.003\n\nThis validates that the statistical conclusions are robust to implementation choice. Details of the comparison: compare_pymc_brms.ipynb\n\n\nModel Diagnostics\nBoth implementations show excellent convergence and good efficiency:\nPyMC: - R-hat: &lt; 1.01 (all parameters converged) - ESS: 715 minimum (~18% of draws)\nbrms: - R-hat: &lt; 1.01 (all parameters converged) - ESS ratio: 0.15-0.34 (acceptable)\nThe models produce similar diagnostics, confirming correct implementation and successful sampling."
+    "text": "Results\n\nKey Findings\nTop predictors (standardized coefficients, posterior means):\n\nRoad Traffic (β = 0.45): Strongest predictor\nHomicide (β = 0.44): Substantial contributor\nSuicide (β = 0.36): Second strongest\nCancer/Neoplasms (β = 0.31): Moderate contributor\nChronic Respiratory Disease (β = 0.30): Significant contributor\n\nCompeting risk effects (negative coefficients): - Cardiovascular Disease (β = -0.19): Negative effect reflects competing risks - Diabetes (β = -0.11): Similar competing risk pattern\nCOVID-19: Small positive effect (β = 0.11), impact largely resolved by 2023.\n\n\nModel Comparison: PyMC and brms\nStatus: ✅ Excellent Agreement\nBoth models produce essentially identical results:\n\nBeta coefficients: Correlation r = 0.999993, all differences &lt; 0.8%\nCountry intercepts: Correlation r = 0.999991, largest difference &lt; 0.009\nHyperparameters: Mean differences &lt; 0.003\n\nThis validates that the statistical conclusions are robust to implementation choice. Details of the comparison: compare_pymc_brms.ipynb\n\n\nModel Diagnostics\nBoth implementations show excellent convergence and good efficiency:\nPyMC: - R-hat: &lt; 1.01 (all parameters converged) - ESS: 715 minimum (~18% of draws)\nbrms: - R-hat: &lt; 1.01 (all parameters converged) - ESS ratio: 0.15-0.34 (acceptable)\nThe models produce similar diagnostics, confirming correct implementation and successful sampling."
   },
   {
     "objectID": "tech_report.html#model-scope-and-limitations",
@@ -130,14 +130,14 @@
     "href": "index.html",
     "title": "Life Expectancy Gender Gap Analysis",
     "section": "",
-    "text": "This project analyzes the gender gap in life expectancy across OECD countries, identifying which mortality factors explain the most variation in the life expectancy gap between men and women."
+    "text": "This project analyzes the gender gap in life expectancy across OECD countries, identifying causes of death that contribute most to the observed differences between men and women."
   },
   {
     "objectID": "index.html#overview",
     "href": "index.html#overview",
     "title": "Life Expectancy Gender Gap Analysis",
     "section": "",
-    "text": "This project analyzes the gender gap in life expectancy across OECD countries, identifying which mortality factors explain the most variation in the life expectancy gap between men and women."
+    "text": "This project analyzes the gender gap in life expectancy across OECD countries, identifying causes of death that contribute most to the observed differences between men and women."
   },
   {
     "objectID": "index.html#documentation",
