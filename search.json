@@ -1,5 +1,138 @@
 [
   {
+    "objectID": "bayesian_model_r.html",
+    "href": "bayesian_model_r.html",
+    "title": "Life Expectancy Gender Gap - Bayesian Hierarchical Panel Model",
+    "section": "",
+    "text": "This notebook implements a Bayesian hierarchical panel model to analyze Life Expectancy gender gaps, replicating the PyMC model in bayesian_model_py.md using brms.\nModel Structure: - Random intercepts by country (37 OECD countries, Turkey excluded) - Shared slopes for 12 Gap predictors - Panel data: ~888 observations (37 countries × 24 years) - Preprocessing: Standardized predictors (mean=0, std=1, population std), centered target - Priors: Normal(0,1) for predictor coefficients\nData source: Panel data from process.ipynb (CSV format)"
+  },
+  {
+    "objectID": "bayesian_model_r.html#prepare-data",
+    "href": "bayesian_model_r.html#prepare-data",
+    "title": "Life Expectancy Gender Gap - Bayesian Hierarchical Panel Model",
+    "section": "Prepare Data",
+    "text": "Prepare Data\n\n\nRaw model data: 888 observations, 12 predictors \n\n\n\n\n\nVerifying standardized predictors in model_data: \n  Expected predictors: Gap_Alcohol, Gap_Suicide, Gap_Homicide, Gap_RoadTraffic, Gap_Cardiovascular, Gap_Diabetes, Gap_Neoplasms, Gap_ChronicRespiratory, Gap_LiverDisease, Gap_UnintentionalInjury, Gap_DrugDisorder, Gap_COVID \n  Found in model_data: Gap_Alcohol, Gap_Suicide, Gap_Homicide, Gap_RoadTraffic, Gap_Cardiovascular, Gap_Diabetes, Gap_Neoplasms, Gap_ChronicRespiratory, Gap_LiverDisease, Gap_UnintentionalInjury, Gap_DrugDisorder, Gap_COVID \n  ✓ All predictors found in model_data \n\nPreprocessing complete: \n  Predictors standardized: mean=0, std=1 (population std) \n  Target centered: mean subtracted (5.723 years) \n  Standardized predictor means: [-0.000, 0.000] \n  Standardized predictor stds: [1.001, 1.001] \n  Centered target mean: 0.000000 years \n\n\n\n# Summary of preprocessing (visible to reviewer)\nlog_and_print(\"\\nPreprocessing summary:\")\nlog_and_print(\"  Predictors: %d standardized (mean=0, std=1, population std)\", length(gap_cols))\nlog_and_print(\"  Target: centered (mean subtracted: %.3f years)\", y_mean)\nlog_and_print(\"  Final data: %d observations, %d countries, %d years\", \n              nrow(model_data), \n              n_distinct(model_data$country),\n              n_distinct(model_data$Year))\n\n\nPreprocessing summary: \n  Predictors: 12 standardized (mean=0, std=1, population std) \n  Target: centered (mean subtracted: 5.723 years) \n  Final data: 888 observations, 37 countries, 24 years"
+  },
+  {
+    "objectID": "bayesian_model_r.html#define-priors",
+    "href": "bayesian_model_r.html#define-priors",
+    "title": "Life Expectancy Gender Gap - Bayesian Hierarchical Panel Model",
+    "section": "Define Priors",
+    "text": "Define Priors\n\n# Priors matching PyMC model:\n# - Normal(0, 1) prior for predictor coefficients (beta)\n# - Normal(0, 5) prior for intercept (mu_alpha)\n# - HalfNormal(1) for random effect SD (sigma_alpha)\n# - HalfNormal(1) for residual SD (sigma)\n\nmodel_priors &lt;- c(\n  # Normal prior for predictor coefficients\n  set_prior(\"normal(0, 1)\", class = \"b\"),\n  # Prior for intercept \n  set_prior(\"normal(0, 5)\", class = \"Intercept\"),\n  # Prior for country random effect SD \n  set_prior(\"normal(0, 1)\", class = \"sd\", lb = 0),\n  # Prior for residual SD \n  set_prior(\"normal(0, 1)\", class = \"sigma\", lb = 0)\n)"
+  },
+  {
+    "objectID": "bayesian_model_r.html#fit-model",
+    "href": "bayesian_model_r.html#fit-model",
+    "title": "Life Expectancy Gender Gap - Bayesian Hierarchical Panel Model",
+    "section": "Fit Model",
+    "text": "Fit Model\n\n# Build formula: LE_gap_centered ~ standardized_predictors + (1 | country)\n#   mu = alpha[country_idx] + X_stdized @ beta\n#   y_centered ~ Normal(mu, sigma)\n\npredictor_formula &lt;- paste(gap_cols, collapse = \" + \")\nmodel_formula &lt;- as.formula(paste(\"LE_gap_centered ~\", predictor_formula, \"+ (1 | country)\"))\n\nlog_and_print(\"Model formula:\")\nlog_and_print(as.character(model_formula))\nlog_and_print(\"\\nNote: Using standardized predictors and centered target.\")\nprint(model_formula)\n\n# Fit the model\n# Sampling parameters: using longer warmup to improve convergence\n# iter=3000, warmup=2000 gives 1000 post-warmup draws per chain (same as before)\n# Longer warmup should help with convergence (R-hat) and ESS\nfit &lt;- brm(\n  model_formula,\n  data = model_data,\n  prior = model_priors,\n  chains = 4,\n  cores = 4,\n  iter = 3000,      # Total iterations per chain\n  warmup = 2000,    # Warmup iterations (longer warmup to improve convergence)\n  seed = 42,\n  backend = \"cmdstanr\",\n  silent = 2,        # Suppress most output\n  refresh = 500     # Print progress every 500 iterations\n)\n\n# Check if sampling completed successfully\nif (nrow(as_draws_df(fit)) == 0) {\n  stop(\"Model sampling failed - no posterior draws generated. Check Stan output above.\")\n}\n\nlog_and_print(\"\\n%s\", paste0(rep(\"=\", 80), collapse = \"\"))\nlog_and_print(\"LIFE EXPECTANCY MODEL - SAMPLING COMPLETE\")\nlog_and_print(\"%s\", paste0(rep(\"=\", 80), collapse = \"\"))\nlog_and_print(\"Total draws: %d (4 chains × %d draws per chain)\", \n              nrow(as_draws_df(fit)),\n              nrow(as_draws_df(fit)) / 4)\n\nlog_and_print(\"\\n✓ Model sampling completed successfully\")\nlog_and_print(\"  Total draws: %d (4 chains × %d draws per chain)\", \n              nrow(as_draws_df(fit)),\n              nrow(as_draws_df(fit)) / 4)\n\nModel formula: \n~ LE_gap_centered Gap_Alcohol + Gap_Suicide + Gap_Homicide + Gap_RoadTraffic + Gap_Cardiovascular + Gap_Diabetes + Gap_Neoplasms + Gap_ChronicRespiratory + Gap_LiverDisease + Gap_UnintentionalInjury + Gap_DrugDisorder + Gap_COVID + (1 | country) \n\nNote: Using standardized predictors and centered target. \nLE_gap_centered ~ Gap_Alcohol + Gap_Suicide + Gap_Homicide + \n    Gap_RoadTraffic + Gap_Cardiovascular + Gap_Diabetes + Gap_Neoplasms + \n    Gap_ChronicRespiratory + Gap_LiverDisease + Gap_UnintentionalInjury + \n    Gap_DrugDisorder + Gap_COVID + (1 | country)\n\n\n\n================================================================================ \nLIFE EXPECTANCY MODEL - SAMPLING COMPLETE \n================================================================================ \nTotal draws: 4000 (4 chains × 1000 draws per chain) \n\n✓ Model sampling completed successfully \n  Total draws: 4000 (4 chains × 1000 draws per chain) \n\n\n\n# Model summary\nsummary(fit)\n\n Family: gaussian \n  Links: mu = identity \nFormula: LE_gap_centered ~ Gap_Alcohol + Gap_Suicide + Gap_Homicide + Gap_RoadTraffic + Gap_Cardiovascular + Gap_Diabetes + Gap_Neoplasms + Gap_ChronicRespiratory + Gap_LiverDisease + Gap_UnintentionalInjury + Gap_DrugDisorder + Gap_COVID + (1 | country) \n   Data: model_data (Number of observations: 888) \n  Draws: 4 chains, each with iter = 3000; warmup = 2000; thin = 1;\n         total post-warmup draws = 4000\n\nMultilevel Hyperparameters:\n~country (Number of levels: 37) \n              Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS\nsd(Intercept)     0.65      0.09     0.50     0.84 1.00      973     1592\n\nRegression Coefficients:\n                        Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS\nIntercept                   0.00      0.10    -0.20     0.21 1.00      580\nGap_Alcohol                 0.14      0.03     0.07     0.20 1.00     4230\nGap_Suicide                 0.36      0.04     0.28     0.45 1.00     3299\nGap_Homicide                0.44      0.02     0.39     0.49 1.00     4652\nGap_RoadTraffic             0.45      0.03     0.40     0.50 1.00     3860\nGap_Cardiovascular         -0.19      0.03    -0.24    -0.13 1.00     2597\nGap_Diabetes               -0.11      0.02    -0.15    -0.06 1.00     4081\nGap_Neoplasms               0.31      0.05     0.21     0.42 1.00     2103\nGap_ChronicRespiratory      0.30      0.04     0.22     0.37 1.00     3616\nGap_LiverDisease            0.25      0.03     0.19     0.31 1.00     3860\nGap_UnintentionalInjury     0.16      0.04     0.08     0.24 1.00     2959\nGap_DrugDisorder            0.09      0.02     0.05     0.13 1.00     4517\nGap_COVID                   0.11      0.01     0.09     0.13 1.00     5419\n                        Tail_ESS\nIntercept                   1004\nGap_Alcohol                 2778\nGap_Suicide                 2747\nGap_Homicide                2840\nGap_RoadTraffic             3007\nGap_Cardiovascular          3034\nGap_Diabetes                2637\nGap_Neoplasms               2489\nGap_ChronicRespiratory      3021\nGap_LiverDisease            2877\nGap_UnintentionalInjury     2925\nGap_DrugDisorder            3216\nGap_COVID                   2328\n\nFurther Distributional Parameters:\n      Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS\nsigma     0.28      0.01     0.26     0.29 1.00     4792     2726\n\nDraws were sampled using sample(hmc). For each parameter, Bulk_ESS\nand Tail_ESS are effective sample size measures, and Rhat is the potential\nscale reduction factor on split chains (at convergence, Rhat = 1)."
+  },
+  {
+    "objectID": "bayesian_model_r.html#convergence",
+    "href": "bayesian_model_r.html#convergence",
+    "title": "Life Expectancy Gender Gap - Bayesian Hierarchical Panel Model",
+    "section": "Convergence",
+    "text": "Convergence\n\n# Check R-hat values\nrhat_vals &lt;- rhat(fit)\nlog_and_print(\"Max R-hat: %.4f (should be &lt; 1.01)\", max(rhat_vals, na.rm = TRUE))\nlog_and_print(\"Min R-hat: %.4f\", min(rhat_vals, na.rm = TRUE))\n\n# Any problematic R-hat?\nproblematic &lt;- rhat_vals[rhat_vals &gt; 1.01]\nif (length(problematic) &gt; 0) {\n  log_and_print(\"\\nWarning: Parameters with R-hat &gt; 1.01:\")\n  log_and_print(paste(names(problematic), collapse = \", \"))\n  print(problematic)\n} else {\n  log_and_print(\"\\nAll R-hat values acceptable.\")\n}\n\nMax R-hat: 1.0064 (should be &lt; 1.01) \nMin R-hat: 1.0000 \n\nAll R-hat values acceptable. \n\n\n\n# Check effective sample size\nneff_vals &lt;- neff_ratio(fit)\nmin_ess &lt;- min(neff_vals, na.rm = TRUE)\nmean_ess &lt;- mean(neff_vals, na.rm = TRUE)\n\nlog_and_print(sprintf(\"Min ESS ratio: %.2f\", min_ess))\nlog_and_print(sprintf(\"Mean ESS ratio: %.2f\", mean_ess))\n\nMin ESS ratio: 0.15 \nMean ESS ratio: 0.34 \n\n\n\n# Trace plots for key parameters\nmcmc_trace(fit, pars = c(\"b_Intercept\", \"sigma\", \"sd_country__Intercept\"))"
+  },
+  {
+    "objectID": "bayesian_model_r.html#loo-cross-validation",
+    "href": "bayesian_model_r.html#loo-cross-validation",
+    "title": "Life Expectancy Gender Gap - Bayesian Hierarchical Panel Model",
+    "section": "LOO Cross-Validation",
+    "text": "LOO Cross-Validation\n\n# Compute LOO-CV\nloo_fit &lt;- loo(fit, save_psis = TRUE)\nprint(loo_fit)\n\n# Log LOO diagnostics\nlog_and_print(\"\\nLOO Cross-Validation:\")\nlog_and_print(\"  ELPD: %.2f (SE: %.2f)\", \n              loo_fit$estimates[\"elpd_loo\", \"Estimate\"], \n              loo_fit$estimates[\"elpd_loo\", \"SE\"])\nlog_and_print(\"  p_loo: %.2f\", loo_fit$estimates[\"p_loo\", \"Estimate\"])\n\n\nComputed from 4000 by 888 log-likelihood matrix.\n\n         Estimate   SE\nelpd_loo   -143.9 32.7\np_loo        55.4  5.1\nlooic       287.8 65.3\n------\nMCSE of elpd_loo is NA.\nMCSE and ESS estimates assume MCMC draws (r_eff in [0.4, 1.4]).\n\nPareto k diagnostic values:\n                         Count Pct.    Min. ESS\n(-Inf, 0.7]   (good)     887   99.9%   653     \n   (0.7, 1]   (bad)        1    0.1%   &lt;NA&gt;    \n   (1, Inf)   (very bad)   0    0.0%   &lt;NA&gt;    \nSee help('pareto-k-diagnostic') for details.\n\nLOO Cross-Validation: \n  ELPD: -143.92 (SE: 32.66) \n  p_loo: 55.40 \n\n\n\n# Check Pareto k values\npareto_k &lt;- loo_fit$diagnostics$pareto_k\n\nlog_and_print(\"\\nPareto k diagnostics:\")\nlog_and_print(\"  Max k: %.3f\", max(pareto_k))\nlog_and_print(\"  Mean k: %.3f\", mean(pareto_k))\nlog_and_print(\"  k &gt; 0.7: %d (%.1f%%)\", \n              sum(pareto_k &gt; 0.7), 100 * mean(pareto_k &gt; 0.7))\n\n# Plot Pareto k values\nplot(loo_fit)\n\n\nPareto k diagnostics: \n  Max k: 0.773 \n  Mean k: 0.088 \n  k &gt; 0.7: 1 (0.1%)"
+  },
+  {
+    "objectID": "bayesian_model_r.html#posterior-predictive-check",
+    "href": "bayesian_model_r.html#posterior-predictive-check",
+    "title": "Life Expectancy Gender Gap - Bayesian Hierarchical Panel Model",
+    "section": "Posterior Predictive Check",
+    "text": "Posterior Predictive Check\n\n# Posterior predictive check (quick example, not exhaustive)\n# Density overlay: Compare the distribution of observed data to posterior predictive samples\n# Good fit: Observed data (dark line) should fall within the range of predictive samples (light lines)\nsuppressWarnings({\n  pp_check(fit, ndraws = 100) +\n    labs(title = \"Posterior Predictive Check: Density Overlay\",\n         subtitle = \"Observed data (dark) vs. posterior predictive samples (light)\")\n})"
+  },
+  {
+    "objectID": "bayesian_model_r.html#fixed-effects-predictor-coefficients",
+    "href": "bayesian_model_r.html#fixed-effects-predictor-coefficients",
+    "title": "Life Expectancy Gender Gap - Bayesian Hierarchical Panel Model",
+    "section": "Fixed Effects (Predictor Coefficients)",
+    "text": "Fixed Effects (Predictor Coefficients)\nBecause predictors are standardized, coefficients represent expected changes in the centered life expectancy gap associated with a one-SD change in the predictor, conditional on country.\n\n# Extract fixed effects\nfixed_eff &lt;- fixef(fit) %&gt;%\n  as.data.frame() %&gt;%\n  rownames_to_column(\"term\") %&gt;%\n  filter(term != \"Intercept\") %&gt;%\n  arrange(desc(abs(Estimate)))\n\n# Plot coefficients with credible intervals\nfixed_eff %&gt;%\n  ggplot(aes(x = reorder(term, Estimate), y = Estimate)) +\n  geom_point(size = 3, color = \"steelblue\") +\n  geom_errorbar(aes(ymin = Q2.5, ymax = Q97.5), width = 0.2, color = \"steelblue\") +\n  geom_hline(yintercept = 0, linetype = \"dashed\", color = \"gray50\") +\n  coord_flip() +\n  labs(\n    title = \"Posterior Coefficient Estimates\",\n    subtitle = \"95% Credible Intervals (Normal(0,1) Prior)\",\n    x = NULL,\n    y = \"Coefficient (standardized)\"\n  )\n\n# Table\nfixed_eff %&gt;%\n  knitr::kable(digits = 3, caption = \"Fixed Effects (Predictor Coefficients)\")\n\n\n\nTable: Fixed Effects (Predictor Coefficients)\n\n|term                    | Estimate| Est.Error|   Q2.5|  Q97.5|\n|:-----------------------|--------:|---------:|------:|------:|\n|Gap_RoadTraffic         |    0.446|     0.026|  0.396|  0.496|\n|Gap_Homicide            |    0.441|     0.024|  0.394|  0.488|\n|Gap_Suicide             |    0.365|     0.041|  0.285|  0.446|\n|Gap_Neoplasms           |    0.314|     0.054|  0.206|  0.418|\n|Gap_ChronicRespiratory  |    0.296|     0.038|  0.222|  0.374|\n|Gap_LiverDisease        |    0.250|     0.032|  0.189|  0.311|\n|Gap_Cardiovascular      |   -0.188|     0.028| -0.243| -0.133|\n|Gap_UnintentionalInjury |    0.161|     0.039|  0.085|  0.238|\n|Gap_Alcohol             |    0.138|     0.034|  0.071|  0.204|\n|Gap_COVID               |    0.108|     0.010|  0.088|  0.128|\n|Gap_Diabetes            |   -0.106|     0.024| -0.154| -0.058|\n|Gap_DrugDisorder        |    0.091|     0.020|  0.053|  0.130|"
+  },
+  {
+    "objectID": "bayesian_model_r.html#random-effects-country-intercepts",
+    "href": "bayesian_model_r.html#random-effects-country-intercepts",
+    "title": "Life Expectancy Gender Gap - Bayesian Hierarchical Panel Model",
+    "section": "Random Effects (Country Intercepts)",
+    "text": "Random Effects (Country Intercepts)\n\n# Extract country random effects\ncountry_effects &lt;- ranef(fit)$country %&gt;%\n  as.data.frame() %&gt;%\n  rownames_to_column(\"country\") %&gt;%\n  arrange(desc(Estimate.Intercept))\n\n# Plot country intercepts\ncountry_effects %&gt;%\n  ggplot(aes(x = reorder(country, Estimate.Intercept), y = Estimate.Intercept)) +\n  geom_point(size = 3, color = \"steelblue\") +\n  geom_errorbar(aes(ymin = Q2.5.Intercept, ymax = Q97.5.Intercept), \n                width = 0.2, color = \"steelblue\") +\n  geom_hline(yintercept = 0, linetype = \"dashed\", color = \"gray50\") +\n  coord_flip() +\n  labs(\n    title = \"Country Random Intercepts\",\n    subtitle = \"Deviation from grand mean (95% CI)\",\n    x = NULL,\n    y = \"Random Intercept\"\n  )\n\n# Table\ncountry_effects %&gt;%\n  select(country, Estimate = Estimate.Intercept, \n         Q2.5 = Q2.5.Intercept, Q97.5 = Q97.5.Intercept) %&gt;%\n  knitr::kable(digits = 3, caption = \"Country Random Effects\")\n\n\n\nTable: Country Random Effects\n\n|country | Estimate|   Q2.5|  Q97.5|\n|:-------|--------:|------:|------:|\n|EST     |    1.322|  0.946|  1.714|\n|LVA     |    1.268|  0.909|  1.649|\n|KOR     |    1.170|  0.917|  1.429|\n|FRA     |    0.852|  0.595|  1.127|\n|POL     |    0.779|  0.502|  1.068|\n|SVK     |    0.713|  0.440|  0.994|\n|LTU     |    0.695|  0.259|  1.135|\n|JPN     |    0.635|  0.324|  0.951|\n|FIN     |    0.475|  0.174|  0.760|\n|IRL     |    0.424|  0.147|  0.686|\n|ISL     |    0.401|  0.110|  0.675|\n|CAN     |    0.104| -0.155|  0.357|\n|DNK     |    0.097| -0.184|  0.373|\n|CZE     |    0.019| -0.220|  0.262|\n|ISR     |   -0.005| -0.296|  0.266|\n|GBR     |   -0.013| -0.277|  0.233|\n|USA     |   -0.033| -0.314|  0.247|\n|NOR     |   -0.052| -0.306|  0.206|\n|SWE     |   -0.145| -0.406|  0.105|\n|GRC     |   -0.165| -0.500|  0.183|\n|HUN     |   -0.196| -0.522|  0.123|\n|AUS     |   -0.205| -0.447|  0.035|\n|NZL     |   -0.225| -0.483|  0.025|\n|CHE     |   -0.262| -0.499| -0.025|\n|COL     |   -0.321| -0.718|  0.055|\n|DEU     |   -0.347| -0.588| -0.106|\n|ESP     |   -0.348| -0.641| -0.055|\n|CRI     |   -0.351| -0.655| -0.070|\n|AUT     |   -0.438| -0.692| -0.188|\n|CHL     |   -0.471| -0.757| -0.209|\n|PRT     |   -0.494| -0.775| -0.193|\n|NLD     |   -0.503| -0.763| -0.251|\n|SVN     |   -0.605| -0.908| -0.305|\n|ITA     |   -0.753| -1.018| -0.485|\n|BEL     |   -0.834| -1.091| -0.569|\n|LUX     |   -0.918| -1.155| -0.694|\n|MEX     |   -1.294| -1.632| -0.966|"
+  },
+  {
+    "objectID": "bayesian_model_r.html#feature-importance",
+    "href": "bayesian_model_r.html#feature-importance",
+    "title": "Life Expectancy Gender Gap - Bayesian Hierarchical Panel Model",
+    "section": "Feature Importance",
+    "text": "Feature Importance\nA heuristic ranking derived from the fitted linear predictor.\n\n# Compute importance as |coefficient| × SD of predictor\n# IMPORTANT: Use original (unstandardized) SDs, not SDs of standardized predictors\n# The standardized predictors have SD ≈ 1, which would give incorrect importance\n# We stored the original SDs in X_std_safe during preprocessing\npredictor_sds &lt;- tibble(\n  term = gap_cols,\n  sd = X_std_safe  # Original SDs (before standardization)\n)\n\nimportance &lt;- fixed_eff %&gt;%\n  left_join(predictor_sds, by = \"term\") %&gt;%\n  mutate(\n    importance = abs(Estimate) * sd,\n    importance_lower = abs(Q2.5) * sd,\n    importance_upper = abs(Q97.5) * sd\n  ) %&gt;%\n  arrange(desc(importance))\n\n# Plot importance\nimportance %&gt;%\n  head(12) %&gt;%\n  ggplot(aes(x = reorder(term, importance), y = importance)) +\n  geom_col(fill = \"steelblue\") +\n  coord_flip() +\n  labs(\n    title = \"Feature Importance\",\n    subtitle = \"|Coefficient| × SD(predictor)\",\n    x = NULL,\n    y = \"Importance\"\n  )"
+  },
+  {
+    "objectID": "bayesian_model_r.html#r²-and-model-fit",
+    "href": "bayesian_model_r.html#r²-and-model-fit",
+    "title": "Life Expectancy Gender Gap - Bayesian Hierarchical Panel Model",
+    "section": "R² and Model Fit",
+    "text": "R² and Model Fit\n\n# Bayesian R²\n# IMPORTANT: In hierarchical models, there are two types of R²:\n# - Conditional R²: includes random effects (country intercepts) in μ\n# - Marginal R²: uses only fixed effects (population-level), no random intercepts\n#\n# brms's bayes_R2() by default computes CONDITIONAL R² (includes random effects)\n# Use re_formula = NA to get MARGINAL R²\n\n# Conditional R² (default - includes country random effects)\nr2_cond &lt;- bayes_R2(fit, summary = FALSE)\nlog_and_print(\"CONDITIONAL R² (includes country random effects):\")\nlog_and_print(\"  R² (mean): %.3f\", mean(r2_cond))\nlog_and_print(\"  R² (95%% CI: %.3f - %.3f)\",\n              quantile(r2_cond, 0.025), quantile(r2_cond, 0.975))\n\n# Marginal R² (fixed effects only, no country intercepts)\nr2_marg &lt;- bayes_R2(fit, summary = FALSE, re_formula = NA)\nlog_and_print(\"\\nMARGINAL R² (fixed effects only, no country intercepts):\")\nlog_and_print(\"  R² (mean): %.3f\", mean(r2_marg))\nlog_and_print(\"  R² (95%% CI: %.3f - %.3f)\",\n              quantile(r2_marg, 0.025), quantile(r2_marg, 0.975))\n\nCONDITIONAL R² (includes country random effects): \n  R² (mean): 0.978 \n  R² (95% CI: 0.978 - 0.979) \n\nMARGINAL R² (fixed effects only, no country intercepts): \n  R² (mean): 0.845 \n  R² (95% CI: 0.802 - 0.877)"
+  },
+  {
+    "objectID": "tech_report.html",
+    "href": "tech_report.html",
+    "title": "Technical Report",
+    "section": "",
+    "text": "This analysis examines the gender gap in Life Expectancy across 37 OECD countries (2000-2023), identifying which mortality factors explain the most variation in why women live longer than men. The analysis uses a Bayesian hierarchical panel model implemented in both PyMC (Python) and brms (R/Stan) to ensure robust, reproducible results.\nKey Finding: External causes of death (road traffic accidents, suicide, homicide, drug overdoses) are the primary drivers of the gender gap, accounting for the majority of the observed differences. In the United States, addressing just four factors could reduce the gender gap by approximately 2.5 years."
+  },
+  {
+    "objectID": "tech_report.html#executive-summary",
+    "href": "tech_report.html#executive-summary",
+    "title": "Technical Report",
+    "section": "",
+    "text": "This analysis examines the gender gap in Life Expectancy across 37 OECD countries (2000-2023), identifying which mortality factors explain the most variation in why women live longer than men. The analysis uses a Bayesian hierarchical panel model implemented in both PyMC (Python) and brms (R/Stan) to ensure robust, reproducible results.\nKey Finding: External causes of death (road traffic accidents, suicide, homicide, drug overdoses) are the primary drivers of the gender gap, accounting for the majority of the observed differences. In the United States, addressing just four factors could reduce the gender gap by approximately 2.5 years."
+  },
+  {
+    "objectID": "tech_report.html#purpose-of-this-repository",
+    "href": "tech_report.html#purpose-of-this-repository",
+    "title": "Technical Report",
+    "section": "Purpose of This Repository",
+    "text": "Purpose of This Repository\nThis repository presents a focused analysis based on the primary model from the HALE (Healthy Life Expectancy) analysis. The repository has three objectives:\n\nPresent the primary model for Life Expectancy, implemented in PyMC (Python)\nReimplement the model in brms (R/Stan) to confirm model equivalence\nCompare and validate results between implementations to ensure consistency\n\nBy implementing the same model in two different Bayesian frameworks, we verify that results are robust to implementation choices and provide code for different audiences."
+  },
+  {
+    "objectID": "tech_report.html#data-and-model",
+    "href": "tech_report.html#data-and-model",
+    "title": "Technical Report",
+    "section": "Data and Model",
+    "text": "Data and Model\n\nData\n\nPanel data: 888 observations (37 OECD countries × 24 years, 2000-2023)\nTarget variable: Life Expectancy gender gap (Female - Male, in years)\nPredictors: 12 cause-specific mortality gender gaps:\n\nExternal causes: Road traffic, suicide, homicide, drug disorders, unintentional injuries, alcohol\nChronic diseases: Cardiovascular, cancer, diabetes, chronic respiratory, liver disease\nPandemic: COVID-19\n\n\nData processing workflow: process.md\n\n\nModel Specification\nBayesian Hierarchical Panel Model: - Random intercepts by country (37 countries) - Shared slopes for all predictors - Identical priors and preprocessing in both implementations\nModel Equation:\ny_centered[i] ~ Normal(μ[i], σ)\nμ[i] = α[country[i]] + X[i] · β\nα[country] ~ Normal(μ_α, σ_α)\nWhere predictors are standardized (mean=0, std=1) and the target is centered.\nPriors: - Predictor coefficients (β): Normal(0, 1) - Intercept mean (μ_α): Normal(0, 5) - Intercept SD (σ_α): HalfNormal(1) - Residual SD (σ): HalfNormal(1)\nComplete model specifications: - PyMC implementation - brms implementation"
+  },
+  {
+    "objectID": "tech_report.html#results",
+    "href": "tech_report.html#results",
+    "title": "Technical Report",
+    "section": "Results",
+    "text": "Results\n\nModel Diagnostics\nBoth implementations show excellent convergence:\nPyMC: - R-hat: 1.0100 (excellent) - ESS: 715 minimum (~18% of draws) - Conditional R²: 0.9783 (includes country effects) - Marginal R²: 0.8446 (fixed effects only)\nbrms: - R-hat: &lt; 1.01 (all parameters converged) - ESS ratio: 0.15-0.34 (acceptable) - Conditional R²: 0.978 - Marginal R²: 0.845\nBoth models produce essentially identical R² values, confirming correct implementation.\n\n\nKey Findings\nTop predictors (standardized coefficients, posterior means):\n\nRoad Traffic (β = 0.45): Strongest predictor\nHomicide (β = 0.44): Substantial contributor\nSuicide (β = 0.36): Second strongest\nCancer/Neoplasms (β = 0.31): Moderate contributor\nChronic Respiratory (β = 0.30): Significant contributor\n\nCompeting risk effects (negative coefficients): - Cardiovascular Disease (β = -0.19): Negative effect reflects competing risks - Diabetes (β = -0.11): Similar competing risk pattern\nCOVID-19: Small positive effect (β = 0.11), impact largely resolved by 2023.\n\n\nModel Comparison: PyMC vs brms\nStatus: ✅ Excellent Agreement\nBoth models produce essentially identical results:\n\nBeta coefficients: Correlation r = 0.999993, all differences &lt; 0.8%\nCountry intercepts: Correlation r = 0.999991, largest difference &lt; 0.009\nHyperparameters: Mean differences &lt; 0.003\nR² values: Identical (conditional: 0.978, marginal: 0.845)\n\nThis validates that the statistical conclusions are robust to implementation choice. Complete comparison: compare_pymc_brms.md"
+  },
+  {
+    "objectID": "tech_report.html#policy-implications",
+    "href": "tech_report.html#policy-implications",
+    "title": "Technical Report",
+    "section": "Policy Implications",
+    "text": "Policy Implications\n\nCounterfactual Analysis: United States Case Study\nIf each cause could be reduced to best-in-class levels observed across OECD countries, the potential reductions in the Life Expectancy gap are:\nTop Opportunities: - Road Traffic: -0.83 years - Drug Disorders: -0.77 years - Suicide: -0.52 years - Homicide: -0.29 years\nNet Potential Reduction: 2.5 years in the Life Expectancy gap\nThese are all areas where evidence-based interventions exist and where progress has been demonstrated in some countries but not others.\nFor detailed counterfactual analysis, see the HALE project’s executive summary."
+  },
+  {
+    "objectID": "tech_report.html#model-scope-and-limitations",
+    "href": "tech_report.html#model-scope-and-limitations",
+    "title": "Technical Report",
+    "section": "Model Scope and Limitations",
+    "text": "Model Scope and Limitations\n\nLinear additive effects: Assumes linear relationships, no interactions\nNo explicit temporal correlation: Country intercepts capture persistent differences but not year-to-year dependencies\nAssociations only: Results represent associations, not causal effects\nSensitivity to prior scale: Not explored here; uses standard weakly informative priors"
+  },
+  {
+    "objectID": "tech_report.html#references",
+    "href": "tech_report.html#references",
+    "title": "Technical Report",
+    "section": "References",
+    "text": "References\n\nPyMC model notebook: bayesian_model_py.md\nbrms model notebook: bayesian_model_r.Rmd\nModel comparison: compare_pymc_brms.md\nHALE project: EqualityWEF/HALE"
+  },
+  {
     "objectID": "index.html",
     "href": "index.html",
     "title": "Life Expectancy Gender Gap Analysis",
@@ -33,54 +166,5 @@
     "title": "Life Expectancy Gender Gap Analysis",
     "section": "Technical Report",
     "text": "Technical Report\nSee the Technical Report for detailed methodology, results, and analysis."
-  },
-  {
-    "objectID": "tech_report.html",
-    "href": "tech_report.html",
-    "title": "Technical Report",
-    "section": "",
-    "text": "[Placeholder - to be populated with executive summary]"
-  },
-  {
-    "objectID": "tech_report.html#executive-summary",
-    "href": "tech_report.html#executive-summary",
-    "title": "Technical Report",
-    "section": "",
-    "text": "[Placeholder - to be populated with executive summary]"
-  },
-  {
-    "objectID": "tech_report.html#data-processing",
-    "href": "tech_report.html#data-processing",
-    "title": "Technical Report",
-    "section": "Data Processing",
-    "text": "Data Processing\n[Placeholder - to be populated with data processing details from process.md]"
-  },
-  {
-    "objectID": "tech_report.html#bayesian-model-specification",
-    "href": "tech_report.html#bayesian-model-specification",
-    "title": "Technical Report",
-    "section": "Bayesian Model Specification",
-    "text": "Bayesian Model Specification\n\nPyMC Model\n[Placeholder - to be populated with PyMC model details from bayesian_model_py.md]\n\n\nbrms Model\n[Placeholder - to be populated with brms model details from bayesian_model_r.Rmd]"
-  },
-  {
-    "objectID": "tech_report.html#results-and-diagnostics",
-    "href": "tech_report.html#results-and-diagnostics",
-    "title": "Technical Report",
-    "section": "Results and Diagnostics",
-    "text": "Results and Diagnostics\n[Placeholder - to be populated with results and diagnostics]"
-  },
-  {
-    "objectID": "tech_report.html#model-comparison",
-    "href": "tech_report.html#model-comparison",
-    "title": "Technical Report",
-    "section": "Model Comparison",
-    "text": "Model Comparison\n[Placeholder - to be populated with comparison results from COMPARISON_RESULTS.md]"
-  },
-  {
-    "objectID": "tech_report.html#counterfactual-analysis",
-    "href": "tech_report.html#counterfactual-analysis",
-    "title": "Technical Report",
-    "section": "Counterfactual Analysis",
-    "text": "Counterfactual Analysis\n[Placeholder - to be populated with counterfactual analysis]"
   }
 ]
