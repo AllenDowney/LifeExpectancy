@@ -147,24 +147,10 @@
     "text": "This project analyzes the gender gap in life expectancy across OECD countries, identifying which mortality factors explain the most variation in the life expectancy gap between men and women."
   },
   {
-    "objectID": "index.html#key-findings",
-    "href": "index.html#key-findings",
+    "objectID": "index.html#documentation",
+    "href": "index.html#documentation",
     "title": "Life Expectancy Gender Gap Analysis",
-    "section": "Key Findings",
-    "text": "Key Findings\n[To be populated with results]"
-  },
-  {
-    "objectID": "index.html#methodology",
-    "href": "index.html#methodology",
-    "title": "Life Expectancy Gender Gap Analysis",
-    "section": "Methodology",
-    "text": "Methodology\nThe analysis uses: - Bayesian hierarchical panel models (implemented in both PyMC and brms) - Panel data from 37 OECD countries over 24 years (2000-2023) - Gender gap indicators for 12 mortality causes (cardiovascular disease, alcohol, suicide, etc.)"
-  },
-  {
-    "objectID": "index.html#technical-report",
-    "href": "index.html#technical-report",
-    "title": "Life Expectancy Gender Gap Analysis",
-    "section": "Technical Report",
-    "text": "Technical Report\nSee the Technical Report for detailed methodology, results, and analysis."
+    "section": "Documentation",
+    "text": "Documentation\n\nTechnical Report - Summary of methodology, results, and findings\nR Model Notebook - Complete brms implementation with diagnostics and results"
   }
 ]
