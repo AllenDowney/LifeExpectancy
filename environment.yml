@@ -1,0 +1,71 @@
+name: LifeExpectancy
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  # Python
+  - python=3.11
+  
+  # Jupyter
+  - jupyter
+  - jupyterlab
+  - jupytext
+  
+  # Data manipulation
+  - numpy
+  - pandas<3.0            # Pin to avoid Arrow string issues with PyMC/nutpie
+  - scipy
+  - pytables          # HDF5 support (tables package)
+  - empiricaldist     # For empirical distributions
+  
+  # Visualization
+  - matplotlib
+  - seaborn
+  
+  # Machine learning
+  - scikit-learn
+  - statsmodels
+  
+  # Bayesian (Python)
+  - pymc
+  - nutpie
+  - arviz
+  - preliz
+  
+  # R base
+  - r-base=4.3
+  - r-irkernel         # R kernel for Jupyter
+  
+  # R Bayesian modeling
+  - r-brms
+  - r-cmdstanr
+  - r-bayesplot
+  - r-loo
+  - r-tidybayes
+  
+  # R data manipulation
+  - r-tidyverse
+  - r-readr
+  - r-dplyr
+  - r-tidyr
+  - r-ggplot2
+  - r-hdf5r            # HDF5 support for R
+  
+  # R visualization & reporting
+  - r-patchwork
+  - r-scales
+  - r-knitr
+  - r-rmarkdown
+  - r-gt
+  
+  # Stan backend
+  - cmdstan
+  
+  # Development tools
+  - pip
+  - black
+  - flake8
+  - pytest
+  - nbmake           # pytest plugin for notebooks
+
