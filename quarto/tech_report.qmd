@@ -1,0 +1,116 @@
+---
+title: "Technical Report"
+---
+
+## Executive Summary
+
+This analysis examines the gender gap in Life Expectancy across 37 OECD countries (2000-2023), identifying which mortality factors explain the most variation across countries and time. The analysis uses a Bayesian hierarchical panel model implemented in both PyMC (Python) and brms (R/Stan) to ensure robust, reproducible results.
+
+**Key Finding**: External causes of death (road traffic accidents, suicide, homicide, drug overdoses) are the primary drivers of the gender gap, accounting for the majority of the observed differences. In the United States, addressing just four factors could reduce the gender gap by approximately 2.5 years.
+
+## Purpose of This Repository
+
+This repository presents a focused analysis based on the primary model from this [analysis of gender gaps in life expectancy](https://allendowney.github.io/EqualityWEF/). The repository has three objectives:
+
+1. Present the primary model for Life Expectancy, implemented in PyMC (Python)
+2. Reimplement the model in brms (R/Stan) to confirm model equivalence
+3. Compare and validate results between implementations to ensure consistency
+
+By implementing the same model in two different Bayesian frameworks, we verify that results are robust to implementation choices and provide code for different audiences.
+
+## Data and Model
+
+### Data
+
+- Panel data: 888 observations (37 OECD countries × 24 years, 2000-2023)
+- Target variable: Life Expectancy gender gap (Female - Male, in years)
+- Predictors: 12 cause-specific mortality gender gaps:
+  - External causes: Road traffic, suicide, homicide, drug disorders, unintentional injuries, alcohol
+  - Chronic diseases: Cardiovascular, cancer, diabetes, chronic respiratory, liver disease
+  - Pandemic: COVID-19
+
+Exporatory data analysis and processing: [`process.ipynb`](https://github.com/AllenDowney/LifeExpectancy/tree/main/notebooks/process.ipynb)
+
+### Model Specification
+
+Bayesian Hierarchical Panel Model:
+- Random intercepts by country (37 countries)
+- Shared slopes for all predictors
+- Identical priors and preprocessing in both implementations
+
+Model Equation:
+```
+y_centered[i] ~ Normal(μ[i], σ)
+μ[i] = α[country[i]] + X[i] · β
+α[country] ~ Normal(μ_α, σ_α)
+```
+
+Where predictors are standardized (mean=0, std=1) and the target is centered.
+
+Priors:
+- Predictor coefficients (β): `Normal(0, 1)`
+- Intercept mean (μ_α): `Normal(0, 5)`
+- Intercept SD (σ_α): `HalfNormal(1)`
+- Residual SD (σ): `HalfNormal(1)`
+
+Models and results in these notebooks:
+- [PyMC implementation](https://github.com/AllenDowney/LifeExpectancy/tree/main/notebooks/bayesian_model_py.ipynb)
+- [brms implementation](https://github.com/AllenDowney/LifeExpectancy/tree/main/notebooks/bayesian_model_r.ipynb)
+
+## Results
+
+### Key Findings
+
+Top predictors (standardized coefficients, posterior means):
+
+1. Road Traffic (β = 0.45): Strongest predictor
+2. Homicide (β = 0.44): Substantial contributor
+3. Suicide (β = 0.36): Second strongest
+4. Cancer/Neoplasms (β = 0.31): Moderate contributor
+5. Chronic Respiratory Disease (β = 0.30): Significant contributor
+
+Competing risk effects (negative coefficients):
+- Cardiovascular Disease (β = -0.19): Negative effect reflects competing risks
+- Diabetes (β = -0.11): Similar competing risk pattern
+
+COVID-19: Small positive effect (β = 0.11), impact largely resolved by 2023.
+
+### Model Comparison: PyMC and brms
+
+Status: ✅ Excellent Agreement
+
+Both models produce essentially identical results:
+
+- Beta coefficients: Correlation r = 0.999993, all differences < 0.8%
+- Country intercepts: Correlation r = 0.999991, largest difference < 0.009
+- Hyperparameters: Mean differences < 0.003
+
+This validates that the statistical conclusions are robust to implementation choice. Details of the comparison: [`compare_pymc_brms.ipynb`](https://github.com/AllenDowney/LifeExpectancy/tree/main/notebooks/compare_pymc_brms.ipynb)
+
+### Model Diagnostics
+
+Both implementations show excellent convergence and good efficiency:
+
+PyMC:
+- R-hat: < 1.01 (all parameters converged)
+- ESS: 715 minimum (~18% of draws)
+
+brms:
+- R-hat: < 1.01 (all parameters converged)
+- ESS ratio: 0.15-0.34 (acceptable)
+
+The models produce similar diagnostics, confirming correct implementation and successful sampling.
+
+## Model Scope and Limitations
+
+- Linear additive effects: Assumes linear relationships, no interactions
+- No explicit temporal correlation: Country intercepts capture persistent differences but not year-to-year dependencies
+- Associations only: Results represent associations, not causal effects
+- Sensitivity to prior scale: Not explored here; uses standard weakly informative priors
+
+## References
+
+- PyMC model notebook: [`bayesian_model_py.ipynb`](https://github.com/AllenDowney/LifeExpectancy/tree/main/notebooks/bayesian_model_py.ipynb)
+- brms model notebook: [`bayesian_model_r.ipynb`](https://github.com/AllenDowney/LifeExpectancy/tree/main/notebooks/bayesian_model_r.ipynb)
+- Model comparison: [`compare_pymc_brms.ipynb`](https://github.com/AllenDowney/LifeExpectancy/tree/main/notebooks/compare_pymc_brms.ipynb)
+- HALE project: [EqualityWEF/HALE](https://allendowney.github.io/EqualityWEF/)

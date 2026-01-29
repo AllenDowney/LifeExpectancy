@@ -1,0 +1,13 @@
+---
+title: "Life Expectancy Gender Gap Analysis"
+---
+
+## Overview
+
+This project analyzes the gender gap in life expectancy across OECD countries, identifying causes of death that contribute most to the observed differences between men and women.
+
+## Documentation
+
+- **[Technical Report](tech_report.html)** - Summary of methodology, results, and findings
+- **[R Model Notebook](bayesian_model_r.html)** - Complete brms implementation with diagnostics and results
+
