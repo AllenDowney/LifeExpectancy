@@ -135,16 +135,16 @@ ul.task-list li input[type="checkbox"] {
 
 <section id="executive-summary" class="level2">
 <h2 class="anchored" data-anchor-id="executive-summary">Executive Summary</h2>
-<p>This analysis examines the <strong>gender gap in Life Expectancy</strong> across 37 OECD countries (2000-2023), identifying which mortality factors explain the most variation in why women live longer than men. The analysis uses a <strong>Bayesian hierarchical panel model</strong> implemented in both PyMC (Python) and brms (R/Stan) to ensure robust, reproducible results.</p>
-<p><strong>Key Finding</strong>: External causes of death (road traffic accidents, suicide, homicide, drug overdoses) are the primary drivers of the gender gap, accounting for the majority of the observed differences. In the United States, addressing just four factors could reduce the gender gap by approximately <strong>2.5 years</strong>.</p>
+<p>This analysis examines the gender gap in Life Expectancy across 37 OECD countries (2000-2023), identifying which mortality factors explain the most variation across countries and time. The analysis uses a Bayesian hierarchical panel model implemented in both PyMC (Python) and brms (R/Stan) to ensure robust, reproducible results.</p>
+<p><strong>Key Finding</strong>: External causes of death (road traffic accidents, suicide, homicide, drug overdoses) are the primary drivers of the gender gap, accounting for the majority of the observed differences. In the United States, addressing just four factors could reduce the gender gap by approximately 2.5 years.</p>
 </section>
 <section id="purpose-of-this-repository" class="level2">
 <h2 class="anchored" data-anchor-id="purpose-of-this-repository">Purpose of This Repository</h2>
-<p>This repository presents a focused analysis based on the primary model from the <a href="https://github.com/AllenDowney/EqualityWEF/tree/main/HALE">HALE (Healthy Life Expectancy) analysis</a>. The repository has three objectives:</p>
+<p>This repository presents a focused analysis based on the primary model from this <a href="https://allendowney.github.io/EqualityWEF/">analysis of gender gaps in life expectancy</a>. The repository has three objectives:</p>
 <ol type="1">
-<li><strong>Present the primary model</strong> for Life Expectancy, implemented in <strong>PyMC</strong> (Python)</li>
-<li><strong>Reimplement the model in brms</strong> (R/Stan) to confirm model equivalence</li>
-<li><strong>Compare and validate results</strong> between implementations to ensure consistency</li>
+<li>Present the primary model for Life Expectancy, implemented in PyMC (Python)</li>
+<li>Reimplement the model in brms (R/Stan) to confirm model equivalence</li>
+<li>Compare and validate results between implementations to ensure consistency</li>
 </ol>
 <p>By implementing the same model in two different Bayesian frameworks, we verify that results are robust to implementation choices and provide code for different audiences.</p>
 </section>
@@ -153,91 +153,79 @@ ul.task-list li input[type="checkbox"] {
 <section id="data" class="level3">
 <h3 class="anchored" data-anchor-id="data">Data</h3>
 <ul>
-<li><strong>Panel data</strong>: 888 observations (37 OECD countries × 24 years, 2000-2023)</li>
-<li><strong>Target variable</strong>: Life Expectancy gender gap (Female - Male, in years)</li>
-<li><strong>Predictors</strong>: 12 cause-specific mortality gender gaps:
+<li>Panel data: 888 observations (37 OECD countries × 24 years, 2000-2023)</li>
+<li>Target variable: Life Expectancy gender gap (Female - Male, in years)</li>
+<li>Predictors: 12 cause-specific mortality gender gaps:
 <ul>
 <li>External causes: Road traffic, suicide, homicide, drug disorders, unintentional injuries, alcohol</li>
 <li>Chronic diseases: Cardiovascular, cancer, diabetes, chronic respiratory, liver disease</li>
 <li>Pandemic: COVID-19</li>
 </ul></li>
 </ul>
-<p>Data processing workflow: <a href="https://github.com/AllenDowney/LifeExpectancy/tree/main/notebooks/process.md"><code>process.md</code></a></p>
+<p>Exporatory data analysis and processing: <a href="https://github.com/AllenDowney/LifeExpectancy/tree/main/notebooks/process.ipynb"><code>process.ipynb</code></a></p>
 </section>
 <section id="model-specification" class="level3">
 <h3 class="anchored" data-anchor-id="model-specification">Model Specification</h3>
-<p><strong>Bayesian Hierarchical Panel Model:</strong> - Random intercepts by country (37 countries) - Shared slopes for all predictors - Identical priors and preprocessing in both implementations</p>
-<p><strong>Model Equation:</strong></p>
+<p>Bayesian Hierarchical Panel Model: - Random intercepts by country (37 countries) - Shared slopes for all predictors - Identical priors and preprocessing in both implementations</p>
+<p>Model Equation:</p>
 <pre><code>y_centered[i] ~ Normal(μ[i], σ)
 μ[i] = α[country[i]] + X[i] · β
 α[country] ~ Normal(μ_α, σ_α)</code></pre>
 <p>Where predictors are standardized (mean=0, std=1) and the target is centered.</p>
-<p><strong>Priors:</strong> - Predictor coefficients (β): <code>Normal(0, 1)</code> - Intercept mean (μ_α): <code>Normal(0, 5)</code> - Intercept SD (σ_α): <code>HalfNormal(1)</code> - Residual SD (σ): <code>HalfNormal(1)</code></p>
-<p>Complete model specifications: - <a href="https://github.com/AllenDowney/LifeExpectancy/tree/main/notebooks/bayesian_model_py.md">PyMC implementation</a> - <a href="https://github.com/AllenDowney/LifeExpectancy/tree/main/notebooks/bayesian_model_r.Rmd">brms implementation</a></p>
+<p>Priors: - Predictor coefficients (β): <code>Normal(0, 1)</code> - Intercept mean (μ_α): <code>Normal(0, 5)</code> - Intercept SD (σ_α): <code>HalfNormal(1)</code> - Residual SD (σ): <code>HalfNormal(1)</code></p>
+<p>Models and results in these notebooks: - <a href="https://github.com/AllenDowney/LifeExpectancy/tree/main/notebooks/bayesian_model_py.ipynb">PyMC implementation</a> - <a href="https://github.com/AllenDowney/LifeExpectancy/tree/main/notebooks/bayesian_model_r.ipynb">brms implementation</a></p>
 </section>
 </section>
 <section id="results" class="level2">
 <h2 class="anchored" data-anchor-id="results">Results</h2>
-<section id="model-diagnostics" class="level3">
-<h3 class="anchored" data-anchor-id="model-diagnostics">Model Diagnostics</h3>
-<p>Both implementations show excellent convergence:</p>
-<p><strong>PyMC:</strong> - R-hat: 1.0100 (excellent) - ESS: 715 minimum (~18% of draws) - Conditional R²: 0.9783 (includes country effects) - Marginal R²: 0.8446 (fixed effects only)</p>
-<p><strong>brms:</strong> - R-hat: &lt; 1.01 (all parameters converged) - ESS ratio: 0.15-0.34 (acceptable) - Conditional R²: 0.978 - Marginal R²: 0.845</p>
-<p>Both models produce essentially identical R² values, confirming correct implementation.</p>
-</section>
 <section id="key-findings" class="level3">
 <h3 class="anchored" data-anchor-id="key-findings">Key Findings</h3>
-<p><strong>Top predictors</strong> (standardized coefficients, posterior means):</p>
+<p>Top predictors (standardized coefficients, posterior means):</p>
 <ol type="1">
-<li><strong>Road Traffic</strong> (β = 0.45): Strongest predictor</li>
-<li><strong>Homicide</strong> (β = 0.44): Substantial contributor</li>
-<li><strong>Suicide</strong> (β = 0.36): Second strongest</li>
-<li><strong>Cancer/Neoplasms</strong> (β = 0.31): Moderate contributor</li>
-<li><strong>Chronic Respiratory</strong> (β = 0.30): Significant contributor</li>
+<li>Road Traffic (β = 0.45): Strongest predictor</li>
+<li>Homicide (β = 0.44): Substantial contributor</li>
+<li>Suicide (β = 0.36): Second strongest</li>
+<li>Cancer/Neoplasms (β = 0.31): Moderate contributor</li>
+<li>Chronic Respiratory Disease (β = 0.30): Significant contributor</li>
 </ol>
-<p><strong>Competing risk effects</strong> (negative coefficients): - <strong>Cardiovascular Disease</strong> (β = -0.19): Negative effect reflects competing risks - <strong>Diabetes</strong> (β = -0.11): Similar competing risk pattern</p>
-<p><strong>COVID-19</strong>: Small positive effect (β = 0.11), impact largely resolved by 2023.</p>
+<p>Competing risk effects (negative coefficients): - Cardiovascular Disease (β = -0.19): Negative effect reflects competing risks - Diabetes (β = -0.11): Similar competing risk pattern</p>
+<p>COVID-19: Small positive effect (β = 0.11), impact largely resolved by 2023.</p>
 </section>
 <section id="model-comparison-pymc-vs-brms" class="level3">
 <h3 class="anchored" data-anchor-id="model-comparison-pymc-vs-brms">Model Comparison: PyMC vs brms</h3>
-<p><strong>Status: ✅ Excellent Agreement</strong></p>
+<p>Status: ✅ Excellent Agreement</p>
 <p>Both models produce essentially identical results:</p>
 <ul>
-<li><strong>Beta coefficients</strong>: Correlation r = 0.999993, all differences &lt; 0.8%</li>
-<li><strong>Country intercepts</strong>: Correlation r = 0.999991, largest difference &lt; 0.009</li>
-<li><strong>Hyperparameters</strong>: Mean differences &lt; 0.003</li>
-<li><strong>R² values</strong>: Identical (conditional: 0.978, marginal: 0.845)</li>
+<li>Beta coefficients: Correlation r = 0.999993, all differences &lt; 0.8%</li>
+<li>Country intercepts: Correlation r = 0.999991, largest difference &lt; 0.009</li>
+<li>Hyperparameters: Mean differences &lt; 0.003</li>
 </ul>
-<p>This validates that the statistical conclusions are robust to implementation choice. Complete comparison: <a href="https://github.com/AllenDowney/LifeExpectancy/tree/main/notebooks/compare_pymc_brms.md"><code>compare_pymc_brms.md</code></a></p>
+<p>This validates that the statistical conclusions are robust to implementation choice. Details of the comparison: <a href="https://github.com/AllenDowney/LifeExpectancy/tree/main/notebooks/compare_pymc_brms.ipynb"><code>compare_pymc_brms.ipynb</code></a></p>
 </section>
-</section>
-<section id="policy-implications" class="level2">
-<h2 class="anchored" data-anchor-id="policy-implications">Policy Implications</h2>
-<section id="counterfactual-analysis-united-states-case-study" class="level3">
-<h3 class="anchored" data-anchor-id="counterfactual-analysis-united-states-case-study">Counterfactual Analysis: United States Case Study</h3>
-<p>If each cause could be reduced to best-in-class levels observed across OECD countries, the potential reductions in the Life Expectancy gap are:</p>
-<p><strong>Top Opportunities:</strong> - Road Traffic: -0.83 years - Drug Disorders: -0.77 years - Suicide: -0.52 years - Homicide: -0.29 years</p>
-<p><strong>Net Potential Reduction: 2.5 years</strong> in the Life Expectancy gap</p>
-<p>These are all areas where evidence-based interventions exist and where progress has been demonstrated in some countries but not others.</p>
-<p>For detailed counterfactual analysis, see the <a href="https://github.com/AllenDowney/EqualityWEF/tree/main/HALE/jb/summary.md">HALE project’s executive summary</a>.</p>
+<section id="model-diagnostics" class="level3">
+<h3 class="anchored" data-anchor-id="model-diagnostics">Model Diagnostics</h3>
+<p>Both implementations show excellent convergence and good efficiency:</p>
+<p>PyMC: - R-hat: &lt; 1.01 (all parameters converged) - ESS: 715 minimum (~18% of draws)</p>
+<p>brms: - R-hat: &lt; 1.01 (all parameters converged) - ESS ratio: 0.15-0.34 (acceptable)</p>
+<p>The models produce similar diagnostics, confirming correct implementation and successful sampling.</p>
 </section>
 </section>
 <section id="model-scope-and-limitations" class="level2">
 <h2 class="anchored" data-anchor-id="model-scope-and-limitations">Model Scope and Limitations</h2>
 <ul>
-<li><strong>Linear additive effects</strong>: Assumes linear relationships, no interactions</li>
-<li><strong>No explicit temporal correlation</strong>: Country intercepts capture persistent differences but not year-to-year dependencies</li>
-<li><strong>Associations only</strong>: Results represent associations, not causal effects</li>
-<li><strong>Sensitivity to prior scale</strong>: Not explored here; uses standard weakly informative priors</li>
+<li>Linear additive effects: Assumes linear relationships, no interactions</li>
+<li>No explicit temporal correlation: Country intercepts capture persistent differences but not year-to-year dependencies</li>
+<li>Associations only: Results represent associations, not causal effects</li>
+<li>Sensitivity to prior scale: Not explored here; uses standard weakly informative priors</li>
 </ul>
 </section>
 <section id="references" class="level2">
 <h2 class="anchored" data-anchor-id="references">References</h2>
 <ul>
-<li><strong>PyMC model notebook</strong>: <a href="https://github.com/AllenDowney/LifeExpectancy/tree/main/notebooks/bayesian_model_py.md"><code>bayesian_model_py.md</code></a></li>
-<li><strong>brms model notebook</strong>: <a href="https://github.com/AllenDowney/LifeExpectancy/tree/main/notebooks/bayesian_model_r.Rmd"><code>bayesian_model_r.Rmd</code></a></li>
-<li><strong>Model comparison</strong>: <a href="https://github.com/AllenDowney/LifeExpectancy/tree/main/notebooks/compare_pymc_brms.md"><code>compare_pymc_brms.md</code></a></li>
-<li><strong>HALE project</strong>: <a href="https://github.com/AllenDowney/EqualityWEF/tree/main/HALE">EqualityWEF/HALE</a></li>
+<li>PyMC model notebook: <a href="https://github.com/AllenDowney/LifeExpectancy/tree/main/notebooks/bayesian_model_py.ipynb"><code>bayesian_model_py.ipynb</code></a></li>
+<li>brms model notebook: <a href="https://github.com/AllenDowney/LifeExpectancy/tree/main/notebooks/bayesian_model_r.ipynb"><code>bayesian_model_r.ipynb</code></a></li>
+<li>Model comparison: <a href="https://github.com/AllenDowney/LifeExpectancy/tree/main/notebooks/compare_pymc_brms.ipynb"><code>compare_pymc_brms.ipynb</code></a></li>
+<li>HALE project: <a href="https://allendowney.github.io/EqualityWEF/">EqualityWEF/HALE</a></li>
 </ul>
 
 

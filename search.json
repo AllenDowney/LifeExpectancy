@@ -81,42 +81,35 @@
     "href": "tech_report.html",
     "title": "Technical Report",
     "section": "",
-    "text": "This analysis examines the gender gap in Life Expectancy across 37 OECD countries (2000-2023), identifying which mortality factors explain the most variation in why women live longer than men. The analysis uses a Bayesian hierarchical panel model implemented in both PyMC (Python) and brms (R/Stan) to ensure robust, reproducible results.\nKey Finding: External causes of death (road traffic accidents, suicide, homicide, drug overdoses) are the primary drivers of the gender gap, accounting for the majority of the observed differences. In the United States, addressing just four factors could reduce the gender gap by approximately 2.5 years."
+    "text": "This analysis examines the gender gap in Life Expectancy across 37 OECD countries (2000-2023), identifying which mortality factors explain the most variation across countries and time. The analysis uses a Bayesian hierarchical panel model implemented in both PyMC (Python) and brms (R/Stan) to ensure robust, reproducible results.\nKey Finding: External causes of death (road traffic accidents, suicide, homicide, drug overdoses) are the primary drivers of the gender gap, accounting for the majority of the observed differences. In the United States, addressing just four factors could reduce the gender gap by approximately 2.5 years."
   },
   {
     "objectID": "tech_report.html#executive-summary",
     "href": "tech_report.html#executive-summary",
     "title": "Technical Report",
     "section": "",
-    "text": "This analysis examines the gender gap in Life Expectancy across 37 OECD countries (2000-2023), identifying which mortality factors explain the most variation in why women live longer than men. The analysis uses a Bayesian hierarchical panel model implemented in both PyMC (Python) and brms (R/Stan) to ensure robust, reproducible results.\nKey Finding: External causes of death (road traffic accidents, suicide, homicide, drug overdoses) are the primary drivers of the gender gap, accounting for the majority of the observed differences. In the United States, addressing just four factors could reduce the gender gap by approximately 2.5 years."
+    "text": "This analysis examines the gender gap in Life Expectancy across 37 OECD countries (2000-2023), identifying which mortality factors explain the most variation across countries and time. The analysis uses a Bayesian hierarchical panel model implemented in both PyMC (Python) and brms (R/Stan) to ensure robust, reproducible results.\nKey Finding: External causes of death (road traffic accidents, suicide, homicide, drug overdoses) are the primary drivers of the gender gap, accounting for the majority of the observed differences. In the United States, addressing just four factors could reduce the gender gap by approximately 2.5 years."
   },
   {
     "objectID": "tech_report.html#purpose-of-this-repository",
     "href": "tech_report.html#purpose-of-this-repository",
     "title": "Technical Report",
     "section": "Purpose of This Repository",
-    "text": "Purpose of This Repository\nThis repository presents a focused analysis based on the primary model from the HALE (Healthy Life Expectancy) analysis. The repository has three objectives:\n\nPresent the primary model for Life Expectancy, implemented in PyMC (Python)\nReimplement the model in brms (R/Stan) to confirm model equivalence\nCompare and validate results between implementations to ensure consistency\n\nBy implementing the same model in two different Bayesian frameworks, we verify that results are robust to implementation choices and provide code for different audiences."
+    "text": "Purpose of This Repository\nThis repository presents a focused analysis based on the primary model from this analysis of gender gaps in life expectancy. The repository has three objectives:\n\nPresent the primary model for Life Expectancy, implemented in PyMC (Python)\nReimplement the model in brms (R/Stan) to confirm model equivalence\nCompare and validate results between implementations to ensure consistency\n\nBy implementing the same model in two different Bayesian frameworks, we verify that results are robust to implementation choices and provide code for different audiences."
   },
   {
     "objectID": "tech_report.html#data-and-model",
     "href": "tech_report.html#data-and-model",
     "title": "Technical Report",
     "section": "Data and Model",
-    "text": "Data and Model\n\nData\n\nPanel data: 888 observations (37 OECD countries × 24 years, 2000-2023)\nTarget variable: Life Expectancy gender gap (Female - Male, in years)\nPredictors: 12 cause-specific mortality gender gaps:\n\nExternal causes: Road traffic, suicide, homicide, drug disorders, unintentional injuries, alcohol\nChronic diseases: Cardiovascular, cancer, diabetes, chronic respiratory, liver disease\nPandemic: COVID-19\n\n\nData processing workflow: process.md\n\n\nModel Specification\nBayesian Hierarchical Panel Model: - Random intercepts by country (37 countries) - Shared slopes for all predictors - Identical priors and preprocessing in both implementations\nModel Equation:\ny_centered[i] ~ Normal(μ[i], σ)\nμ[i] = α[country[i]] + X[i] · β\nα[country] ~ Normal(μ_α, σ_α)\nWhere predictors are standardized (mean=0, std=1) and the target is centered.\nPriors: - Predictor coefficients (β): Normal(0, 1) - Intercept mean (μ_α): Normal(0, 5) - Intercept SD (σ_α): HalfNormal(1) - Residual SD (σ): HalfNormal(1)\nComplete model specifications: - PyMC implementation - brms implementation"
+    "text": "Data and Model\n\nData\n\nPanel data: 888 observations (37 OECD countries × 24 years, 2000-2023)\nTarget variable: Life Expectancy gender gap (Female - Male, in years)\nPredictors: 12 cause-specific mortality gender gaps:\n\nExternal causes: Road traffic, suicide, homicide, drug disorders, unintentional injuries, alcohol\nChronic diseases: Cardiovascular, cancer, diabetes, chronic respiratory, liver disease\nPandemic: COVID-19\n\n\nExporatory data analysis and processing: process.ipynb\n\n\nModel Specification\nBayesian Hierarchical Panel Model: - Random intercepts by country (37 countries) - Shared slopes for all predictors - Identical priors and preprocessing in both implementations\nModel Equation:\ny_centered[i] ~ Normal(μ[i], σ)\nμ[i] = α[country[i]] + X[i] · β\nα[country] ~ Normal(μ_α, σ_α)\nWhere predictors are standardized (mean=0, std=1) and the target is centered.\nPriors: - Predictor coefficients (β): Normal(0, 1) - Intercept mean (μ_α): Normal(0, 5) - Intercept SD (σ_α): HalfNormal(1) - Residual SD (σ): HalfNormal(1)\nModels and results in these notebooks: - PyMC implementation - brms implementation"
   },
   {
     "objectID": "tech_report.html#results",
     "href": "tech_report.html#results",
     "title": "Technical Report",
     "section": "Results",
-    "text": "Results\n\nModel Diagnostics\nBoth implementations show excellent convergence:\nPyMC: - R-hat: 1.0100 (excellent) - ESS: 715 minimum (~18% of draws) - Conditional R²: 0.9783 (includes country effects) - Marginal R²: 0.8446 (fixed effects only)\nbrms: - R-hat: &lt; 1.01 (all parameters converged) - ESS ratio: 0.15-0.34 (acceptable) - Conditional R²: 0.978 - Marginal R²: 0.845\nBoth models produce essentially identical R² values, confirming correct implementation.\n\n\nKey Findings\nTop predictors (standardized coefficients, posterior means):\n\nRoad Traffic (β = 0.45): Strongest predictor\nHomicide (β = 0.44): Substantial contributor\nSuicide (β = 0.36): Second strongest\nCancer/Neoplasms (β = 0.31): Moderate contributor\nChronic Respiratory (β = 0.30): Significant contributor\n\nCompeting risk effects (negative coefficients): - Cardiovascular Disease (β = -0.19): Negative effect reflects competing risks - Diabetes (β = -0.11): Similar competing risk pattern\nCOVID-19: Small positive effect (β = 0.11), impact largely resolved by 2023.\n\n\nModel Comparison: PyMC vs brms\nStatus: ✅ Excellent Agreement\nBoth models produce essentially identical results:\n\nBeta coefficients: Correlation r = 0.999993, all differences &lt; 0.8%\nCountry intercepts: Correlation r = 0.999991, largest difference &lt; 0.009\nHyperparameters: Mean differences &lt; 0.003\nR² values: Identical (conditional: 0.978, marginal: 0.845)\n\nThis validates that the statistical conclusions are robust to implementation choice. Complete comparison: compare_pymc_brms.md"
-  },
-  {
-    "objectID": "tech_report.html#policy-implications",
-    "href": "tech_report.html#policy-implications",
-    "title": "Technical Report",
-    "section": "Policy Implications",
-    "text": "Policy Implications\n\nCounterfactual Analysis: United States Case Study\nIf each cause could be reduced to best-in-class levels observed across OECD countries, the potential reductions in the Life Expectancy gap are:\nTop Opportunities: - Road Traffic: -0.83 years - Drug Disorders: -0.77 years - Suicide: -0.52 years - Homicide: -0.29 years\nNet Potential Reduction: 2.5 years in the Life Expectancy gap\nThese are all areas where evidence-based interventions exist and where progress has been demonstrated in some countries but not others.\nFor detailed counterfactual analysis, see the HALE project’s executive summary."
+    "text": "Results\n\nKey Findings\nTop predictors (standardized coefficients, posterior means):\n\nRoad Traffic (β = 0.45): Strongest predictor\nHomicide (β = 0.44): Substantial contributor\nSuicide (β = 0.36): Second strongest\nCancer/Neoplasms (β = 0.31): Moderate contributor\nChronic Respiratory Disease (β = 0.30): Significant contributor\n\nCompeting risk effects (negative coefficients): - Cardiovascular Disease (β = -0.19): Negative effect reflects competing risks - Diabetes (β = -0.11): Similar competing risk pattern\nCOVID-19: Small positive effect (β = 0.11), impact largely resolved by 2023.\n\n\nModel Comparison: PyMC vs brms\nStatus: ✅ Excellent Agreement\nBoth models produce essentially identical results:\n\nBeta coefficients: Correlation r = 0.999993, all differences &lt; 0.8%\nCountry intercepts: Correlation r = 0.999991, largest difference &lt; 0.009\nHyperparameters: Mean differences &lt; 0.003\n\nThis validates that the statistical conclusions are robust to implementation choice. Details of the comparison: compare_pymc_brms.ipynb\n\n\nModel Diagnostics\nBoth implementations show excellent convergence and good efficiency:\nPyMC: - R-hat: &lt; 1.01 (all parameters converged) - ESS: 715 minimum (~18% of draws)\nbrms: - R-hat: &lt; 1.01 (all parameters converged) - ESS ratio: 0.15-0.34 (acceptable)\nThe models produce similar diagnostics, confirming correct implementation and successful sampling."
   },
   {
     "objectID": "tech_report.html#model-scope-and-limitations",
@@ -130,7 +123,7 @@
     "href": "tech_report.html#references",
     "title": "Technical Report",
     "section": "References",
-    "text": "References\n\nPyMC model notebook: bayesian_model_py.md\nbrms model notebook: bayesian_model_r.Rmd\nModel comparison: compare_pymc_brms.md\nHALE project: EqualityWEF/HALE"
+    "text": "References\n\nPyMC model notebook: bayesian_model_py.ipynb\nbrms model notebook: bayesian_model_r.ipynb\nModel comparison: compare_pymc_brms.ipynb\nHALE project: EqualityWEF/HALE"
   },
   {
     "objectID": "index.html",
