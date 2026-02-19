@@ -19,17 +19,23 @@ A [Quarto website](https://allendowney.github.io/LifeExpectancy/) provides a con
 LifeExpectancy/
 ├── environment.yml      # Conda environment (Python + R + Stan)
 ├── Makefile             # Setup and build commands
-├── data/                # WHO and IHME data files
+├── data/                # Raw data files (WHO and IHME)
 │   ├── who_*.csv        # WHO health indicators
 │   ├── ihme_*.csv       # IHME cause-of-death data
-│   └── *.h5             # Processed data (HDF5)
-├── notebooks/
+│   └── *.h5             # Processed data files
+├── notebooks/           # Analysis notebooks and outputs
+│   ├── *.ipynb, *.md   # Jupyter notebooks (in .ipynb and .md formats)
 │   ├── utils.py         # Helper functions (Python)
 │   ├── utils.R          # Helper functions (R)
-│   ├── process.ipynb    # Data preparation and processing
-│   ├── bayesian_model_py.ipynb  # PyMC implementation
-│   ├── bayesian_model_r.Rmd     # brms implementation
-│   └── compare_pymc_brms.ipynb  # Model comparison
+│   ├── counterfactual_utils.py  # Counterfactual analysis utilities
+│   ├── download_data.py # Data download scripts
+│   ├── who_data.py      # WHO data access utilities
+│   ├── interim/         # Interim data (metadata, panel datasets)
+│   ├── nc/              # NetCDF trace files (model outputs)
+│   ├── figs/            # Figure outputs
+│   ├── tables/          # Table outputs (HTML, CSV)
+│   └── logs/            # Execution logs
+├── jb/                  # Jupyter Book (figs and tables for reports)
 └── quarto/              # Quarto website source
     ├── _quarto.yml      # Site configuration
     ├── index.qmd        # Landing page
@@ -70,12 +76,34 @@ jupyter lab
 
 ## Data Pipeline
 
+### Main Analysis Pipeline
+
 Run the notebooks in order:
 
 1. **`process.ipynb`** — Load raw data, compute gender gaps, filter to OECD countries, save to HDF5/CSV
-2. **`bayesian_model_py.ipynb`** — Fit Bayesian hierarchical panel model using PyMC
+2. **`bayesian_model_py.ipynb`** or **`bayesian_model.ipynb`** — Fit Bayesian hierarchical panel model using PyMC
 3. **`bayesian_model_r.Rmd`** — Fit Bayesian hierarchical panel model using brms
 4. **`compare_pymc_brms.ipynb`** — Compare results between PyMC and brms implementations
+
+### Additional Analyses
+
+- **`eda.ipynb`** — Exploratory data analysis
+- **`bayes_counter_hale.ipynb`** — Counterfactual analysis for HALE gap
+- **`bayes_counter_le.ipynb`** — Counterfactual analysis for Life Expectancy gap
+- **`time_series.ipynb`** — Time series analysis of gaps and predictors
+- **`neoplasms.ipynb`** — Cancer-specific analysis
+- **`model_hale.ipynb`**, **`model_le.ipynb`** — Additional modeling approaches
+
+### Output Organization
+
+Notebooks write outputs to subdirectories within `notebooks/`:
+- **`interim/`** — Intermediate data files (metadata, panel datasets) generated during processing
+- **`nc/`** — NetCDF trace files from Bayesian model fits
+- **`figs/`** — All figure outputs (PNG)
+- **`tables/`** — All table outputs (HTML, CSV)
+- **`logs/`** — Execution logs
+
+Data files are read from `../data/` (relative to notebooks directory).
 
 ## Data Sources
 

@@ -1,0 +1,38 @@
+# See docs at: https://mystmd.org/guide/frontmatter
+version: 1
+
+project:
+  id: 303416f0-a19e-4172-86b8-e51668f44f51
+  title: Gender Gaps in Life Expectancy
+  # description:
+  # keywords: []
+  # authors: []
+  github: https://github.com/AllenDowney/EqualityWEF
+  toc:
+    - file: index.md
+    - file: summary.md
+      title: Executive Summary
+    - file: tech_report.md
+      title: Technical Report
+    - file: data_inventory.md
+      title: Data Inventory
+    - file: neoplasms_report.md
+      title: Neoplasms Analysis
+    - file: eda_report.md
+      title: Exploratory Data Analysis
+    - file: validation.md
+      title: Validation Experiments
+    - file: time_series_report.md
+      title: Time Series Analysis
+    - file: temporal.md
+      title: Temporal Analysis
+    - file: bayesian_model_report_2023.md
+      title: Bayesian Panel Data Model (2000-2023, IHME HALE)
+
+site:
+  template: book-theme
+  title: Gender Gaps in Life Expectancy
+  options:
+    logo_text: Gender Gaps in Life Expectancy
+    # favicon: favicon.ico
+    # logo: site_logo.png
