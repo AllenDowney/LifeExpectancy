@@ -1924,6 +1924,7 @@ column_name_mapping = {
     'MaternalDisordersDeathRate': 'MaternalDisorders',
     'AllCausesUnder5DeathRate': 'Childhood',  # Map to 'Childhood' for compatibility with model notebooks (replacing WHO U5MR)
     'COVID19DeathRate': 'COVID',  # Map to 'COVID' for compatibility with model notebooks
+    'ConflictAndTerrorismDeathRate': 'ConflictTerrorism',
 }
 
 

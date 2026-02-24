@@ -28,6 +28,8 @@ project:
       title: Temporal Analysis
     - file: bayesian_model_report_2023.md
       title: Bayesian Panel Data Model (2000-2023, IHME HALE)
+    - file: blog1_time_series.md
+      title: "Blog Post 1: Time Series Analysis"
 
 site:
   template: book-theme

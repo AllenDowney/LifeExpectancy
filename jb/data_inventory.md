@@ -532,6 +532,32 @@ See `validation.md` section "Removing Childhood Indicator (Under-Five Mortality)
 **Status**: ✅ Downloaded and integrated into model  
 **Relevance**: Unintentional injuries (including falls, drowning, fires, and other accidents) are a significant cause of death and may contribute to the HALE gender gap. These injuries often show gender differences due to occupational exposures, risk-taking behaviors, and activity patterns. This indicator provides comprehensive unintentional injury death rates with better temporal coverage (1990-2023) than many WHO indicators.
 
+### Conflict and Terrorism Death Rates (Downloaded)
+
+**Indicator**: Conflict and terrorism  
+**Measure**: Deaths  
+**Metric**: Rate (per 100,000 population)  
+**Locations**: OECD countries  
+**Age**: All ages  
+**Sex**: Separate files for Male and Female
+
+**GBD Compare Tool Settings**:
+- Display: Cause
+- Cause: Conflict and terrorism
+- Measure: Deaths
+- Locations: OECD
+- Age: All
+- Sex: Both (downloaded separately as Male and Female)
+- Metric: Rate
+
+**Files**:
+- `data/ihme_conflict_and_terrorism_deaths_male.csv`
+- `data/ihme_conflict_and_terrorism_deaths_female.csv`
+
+**Status**: ✅ Downloaded, not yet integrated into model  
+**Relevance**: Conflict and terrorism deaths may contribute to the HALE/LE gender gap, as men typically have higher exposure to conflict-related mortality (military, combat, terrorism). This indicator provides death rates with excellent temporal coverage (1990-2023, 34 years) and OECD country coverage (38 countries). Rates are generally very low in OECD countries but may be relevant for understanding gender gaps in countries with historical conflict exposure.  
+**Data Details**: ~1,293 records per file; columns: Population, Location, Year, Age, Sex, Cause of death or injury, Measure, Value, Lower bound, Upper bound.
+
 ### Road Traffic Crash Death Rate Indicators (Identified)
 
 Multiple road traffic-related death rate indicators have been identified from WHO GHO API:

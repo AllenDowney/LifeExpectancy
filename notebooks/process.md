@@ -900,6 +900,41 @@ plot_distributions(unintentional_injuries_ihme_gap, indicator_name='Unintentiona
 plt.savefig('figs/unintentional_injuries_distributions.png', dpi=300, bbox_inches='tight')
 ```
 
+### Conflict and Terrorism (IHME)
+
+**Conflict and terrorism death rates (per 100,000 population)** - Deaths from conflict and terrorism, from IHME Global Burden of Disease data.
+
+**Data Source**: IHME Global Burden of Disease (https://vizhub.healthdata.org/gbd-compare/)  
+**Relevance**: Conflict and terrorism deaths may contribute to the HALE/LE gender gap, as men typically have higher exposure to conflict-related mortality (military, combat, terrorism). This indicator provides death rates with excellent temporal coverage (1990-2023, 34 years) and OECD country coverage. Rates are generally very low in OECD countries but may be relevant for understanding gender gaps in countries with historical conflict exposure. Data includes separate male and female values, allowing for gender gap analysis.
+
+```python
+filename_male = '../data/ihme_conflict_and_terrorism_deaths_male.csv'
+filename_female = '../data/ihme_conflict_and_terrorism_deaths_female.csv'
+conflict_terrorism_ihme, years = load_ihme_indicator(
+    filename_male, filename_female,
+    value_col_name='ConflictAndTerrorismDeathRate',
+    indicator_code='IHME_CONFLICT_TERRORISM',
+    indicator_name='Conflict and terrorism, death rate per 100,000'
+)
+```
+
+```python
+conflict_terrorism_ihme.head()
+```
+
+```python
+col = 'ConflictAndTerrorismDeathRate'
+conflict_terrorism_ihme = conflict_terrorism_ihme.rename(columns=column_name_mapping)
+col = column_name_mapping.get(col, col)
+conflict_terrorism_ihme_gap = summarize_gap(conflict_terrorism_ihme, col, cutoff_year=cutoff_year)
+plt.savefig('figs/conflict_terrorism_scatter.png', dpi=300, bbox_inches='tight')
+```
+
+```python
+plot_distributions(conflict_terrorism_ihme_gap, indicator_name='ConflictTerrorism')
+plt.savefig('figs/conflict_terrorism_distributions.png', dpi=300, bbox_inches='tight')
+```
+
 ### Alcohol Use Disorders (IHME) - USED IN MODEL
 
 **Alcohol use disorders death rates (per 100,000 population)** - Deaths from alcohol use disorders, from IHME Global Burden of Disease data.
@@ -2404,6 +2439,11 @@ drug_disorders_temporal = load_ihme_indicator_temporal(
     'IHME_DRUG_DISORDERS', 'Drug use disorders',
     max_year=PANEL_CUTOFF_YEAR)
 
+conflict_terrorism_temporal = load_ihme_indicator_temporal(
+    'ihme_conflict_and_terrorism_deaths', 'ConflictAndTerrorismDeathRate',
+    'IHME_CONFLICT_TERRORISM', 'Conflict and terrorism',
+    max_year=PANEL_CUTOFF_YEAR)
+
 if INCLUDE_COVID_DATA:
     covid_temporal = load_ihme_indicator_temporal(
         'ihme_covid19_deaths', 'COVID19DeathRate',
@@ -2429,6 +2469,7 @@ predictors_to_merge = [
     (liver_disease_temporal, 'LiverDisease'),
     (unintentional_injuries_temporal, 'UnintentionalInjuries'),
     (drug_disorders_temporal, 'DrugDisorder'),
+    (conflict_terrorism_temporal, 'ConflictTerrorism'),
 ]
 
 if INCLUDE_COVID_DATA:

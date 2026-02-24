@@ -27,6 +27,8 @@ This project explores differences in life expectancy and health-adjusted life ex
 
 - [Temporal Analysis](temporal.md) - Evolution of health patterns and gender gaps over time (2000-2019). Runs predictive models at five-year intervals (2000, 2005, 2010, 2015, 2019) and compares results to examine how indicator importance and intervention opportunities have changed.
 
+- [Blog Post 1: Time Series Analysis](blog1_time_series.md) - First in a series on gender gaps in life expectancy: variation across OECD countries and over time, with cause-specific death rate gaps (drug disorders, homicide, suicide, road traffic).
+
 ## Methodology
 
 Our primary analysis uses a **Bayesian hierarchical panel model** to analyze the gender gap in life expectancy and HALE. This approach leverages both temporal variation (2000-2023 for both outcomes) and cross-country variation simultaneously, providing several advantages:
