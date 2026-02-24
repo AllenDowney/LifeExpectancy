@@ -1,0 +1,154 @@
+# HALE Gender Gap Analysis
+
+This document summarizes the differences in Healthy Life Expectancy (HALE) and Life Expectancy between men and women across OECD countries, and explores the factors that contribute to these differences.
+
+## Target Variables
+
+The analysis focuses on two target variables:
+- **HALE Gap**: The difference in Healthy Life Expectancy between women and men (Female - Male, in years)
+- **Life Expectancy Gap**: The difference in Life Expectancy between women and men (Female - Male, in years)
+
+### Target Variables - Rates
+
+The following table shows the median across countries, minimum, and maximum values for HALE and Life Expectancy across OECD countries.
+
+```{include} tables/target_rates.html
+```
+
+### Target Variables - Gaps
+
+The following table shows the median, minimum, and maximum gender gaps (Female - Male) for HALE and Life Expectancy across OECD countries.
+
+```{include} tables/target_gaps.html
+```
+
+## Predictor Indicators
+
+The following tables summarize the predictor indicators used to explain variation in the HALE and Life Expectancy gender gaps. Each indicator includes:
+- **Median Rate**: The median across countries of the overall rate (computed as the midpoint, or average, of male and female rates)
+- **Min Rate / Max Rate**: The range of overall rates across countries
+- **Median Gap**: The median gender gap (Male - Female for predictors) across countries
+- **Min Gap / Max Gap**: The range of gender gaps across countries
+- **Corr HALE**: Correlation with HALE gap
+- **Corr LE**: Correlation with Life Expectancy gap
+
+### Predictor Indicators - Rates
+
+The following table shows statistics for the overall rates (computed as the midpoint, or average, of male and female rates) for each predictor indicator.
+
+```{include} tables/predictor_rates.html
+```
+
+### Predictor Indicators - Gaps
+
+The following table shows statistics for the gender gaps (Male - Female) for each predictor indicator.
+
+```{include} tables/predictor_gaps.html
+```
+
+### Rate-Gap Correlation
+
+The following table shows the correlation between the overall rate and the gender gap for each predictor indicator. This helps identify indicators where countries with higher overall rates also tend to have larger gender gaps.
+
+```{include} tables/rate_gap_correlation.html
+```
+
+### Top Correlations Among Predictors
+
+The following tables show the strongest correlations between predictor indicators. These correlations help explain why we use Elastic Net regression instead of ordinary least squares, as many indicators are highly correlated with each other.
+
+#### Top Rate-Rate Correlations
+
+The following table shows the top correlations between the overall rates of different indicators.
+
+```{include} tables/rate_rate_correlation_top10.html
+```
+
+#### Top Gap-Gap Correlations
+
+The following table shows the top correlations between the gender gaps of different indicators.
+
+```{include} tables/gap_gap_correlation_top10.html
+```
+
+### Why Use Elastic Net Instead of Ordinary Least Squares?
+
+Before fitting any model, we can look at the correlations among the predictors. Many of the indicators are strongly correlated with each other. For example, across OECD countries:
+
+- The median **Childhood** mortality rate is highly correlated with **Homicide** (ρ ≈ 0.86) and **RoadTraffic** (ρ ≈ 0.79).
+- **Alcohol** is strongly correlated with **Cardiovascular** (ρ ≈ 0.83) and **Poisoning** (ρ ≈ 0.75), and moderately with **Suicide** (ρ ≈ 0.55).
+- **Cardiovascular** is also correlated with **Poisoning** (ρ ≈ 0.66).
+- **UnintentionalInjury** is correlated with **Cardiovascular** (ρ ≈ 0.54) and **Suicide** (ρ ≈ 0.49), and negatively with **Childhood** (ρ ≈ −0.50).
+
+The same pattern appears in the **gaps** (female–male differences):
+
+- The **Childhood** gap and **Homicide** gap are extremely highly correlated (ρ ≈ 0.92).
+- The **Alcohol** gap is strongly correlated with the **Suicide** gap (ρ ≈ 0.79) and the **UnintentionalInjury** gap (ρ ≈ 0.76).
+- The **RoadTraffic** and **Homicide** gaps are also strongly correlated (ρ ≈ 0.76).
+
+So we have clusters of indicators that move together, both in their overall rates and in their gender gaps.
+
+---
+
+#### 1. Why ordinary least squares is not enough
+
+If we put all of these predictors into a single ordinary least squares (OLS) regression, the model is forced to divide the explanatory “credit” among highly correlated variables. In that setting:
+
+- Small amounts of noise can change which variable gets the larger coefficient.
+- Coefficients within a correlated cluster can flip sign or change magnitude dramatically.
+- The allocation of effect size among correlated predictors is essentially arbitrary.
+
+As a result, an OLS model with all indicators included does not give a stable or interpretable answer to the question “which factors matter most?”.
+
+---
+
+#### 2. What Elastic Net adds
+
+Elastic Net regression combines two kinds of regularization:
+
+- An **L2 (ridge)** component that stabilizes coefficients and allows correlated predictors to share weight.
+- An **L1 (lasso)** component that shrinks some coefficients all the way to zero when they do not improve predictive performance.
+
+The model is tuned by cross-validation, so the amount of regularization is chosen to maximize **out-of-sample predictive accuracy**, not to fit the particular noise pattern in this dataset.
+
+In practice, this means:
+
+- Correlated predictors are handled coherently, with coefficients shrunk toward each other and toward zero.
+- Predictors that do not add predictive information beyond the ones already in the model are often assigned coefficients very close to zero.
+- The remaining non-zero coefficients identify a smaller set of predictors that are genuinely helpful for predicting the life expectancy gap.
+
+---
+
+#### 3. Why this is especially appropriate for these indicators
+
+In this application, many of the predictors are not just “associated” with the outcome in an abstract sense; they contribute to it almost by construction. Life Expectancy and HALE are computed from sex-specific mortality rates, so:
+
+- If the male death rate from **Homicide**, **RoadTraffic**, **Alcohol**, or **Suicide** is higher than the female rate, that directly pushes male life expectancy and HALE down relative to female.
+- The **gaps** in these predictors (female–male differences) therefore have a near-mechanical connection to the **gap** in life expectancy and HALE.
+
+In other words, whenever we see a large female–male gap in one of these cause-specific mortality rates, we expect it to contribute to the female–male gap in life expectancy and HALE.
+
+That does not mean that every non-zero coefficient in the regression can be interpreted as a clean causal effect. It does mean, however, that:
+
+- Predictors with a stronger direct influence on sex-specific mortality should generally be more **predictive** of the life expectancy gap.
+- Predictors that are only loosely or indirectly associated with these mortality differences should contribute less to out-of-sample prediction.
+
+---
+
+#### 4. How to interpret the Elastic Net results
+
+Putting these pieces together:
+
+- We know from the correlation tables that indicators like **Homicide**, **RoadTraffic**, **Childhood** mortality, **Alcohol**, **Poisoning**, and **Suicide** form strongly correlated clusters, both in their overall rates and in their gaps.
+- An OLS model would split coefficients among these indicators in an unstable and arbitrary way.
+- Elastic Net instead uses **predictive performance** to decide which members of each correlated cluster carry the most useful information about the life expectancy gap.
+
+As a result, when Elastic Net assigns substantial weight to a predictor like **Alcohol** or **Homicide**, and shrinks others in the same cluster toward zero, we can interpret that as:
+
+> This indicator captures the key variation in sex-specific mortality that matters for explaining differences in life expectancy between women and men, given the other indicators in the model.
+
+This does not prove causality in the strong sense, but it does provide a principled way to:
+
+- handle collinearity among cause-specific mortality indicators,
+- highlight which patterns of mortality and injury are most strongly associated with the life expectancy gap,
+- and down-weight predictors that are merely redundant proxies for the ones that are truly driving the differences we observe.

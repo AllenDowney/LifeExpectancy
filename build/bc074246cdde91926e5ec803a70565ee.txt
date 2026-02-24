@@ -1,0 +1,553 @@
+                              Alcohol_Male  Alcohol_Female  Gap_Alcohol  \
+Alcohol_Male                      1.000000        0.867340     0.993912   
+Alcohol_Female                    0.867340        1.000000     0.807225   
+Gap_Alcohol                       0.993912        0.807225     1.000000   
+Mid_Alcohol                       0.996819        0.904250     0.981969   
+ChronicRespiratory_Male          -0.238145       -0.020094    -0.277969   
+ChronicRespiratory_Female        -0.297228       -0.004882    -0.351403   
+Gap_ChronicRespiratory            0.121873       -0.025246     0.150118   
+Mid_ChronicRespiratory           -0.280348       -0.012873    -0.329616   
+UnintentionalInjury_Male          0.616266        0.592072     0.599773   
+UnintentionalInjury_Female        0.333059        0.386590     0.309402   
+Gap_UnintentionalInjury           0.336321        0.248524     0.343833   
+Mid_UnintentionalInjury           0.530777        0.546520     0.508474   
+RoadTraffic_Male                 -0.045456       -0.249415     0.001303   
+RoadTraffic_Female               -0.036795       -0.176030    -0.004670   
+Gap_RoadTraffic                  -0.045860       -0.259364     0.003026   
+Mid_RoadTraffic                  -0.044667       -0.239995     0.000154   
+Diabetes_Male                     0.133371        0.001765     0.157775   
+Diabetes_Female                   0.167926       -0.023723     0.204395   
+Gap_Diabetes                     -0.157169        0.083712    -0.204917   
+Mid_Diabetes                      0.153278       -0.011765     0.184377   
+Cardiovascular_Male               0.582728        0.534288     0.572791   
+Cardiovascular_Female             0.628519        0.545925     0.624519   
+Gap_Cardiovascular               -0.669986       -0.479947    -0.688300   
+Mid_Cardiovascular                0.609585        0.542181     0.602893   
+DrugDisorder_Male                 0.103909        0.377176     0.039736   
+DrugDisorder_Female              -0.010600        0.278728    -0.074270   
+Gap_DrugDisorder                  0.182244        0.429690     0.121009   
+Mid_DrugDisorder                  0.069792        0.350365     0.005210   
+Homicide_Male                    -0.131184       -0.240782    -0.102273   
+Homicide_Female                  -0.041130       -0.132099    -0.019536   
+Gap_Homicide                     -0.141733       -0.253194    -0.112035   
+Mid_Homicide                     -0.122587       -0.230614    -0.094329   
+Suicide_Male                      0.598397        0.566268     0.584294   
+Suicide_Female                    0.196119        0.300972     0.165955   
+Gap_Suicide                       0.680563        0.595953     0.675165   
+Mid_Suicide                       0.524164        0.525876     0.505202   
+Neoplasms_Male                    0.418297        0.411439     0.404985   
+Neoplasms_Female                  0.475776        0.553800     0.441637   
+Gap_Neoplasms                     0.187812        0.044809     0.212808   
+Mid_Neoplasms                     0.450148        0.478984     0.427805   
+LiverDiseaseDeathRate_Male        0.540730        0.388743     0.555203   
+LiverDiseaseDeathRate_Female      0.519218        0.436519     0.519117   
+Gap_LiverDiseaseDeathRate         0.520489        0.340409     0.541898   
+Mid_LiverDiseaseDeathRate         0.542722        0.407226     0.553474   
+
+                              Mid_Alcohol  ChronicRespiratory_Male  \
+Alcohol_Male                     0.996819                -0.238145   
+Alcohol_Female                   0.904250                -0.020094   
+Gap_Alcohol                      0.981969                -0.277969   
+Mid_Alcohol                      1.000000                -0.207528   
+ChronicRespiratory_Male         -0.207528                 1.000000   
+ChronicRespiratory_Female       -0.255781                 0.832161   
+Gap_ChronicRespiratory           0.100515                 0.219938   
+Mid_ChronicRespiratory          -0.242579                 0.955182   
+UnintentionalInjury_Male         0.623523                -0.097498   
+UnintentionalInjury_Female       0.347647                 0.256963   
+Gap_UnintentionalInjury          0.328337                -0.399998   
+Mid_UnintentionalInjury          0.542885                 0.086095   
+RoadTraffic_Male                -0.078939                -0.272513   
+RoadTraffic_Female              -0.059756                -0.172616   
+Gap_RoadTraffic                 -0.080879                -0.289276   
+Mid_RoadTraffic                 -0.076753                -0.258342   
+Diabetes_Male                    0.114705                -0.036910   
+Diabetes_Female                  0.140269                -0.067299   
+Gap_Diabetes                    -0.121433                 0.112362   
+Mid_Diabetes                     0.129617                -0.053490   
+Cardiovascular_Male              0.585496                -0.037433   
+Cardiovascular_Female            0.626645                -0.077620   
+Gap_Cardiovascular              -0.651656                 0.207915   
+Mid_Cardiovascular               0.609801                -0.059693   
+DrugDisorder_Male                0.149547                 0.182318   
+DrugDisorder_Female              0.035540                 0.213798   
+Gap_DrugDisorder                 0.225162                 0.149916   
+Mid_DrugDisorder                 0.115983                 0.193544   
+Homicide_Male                   -0.151104                -0.288197   
+Homicide_Female                 -0.056441                -0.313139   
+Gap_Homicide                    -0.162142                -0.284018   
+Mid_Homicide                    -0.142101                -0.291395   
+Suicide_Male                     0.604060                -0.211072   
+Suicide_Female                   0.216452                 0.077673   
+Gap_Suicide                      0.679307                -0.301233   
+Mid_Suicide                      0.533906                -0.146891   
+Neoplasms_Male                   0.424754                 0.402095   
+Neoplasms_Female                 0.496864                 0.413480   
+Gap_Neoplasms                    0.168304                 0.252057   
+Mid_Neoplasms                    0.462896                 0.414201   
+LiverDiseaseDeathRate_Male       0.526158                -0.132908   
+LiverDiseaseDeathRate_Female     0.515353                -0.002957   
+Gap_LiverDiseaseDeathRate        0.501053                -0.194524   
+Mid_LiverDiseaseDeathRate        0.530827                -0.099784   
+
+                              ChronicRespiratory_Female  \
+Alcohol_Male                                  -0.297228   
+Alcohol_Female                                -0.004882   
+Gap_Alcohol                                   -0.351403   
+Mid_Alcohol                                   -0.255781   
+ChronicRespiratory_Male                        0.832161   
+ChronicRespiratory_Female                      1.000000   
+Gap_ChronicRespiratory                        -0.357932   
+Mid_ChronicRespiratory                         0.959018   
+UnintentionalInjury_Male                      -0.364406   
+UnintentionalInjury_Female                     0.159326   
+Gap_UnintentionalInjury                       -0.597863   
+Mid_UnintentionalInjury                       -0.118187   
+RoadTraffic_Male                              -0.300268   
+RoadTraffic_Female                            -0.195796   
+Gap_RoadTraffic                               -0.317064   
+Mid_RoadTraffic                               -0.285755   
+Diabetes_Male                                 -0.089809   
+Diabetes_Female                               -0.210590   
+Gap_Diabetes                                   0.428276   
+Mid_Diabetes                                  -0.155053   
+Cardiovascular_Male                           -0.293032   
+Cardiovascular_Female                         -0.342495   
+Gap_Cardiovascular                             0.453940   
+Mid_Cardiovascular                            -0.321112   
+DrugDisorder_Male                              0.389619   
+DrugDisorder_Female                            0.463668   
+Gap_DrugDisorder                               0.315421   
+Mid_DrugDisorder                               0.415682   
+Homicide_Male                                 -0.216896   
+Homicide_Female                               -0.251187   
+Gap_Homicide                                  -0.211846   
+Mid_Homicide                                  -0.220841   
+Suicide_Male                                  -0.348061   
+Suicide_Female                                 0.003733   
+Gap_Suicide                                   -0.444933   
+Mid_Suicide                                   -0.274402   
+Neoplasms_Male                                 0.096156   
+Neoplasms_Female                               0.243618   
+Gap_Neoplasms                                 -0.175700   
+Mid_Neoplasms                                  0.160128   
+LiverDiseaseDeathRate_Male                    -0.350108   
+LiverDiseaseDeathRate_Female                  -0.255023   
+Gap_LiverDiseaseDeathRate                     -0.380354   
+Mid_LiverDiseaseDeathRate                     -0.329515   
+
+                              Gap_ChronicRespiratory  Mid_ChronicRespiratory  \
+Alcohol_Male                                0.121873               -0.280348   
+Alcohol_Female                             -0.025246               -0.012873   
+Gap_Alcohol                                 0.150118               -0.329616   
+Mid_Alcohol                                 0.100515               -0.242579   
+ChronicRespiratory_Male                     0.219938                0.955182   
+ChronicRespiratory_Female                  -0.357932                0.959018   
+Gap_ChronicRespiratory                      1.000000               -0.078690   
+Mid_ChronicRespiratory                     -0.078690                1.000000   
+UnintentionalInjury_Male                    0.476876               -0.244344   
+UnintentionalInjury_Female                  0.152405                0.216349   
+Gap_UnintentionalInjury                     0.378202               -0.523532   
+Mid_UnintentionalInjury                     0.352879               -0.019099   
+RoadTraffic_Male                            0.069350               -0.299532   
+RoadTraffic_Female                          0.053777               -0.192719   
+Gap_RoadTraffic                             0.070672               -0.317063   
+Mid_RoadTraffic                             0.067682               -0.284543   
+Diabetes_Male                               0.095838               -0.066801   
+Diabetes_Female                             0.257140               -0.146803   
+Gap_Diabetes                               -0.564204                0.286033   
+Mid_Diabetes                                0.182694               -0.110102   
+Cardiovascular_Male                         0.452457               -0.175552   
+Cardiovascular_Female                       0.471803               -0.222490   
+Gap_Cardiovascular                         -0.448457                0.348557   
+Mid_Cardiovascular                          0.464374               -0.201915   
+DrugDisorder_Male                          -0.378407                0.301143   
+DrugDisorder_Female                        -0.455664                0.356756   
+Gap_DrugDisorder                           -0.302441                0.244978   
+Mid_DrugDisorder                           -0.405353                0.320792   
+Homicide_Male                              -0.103723               -0.263040   
+Homicide_Female                            -0.085399               -0.294089   
+Gap_Homicide                               -0.105572               -0.258209   
+Mid_Homicide                               -0.102168               -0.266780   
+Suicide_Male                                0.256883               -0.293650   
+Suicide_Female                              0.124223                0.041680   
+Gap_Suicide                                 0.275478               -0.391431   
+Mid_Suicide                                 0.235374               -0.221536   
+Neoplasms_Male                              0.507911                0.256784   
+Neoplasms_Female                            0.267673                0.341319   
+Gap_Neoplasms                               0.733508                0.034999   
+Mid_Neoplasms                               0.415758                0.297119   
+LiverDiseaseDeathRate_Male                  0.392100               -0.254804   
+LiverDiseaseDeathRate_Female                0.443647               -0.137646   
+Gap_LiverDiseaseDeathRate                   0.341555               -0.302433   
+Mid_LiverDiseaseDeathRate                   0.411649               -0.226887   
+
+                              UnintentionalInjury_Male  \
+Alcohol_Male                                  0.616266   
+Alcohol_Female                                0.592072   
+Gap_Alcohol                                   0.599773   
+Mid_Alcohol                                   0.623523   
+ChronicRespiratory_Male                      -0.097498   
+ChronicRespiratory_Female                    -0.364406   
+Gap_ChronicRespiratory                        0.476876   
+Mid_ChronicRespiratory                       -0.244344   
+UnintentionalInjury_Male                      1.000000   
+UnintentionalInjury_Female                    0.612484   
+Gap_UnintentionalInjury                       0.465065   
+Mid_UnintentionalInjury                       0.900843   
+RoadTraffic_Male                             -0.143647   
+RoadTraffic_Female                           -0.099069   
+Gap_RoadTraffic                              -0.150068   
+Mid_RoadTraffic                              -0.137767   
+Diabetes_Male                                -0.028783   
+Diabetes_Female                               0.053615   
+Gap_Diabetes                                 -0.263200   
+Mid_Diabetes                                  0.014690   
+Cardiovascular_Male                           0.739232   
+Cardiovascular_Female                         0.773432   
+Gap_Cardiovascular                           -0.744174   
+Mid_Cardiovascular                            0.760131   
+DrugDisorder_Male                            -0.000796   
+DrugDisorder_Female                          -0.091199   
+Gap_DrugDisorder                              0.065316   
+Mid_DrugDisorder                             -0.028456   
+Homicide_Male                                -0.243153   
+Homicide_Female                              -0.128729   
+Gap_Homicide                                 -0.256260   
+Mid_Homicide                                 -0.232422   
+Suicide_Male                                  0.746089   
+Suicide_Female                                0.447949   
+Gap_Suicide                                   0.763785   
+Mid_Suicide                                   0.706170   
+Neoplasms_Male                                0.676603   
+Neoplasms_Female                              0.628581   
+Gap_Neoplasms                                 0.533661   
+Mid_Neoplasms                                 0.668625   
+LiverDiseaseDeathRate_Male                    0.512705   
+LiverDiseaseDeathRate_Female                  0.550231   
+Gap_LiverDiseaseDeathRate                     0.462572   
+Mid_LiverDiseaseDeathRate                     0.530211   
+
+                              UnintentionalInjury_Female  ...  Gap_Suicide  \
+Alcohol_Male                                    0.333059  ...     0.680563   
+Alcohol_Female                                  0.386590  ...     0.595953   
+Gap_Alcohol                                     0.309402  ...     0.675165   
+Mid_Alcohol                                     0.347647  ...     0.679307   
+ChronicRespiratory_Male                         0.256963  ...    -0.301233   
+ChronicRespiratory_Female                       0.159326  ...    -0.444933   
+Gap_ChronicRespiratory                          0.152405  ...     0.275478   
+Mid_ChronicRespiratory                          0.216349  ...    -0.391431   
+UnintentionalInjury_Male                        0.612484  ...     0.763785   
+UnintentionalInjury_Female                      1.000000  ...     0.220156   
+Gap_UnintentionalInjury                        -0.414951  ...     0.632559   
+Mid_UnintentionalInjury                         0.894936  ...     0.552037   
+RoadTraffic_Male                               -0.476343  ...     0.062007   
+RoadTraffic_Female                             -0.401975  ...     0.171101   
+Gap_RoadTraffic                                -0.475679  ...     0.026418   
+Mid_RoadTraffic                                -0.471296  ...     0.084719   
+Diabetes_Male                                  -0.177830  ...    -0.003201   
+Diabetes_Female                                -0.178999  ...     0.047172   
+Gap_Diabetes                                    0.061081  ...    -0.165534   
+Mid_Diabetes                                   -0.180500  ...     0.023542   
+Cardiovascular_Male                             0.159331  ...     0.663940   
+Cardiovascular_Female                           0.223258  ...     0.682200   
+Gap_Cardiovascular                             -0.410756  ...    -0.613237   
+Mid_Cardiovascular                              0.195015  ...     0.675843   
+DrugDisorder_Male                               0.055872  ...     0.066615   
+DrugDisorder_Female                             0.074388  ...    -0.007738   
+Gap_DrugDisorder                                0.039460  ...     0.117522   
+Mid_DrugDisorder                                0.062025  ...     0.044454   
+Homicide_Male                                  -0.448488  ...    -0.152420   
+Homicide_Female                                -0.422651  ...    -0.022120   
+Gap_Homicide                                   -0.449923  ...    -0.167827   
+Mid_Homicide                                   -0.447056  ...    -0.139887   
+Suicide_Male                                    0.308037  ...     0.961310   
+Suicide_Female                                  0.413426  ...     0.539031   
+Gap_Suicide                                     0.220156  ...     1.000000   
+Mid_Suicide                                     0.350674  ...     0.900009   
+Neoplasms_Male                                  0.582528  ...     0.418987   
+Neoplasms_Female                                0.659017  ...     0.354226   
+Gap_Neoplasms                                   0.267350  ...     0.387569   
+Mid_Neoplasms                                   0.625383  ...     0.399267   
+LiverDiseaseDeathRate_Male                     -0.007260  ...     0.565485   
+LiverDiseaseDeathRate_Female                    0.054008  ...     0.566344   
+Gap_LiverDiseaseDeathRate                      -0.039561  ...     0.531841   
+Mid_LiverDiseaseDeathRate                       0.009155  ...     0.573865   
+
+                              Mid_Suicide  Neoplasms_Male  Neoplasms_Female  \
+Alcohol_Male                     0.524164        0.418297          0.475776   
+Alcohol_Female                   0.525876        0.411439          0.553800   
+Gap_Alcohol                      0.505202        0.404985          0.441637   
+Mid_Alcohol                      0.533906        0.424754          0.496864   
+ChronicRespiratory_Male         -0.146891        0.402095          0.413480   
+ChronicRespiratory_Female       -0.274402        0.096156          0.243618   
+Gap_ChronicRespiratory           0.235374        0.507911          0.267673   
+Mid_ChronicRespiratory          -0.221536        0.256784          0.341319   
+UnintentionalInjury_Male         0.706170        0.676603          0.628581   
+UnintentionalInjury_Female       0.350674        0.582528          0.659017   
+Gap_UnintentionalInjury          0.420073        0.126384         -0.014550   
+Mid_UnintentionalInjury          0.591198        0.701847          0.716749   
+RoadTraffic_Male                -0.141411       -0.416979         -0.534083   
+RoadTraffic_Female               0.052093       -0.307996         -0.419919   
+Gap_RoadTraffic                 -0.192453       -0.429514         -0.542539   
+Mid_RoadTraffic                 -0.106183       -0.403926         -0.522367   
+Diabetes_Male                   -0.137715       -0.074058         -0.110197   
+Diabetes_Female                 -0.118270       -0.002579         -0.096091   
+Gap_Diabetes                    -0.019992       -0.212528         -0.011187   
+Mid_Diabetes                    -0.128964       -0.036911         -0.103967   
+Cardiovascular_Male              0.478133        0.637064          0.572516   
+Cardiovascular_Female            0.504664        0.658661          0.584176   
+Gap_Cardiovascular              -0.500852       -0.606454         -0.510706   
+Mid_Cardiovascular               0.494082        0.650732          0.580527   
+DrugDisorder_Male                0.081978       -0.047363          0.077632   
+DrugDisorder_Female              0.042715       -0.113722          0.028796   
+Gap_DrugDisorder                 0.106449        0.003577          0.109324   
+Mid_DrugDisorder                 0.070686       -0.068077          0.063373   
+Homicide_Male                   -0.272961       -0.593986         -0.591087   
+Homicide_Female                 -0.143128       -0.552249         -0.553072   
+Gap_Homicide                    -0.287844       -0.596810         -0.593465   
+Mid_Homicide                    -0.260778       -0.591344         -0.588806   
+Suicide_Male                     0.985256        0.444289          0.394280   
+Suicide_Female                   0.852262        0.352779          0.355312   
+Gap_Suicide                      0.900009        0.418987          0.354226   
+Mid_Suicide                      1.000000        0.442777          0.403868   
+Neoplasms_Male                   0.442777        1.000000          0.927164   
+Neoplasms_Female                 0.403868        0.927164          1.000000   
+Gap_Neoplasms                    0.361434        0.791769          0.505253   
+Mid_Neoplasms                    0.434399        0.987424          0.974736   
+LiverDiseaseDeathRate_Male       0.394919        0.302528          0.244734   
+LiverDiseaseDeathRate_Female     0.396804        0.366607          0.333438   
+Gap_LiverDiseaseDeathRate        0.370737        0.250545          0.182989   
+Mid_LiverDiseaseDeathRate        0.401118        0.324165          0.272178   
+
+                              Gap_Neoplasms  Mid_Neoplasms  \
+Alcohol_Male                       0.187812       0.450148   
+Alcohol_Female                     0.044809       0.478984   
+Gap_Alcohol                        0.212808       0.427805   
+Mid_Alcohol                        0.168304       0.462896   
+ChronicRespiratory_Male            0.252057       0.414201   
+ChronicRespiratory_Female         -0.175700       0.160128   
+Gap_ChronicRespiratory             0.733508       0.415758   
+Mid_ChronicRespiratory             0.034999       0.297119   
+UnintentionalInjury_Male           0.533661       0.668625   
+UnintentionalInjury_Female         0.267350       0.625383   
+Gap_UnintentionalInjury            0.314832       0.069208   
+Mid_UnintentionalInjury            0.448061       0.720880   
+RoadTraffic_Male                  -0.089714      -0.473966   
+RoadTraffic_Female                -0.024814      -0.360818   
+Gap_RoadTraffic                   -0.104801      -0.485008   
+Mid_RoadTraffic                   -0.078750      -0.461241   
+Diabetes_Male                      0.009076      -0.090653   
+Diabetes_Female                    0.150722      -0.042086   
+Gap_Diabetes                      -0.471293      -0.131426   
+Mid_Diabetes                       0.084483      -0.065878   
+Cardiovascular_Male                0.533994       0.621394   
+Cardiovascular_Female              0.564729       0.639190   
+Gap_Cardiovascular                -0.564259      -0.577062   
+Mid_Cardiovascular                 0.552415       0.632923   
+DrugDisorder_Male                 -0.235663       0.004523   
+DrugDisorder_Female               -0.308893      -0.055647   
+Gap_DrugDisorder                  -0.169997       0.048265   
+Mid_DrugDisorder                  -0.260127      -0.013843   
+Homicide_Male                     -0.404493      -0.603549   
+Homicide_Female                   -0.370334      -0.562624   
+Gap_Homicide                      -0.407120      -0.606236   
+Mid_Homicide                      -0.402124      -0.601011   
+Suicide_Male                       0.380549       0.431254   
+Suicide_Female                     0.233297       0.360254   
+Gap_Suicide                        0.387569       0.399267   
+Mid_Suicide                        0.361434       0.434399   
+Neoplasms_Male                     0.791769       0.987424   
+Neoplasms_Female                   0.505253       0.974736   
+Gap_Neoplasms                      1.000000       0.685242   
+Mid_Neoplasms                      0.685242       1.000000   
+LiverDiseaseDeathRate_Male         0.297831       0.283633   
+LiverDiseaseDeathRate_Female       0.300812       0.359268   
+Gap_LiverDiseaseDeathRate          0.278761       0.226587   
+Mid_LiverDiseaseDeathRate          0.302926       0.308114   
+
+                              LiverDiseaseDeathRate_Male  \
+Alcohol_Male                                    0.540730   
+Alcohol_Female                                  0.388743   
+Gap_Alcohol                                     0.555203   
+Mid_Alcohol                                     0.526158   
+ChronicRespiratory_Male                        -0.132908   
+ChronicRespiratory_Female                      -0.350108   
+Gap_ChronicRespiratory                          0.392100   
+Mid_ChronicRespiratory                         -0.254804   
+UnintentionalInjury_Male                        0.512705   
+UnintentionalInjury_Female                     -0.007260   
+Gap_UnintentionalInjury                         0.598253   
+Mid_UnintentionalInjury                         0.285413   
+RoadTraffic_Male                                0.309805   
+RoadTraffic_Female                              0.327616   
+Gap_RoadTraffic                                 0.289591   
+Mid_RoadTraffic                                 0.319543   
+Diabetes_Male                                   0.493017   
+Diabetes_Female                                 0.522779   
+Gap_Diabetes                                   -0.257031   
+Mid_Diabetes                                    0.514519   
+Cardiovascular_Male                             0.613091   
+Cardiovascular_Female                           0.606042   
+Gap_Cardiovascular                             -0.460425   
+Mid_Cardiovascular                              0.610900   
+DrugDisorder_Male                              -0.123012   
+DrugDisorder_Female                            -0.207493   
+Gap_DrugDisorder                               -0.054929   
+Mid_DrugDisorder                               -0.149931   
+Homicide_Male                                   0.160516   
+Homicide_Female                                 0.270966   
+Gap_Homicide                                    0.146333   
+Mid_Homicide                                    0.171869   
+Suicide_Male                                    0.471545   
+Suicide_Female                                  0.084476   
+Gap_Suicide                                     0.565485   
+Mid_Suicide                                     0.394919   
+Neoplasms_Male                                  0.302528   
+Neoplasms_Female                                0.244734   
+Gap_Neoplasms                                   0.297831   
+Mid_Neoplasms                                   0.283633   
+LiverDiseaseDeathRate_Male                      1.000000   
+LiverDiseaseDeathRate_Female                    0.927727   
+Gap_LiverDiseaseDeathRate                       0.979922   
+Mid_LiverDiseaseDeathRate                       0.994923   
+
+                              LiverDiseaseDeathRate_Female  \
+Alcohol_Male                                      0.519218   
+Alcohol_Female                                    0.436519   
+Gap_Alcohol                                       0.519117   
+Mid_Alcohol                                       0.515353   
+ChronicRespiratory_Male                          -0.002957   
+ChronicRespiratory_Female                        -0.255023   
+Gap_ChronicRespiratory                            0.443647   
+Mid_ChronicRespiratory                           -0.137646   
+UnintentionalInjury_Male                          0.550231   
+UnintentionalInjury_Female                        0.054008   
+Gap_UnintentionalInjury                           0.572830   
+Mid_UnintentionalInjury                           0.340244   
+RoadTraffic_Male                                  0.311664   
+RoadTraffic_Female                                0.365180   
+Gap_RoadTraffic                                   0.280689   
+Mid_RoadTraffic                                   0.328465   
+Diabetes_Male                                     0.422470   
+Diabetes_Female                                   0.446366   
+Gap_Diabetes                                     -0.214938   
+Mid_Diabetes                                      0.440040   
+Cardiovascular_Male                               0.662754   
+Cardiovascular_Female                             0.641295   
+Gap_Cardiovascular                               -0.436458   
+Mid_Cardiovascular                                0.652755   
+DrugDisorder_Male                                 0.036031   
+DrugDisorder_Female                              -0.052930   
+Gap_DrugDisorder                                  0.099192   
+Mid_DrugDisorder                                  0.009134   
+Homicide_Male                                     0.090358   
+Homicide_Female                                   0.209092   
+Gap_Homicide                                      0.075430   
+Mid_Homicide                                      0.102355   
+Suicide_Male                                      0.473074   
+Suicide_Female                                    0.087087   
+Gap_Suicide                                       0.566344   
+Mid_Suicide                                       0.396804   
+Neoplasms_Male                                    0.366607   
+Neoplasms_Female                                  0.333438   
+Gap_Neoplasms                                     0.300812   
+Mid_Neoplasms                                     0.359268   
+LiverDiseaseDeathRate_Male                        0.927727   
+LiverDiseaseDeathRate_Female                      1.000000   
+Gap_LiverDiseaseDeathRate                         0.834677   
+Mid_LiverDiseaseDeathRate                         0.960582   
+
+                              Gap_LiverDiseaseDeathRate  \
+Alcohol_Male                                   0.520489   
+Alcohol_Female                                 0.340409   
+Gap_Alcohol                                    0.541898   
+Mid_Alcohol                                    0.501053   
+ChronicRespiratory_Male                       -0.194524   
+ChronicRespiratory_Female                     -0.380354   
+Gap_ChronicRespiratory                         0.341555   
+Mid_ChronicRespiratory                        -0.302433   
+UnintentionalInjury_Male                       0.462572   
+UnintentionalInjury_Female                    -0.039561   
+Gap_UnintentionalInjury                        0.576724   
+Mid_UnintentionalInjury                        0.239374   
+RoadTraffic_Male                               0.290631   
+RoadTraffic_Female                             0.288325   
+Gap_RoadTraffic                                0.277352   
+Mid_RoadTraffic                                0.296025   
+Diabetes_Male                                  0.501769   
+Diabetes_Female                                0.532918   
+Gap_Diabetes                                  -0.264433   
+Mid_Diabetes                                   0.524109   
+Cardiovascular_Male                            0.550584   
+Cardiovascular_Female                          0.551646   
+Gap_Cardiovascular                            -0.446208   
+Mid_Cardiovascular                             0.552692   
+DrugDisorder_Male                             -0.200749   
+DrugDisorder_Female                           -0.277879   
+Gap_DrugDisorder                              -0.134032   
+Mid_DrugDisorder                              -0.226100   
+Homicide_Male                                  0.188572   
+Homicide_Female                                0.288115   
+Gap_Homicide                                   0.175620   
+Mid_Homicide                                   0.198914   
+Suicide_Male                                   0.443057   
+Suicide_Female                                 0.078123   
+Gap_Suicide                                    0.531841   
+Mid_Suicide                                    0.370737   
+Neoplasms_Male                                 0.250545   
+Neoplasms_Female                               0.182989   
+Gap_Neoplasms                                  0.278761   
+Mid_Neoplasms                                  0.226587   
+LiverDiseaseDeathRate_Male                     0.979922   
+LiverDiseaseDeathRate_Female                   0.834677   
+Gap_LiverDiseaseDeathRate                      1.000000   
+Mid_LiverDiseaseDeathRate                      0.954880   
+
+                              Mid_LiverDiseaseDeathRate  
+Alcohol_Male                                   0.542722  
+Alcohol_Female                                 0.407226  
+Gap_Alcohol                                    0.553474  
+Mid_Alcohol                                    0.530827  
+ChronicRespiratory_Male                       -0.099784  
+ChronicRespiratory_Female                     -0.329515  
+Gap_ChronicRespiratory                         0.411649  
+Mid_ChronicRespiratory                        -0.226887  
+UnintentionalInjury_Male                       0.530211  
+UnintentionalInjury_Female                     0.009155  
+Gap_UnintentionalInjury                        0.600019  
+Mid_UnintentionalInjury                        0.304310  
+RoadTraffic_Male                               0.314770  
+RoadTraffic_Female                             0.342465  
+Gap_RoadTraffic                                0.291364  
+Mid_RoadTraffic                                0.326553  
+Diabetes_Male                                  0.481100  
+Diabetes_Female                                0.509709  
+Gap_Diabetes                                  -0.249385  
+Mid_Diabetes                                   0.501851  
+Cardiovascular_Male                            0.635316  
+Cardiovascular_Female                          0.624281  
+Gap_Cardiovascular                            -0.460597  
+Mid_Cardiovascular                             0.630988  
+DrugDisorder_Male                             -0.081901  
+DrugDisorder_Female                           -0.168808  
+Gap_DrugDisorder                              -0.014165  
+Mid_DrugDisorder                              -0.109203  
+Homicide_Male                                  0.143912  
+Homicide_Female                                0.258187  
+Gap_Homicide                                   0.129324  
+Mid_Homicide                                   0.155602  
+Suicide_Male                                   0.478752  
+Suicide_Female                                 0.086397  
+Gap_Suicide                                    0.573865  
+Mid_Suicide                                    0.401118  
+Neoplasms_Male                                 0.324165  
+Neoplasms_Female                               0.272178  
+Gap_Neoplasms                                  0.302926  
+Mid_Neoplasms                                  0.308114  
+LiverDiseaseDeathRate_Male                     0.994923  
+LiverDiseaseDeathRate_Female                   0.960582  
+Gap_LiverDiseaseDeathRate                      0.954880  
+Mid_LiverDiseaseDeathRate                      1.000000  
+
+[44 rows x 44 columns]

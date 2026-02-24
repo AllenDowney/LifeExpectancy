@@ -1,0 +1,271 @@
+# The Gender Gap in Life Expectancy
+
+*This is the first in a series on gender gaps in life expectancy, what causes them, and what we can do about it.*
+
+---
+
+In most countries, women live longer than men.
+That fact is so familiar it's often treated as natural and inevitable
+
+For example, the [World Economic Forum’s Global Gender Gap Report](https://www.weforum.org/publications/global-gender-gap-report-2025/)(GGGR) treats a smaller life-expectancy gap as evidence of discrimination against women, assuming that women *should* live about five years longer.
+In Section B they explain:
+
+> In the case of healthy life expectancy the equality benchmark is set at 1.06 to capture the fact that women tend to naturally live longer than men. As such, parity is considered as achieved if, on average, women live five years longer than men.
+
+We wrote about this adjustment in a recent report [Beyond half measures: How to improve gender gap indices](https://aibm.org/research/beyond-half-measures-how-to-improve-gender-gap-indices/).
+
+In a footnote, the GGGR explains that the 1.06 ratio is "based on the standards used in the UNDP’s Gender-Related Development Index, which uses 87.5 years as the maximum age for women and 82.5 years as the maximum age for men", and cites the [technical notes](https://hdr.undp.org/sites/default/files/2025_HDR/hdr2025_technical_notes.pdf) of the United Nations Development Programme [*Human Development Report 2021-2022*](https://hdr.undp.org/content/human-development-report-2021-22), which explains:
+
+> The indicators are transformed into indices [...] using the same goalposts that are used for the HDI, except life expectancy at birth, which is adjusted for the average five-year biological advantage that women have over men.
+
+There is no other explanation, no source cited for the size of the gap, and no evidence that it is biological.
+
+## Variation in place and time
+
+Contrary to the assumption that the five-year gap is biological and inevitable, it varies substantially between countries and across time.
+The following figure shows the gender gap in life expectancy for 38 OECD countries from 2000-2023, with selected countries labeled.
+
+```{figure} figs/le_gap_timeseries_selected.png
+:width: 80%
+
+Life expectancy gender gap over time (2000–2023), selected OECD countries.
+```
+
+A positive gap means women live longer. The dashed line shows the OECD average.
+
+There are large differences between countries.
+The largest gap in the dataset was 12.7 years in Lithuania in 2007.
+The smallest was just 2.5 years in Israel in 2015.
+
+In 2023 the largest gaps are in Lithuania, Latvia, and Estonia, all greater than 8 years.
+The smallest gaps are in Norway, the Netherlands, Luxembourg, and New Zealand, all less than 3.5 years.
+The United States is close to the OECD average at 5.0 years.
+
+Notably, some of the largest gaps are in Baltic countries, and some of the smallest in Scandanavia.
+A ferry from Talinn to Stockholm travels 240 miles and closes the gender gap from 8.1 years in Estonia to 3.7 years in Sweden.
+What a difference the Baltic Sea makes.
+
+There are also large differences over time.
+The OECD average dropped from 6.5 to 5.1 between 2000 and 2023 at an average rate of 0.6 years per decade.
+The largest decrease was in Estonia, at a rate of 1.5 years per decade.
+Gaps in Slovenia, Lithuania, Columbia, and Hungary have also closed faster than 1.0 years per decade.
+The only increases were in Mexico (0.8 years per decade) and Costa Rica (0.3 years per decade).
+
+In the United States, the gap closed slightly between 2000 and 2015, then increased due to the opioid epidemic and COVID.
+Since 2021 it has descreased again as deaths due to both causes have declined.
+The net change is a decrease from 5.3 in 2000 to 5.0 in 2023.
+The pattern in Canada is similar to the U.S.
+
+The large differences between countries and the consistent decline in almost all OECD countries suggest that the gender gap in life expectancy is not natural or inevitable.
+
+## But Why?
+
+These results raise an obvious question: what causes these differences between countries and changes over time?
+Common explanations fall into three groups;
+
+* Biological: For example, the "frail male hypothesis" posits that men might have genetic vulnerabilities at higher rates because with only one X chromosome, they have less genetic redundancy than women. They also might be more vulnerable to diseases of aging because evolutionary forces rewarded "live fast, die young" strategies for males more than females.
+
+* Behavioral: Men might be more inclined to risk-taking behaviors like smoking, alcohol and drug use, aggressive driving, and extreme sports. And they might be more likely to engage in violent interactions and become victims of homicide.
+
+* Social: Men are overrepresented in hazardous occupations including military service. They might be exposed to road traffic hazards at higher rates as they are more likely to commute or drive for work. And they might have greater exposure and vulnerability to diseases of despair.
+
+At this point we don't mean to assert that any of these are true, or if true that they are the largest causal factors -- only that these are the kinds of explanations people offer.
+Anecdotally, we notice that explanations are most often offered in this order: biological first, behavoral second (and often underpinned by biology), and social last or never.
+
+## Drug Use Disorders
+
+Looking at differences between countries and across time, we can make informed guesses about likely contributing factors.
+
+For example, we have already suggested that the increasing gap in the United States between 2015 and 2020 was caused at least in part by the opioid epidemic.
+To see whether that explanation is plausible, we use cause-specific death rates from the [Global Burden of Disease (GBD)](https://www.healthdata.org/research-analysis/gbd) study, produced by the Institute for Health Metrics and Evaluation (IHME).
+This dataset includes death rates by cause, sex, country, and year, with a consistent methodology that allows us to compare gender gaps between countries and over time.
+
+The following figure shows death rates due to drug use disorders in OECD countries from 2000-2023.
+
+TODO: figure
+
+The most notable feature is the increase in the United States and Canada after 2013, which aligns with the third wave of the opioid epidemic, attributed to synthetic opioids like fentanyl.
+This wave peaked in 2022, with an estimated 107,000 deaths.
+
+Men account for roughly 70% of opioid overdose deaths, and peak mortality occurred among working-age men.
+And deaths among relatively young people have a larger effect on life expectancy.
+
+The pattern is similar in Canada, although the gaps are somewhat lower throughout.
+In many other countries, the gap declined slowly, with the steepest decline in Norway.
+Other than the United States and Canada, the biggest increases were in Lithuania and Great Britain 
+
+
+The highest gap was 24 deaths per 100,000 in the United States in 2022.
+The smallest gap was essentially zero in Japan in 2013; the smallest current gap is in South Korea.
+
+## Causation
+
+It is not just plausible that the gaps in these death rates contribute to the gap in life expectancy, it is a near mathematical certainty.
+Differences in cause-specific death rates contribute to differences in age-specific death rates, which contribute to differences in period life expectancy.
+
+For that reason, these factors are almost certainly causal in the counterfactual sense -- if the gaps in the death rates were smaller, the gap in life expectancy would be smaller -- and in the intervention sense -- if a public health policy is able to reduce these rates, it would cause the life expectancy gap to close.
+
+Finally, we note that there are two ways to address gender gaps like this
+
+* If a gender-targeted intervention reduces death rates for men more than for women, it would obviously decrease the gender gap.
+
+* Less obviously, if a general intervention is equally effective for men and women, in the sense that it decreases rates by the same percentage, it would also decrease the gender gap. For example, the 2023 death rates due to drug use disorders in the United States were 41 for men and 17 for women, a gap of 24 deaths per 100,000.
+If both rates were cut by 50%, they would be 20.5 and 8.5, a gap of 12.
+In general, an intervention that improves health outcomes in general is likely to decrease the life expectancy gap.
+
+
+## Homicide
+
+The following figure shows the gender gap in death rates due to homicide in OECD countries from 2000-2023
+
+# TODO figure
+
+The smallest gap was in Norway in 2019, when the rate was 0.48 for men and 0.55 for women.
+Currently the smallest gap is in Switzerland, where the rates are 0.47 and 0.45.
+
+The largest gap was in Colombia in 2002: the homicide rate was 158 per 100,000 for men and 18 for women, a difference of 140 (truncated in the chart).
+In Colombia in the early 2000s, homicide rates were among the highest in the world.
+Nearly nine out of ten victims were men.
+When homicide declined, the gender gap narrowed.
+
+Other than Colombia, the largest decreases were in the Baltic countries.
+The largest increases were in Mexico, Costa Rica, and the United States.
+
+In the United States, homicide rates for men and women declined between 2000 and 2014, and the gap shrank.
+Since then, the rate for men increased much more than the rate for women, so the gap expanded.
+The net effect is an increase from 6.6 in 2000 to 8.8 in 2023.
+
+
+## Suicide
+
+The following figure shows the gender gap in death rates due to homicide in OECD countries from 2000-2023
+
+# TODO figure
+
+The gender gap is much higher in Lithuania than in any other OECD country, but decreased between 2000 and 2023. Other countries with large gaps are Latvia and South Korea, both over 20 per 100,000.
+
+The countries with the smallest gaps -- and lowest rates -- are Turkey, Greece, and Israel.
+These low rates might be explained by cultural characteristics, but they might also reflect classification practices.
+
+In the United States, suicide rates have increased for both men and women, but they have increased about three times faster for men, so the gender gap has grown from 14 in 2000 to 18 in 2023.
+In 2023, the rate for men was 24.2 per 100,000, almost four times the rate for women, 6.5 per 100,000.
+
+
+## Road Traffic
+
+The following figure shows the gender gap in death rates due to road traffic in OECD countries from 2000-2023
+
+# TODO figure
+
+The most apparent change is the decline in Lithuania, from worst in 2005 to close to the OECD average.
+Also apparent is the divergence of Mexico and Costa Rica.
+
+In the United States, the gap narrowed slightly between 2000 and 2010, the grew from 10 in 2010 to 13 in 2023.
+This change is driven primarily by the increase in death rates for men, from 17.5 in 2010 to 21 in 2023.
+
+The widening gap reflects both exposure and risk per mile.
+Men in the United States drive about 60 percent more vehicle miles per year than women, and a disproportionate share of those miles occur in higher-risk settings such as nighttime and rural driving.
+Adjusting for miles driven removes roughly half of the raw male–female difference in fatalities.
+But even per mile driven, risk for men is higher, primarily due to higher rates of speeding, alcohol impairment, and lower seatbelt use.
+
+
+
+TEXT WAITING TO BE PLACED
+
+GGGR2025 describes decreasing gaps as 
+
+> However, the gender differences in healthy life expectancy have narrowed in a majority
+of economies with data available in both the 2006 and 2025 editions. While overall life expectancy by gender has remained more stable than healthy life expectancy, and women continue to outlive men, this indicates that the proportion of women’s lives spent in full health has declined relative to men.
+
+While this is technically true, it would be just as true to write that the proportion of men's lifes in good health as improved relative to women, but either summary is equally misleading.
+If we only look at the gap, and not the life expectancies in both groups, we can't tell whether a closing gap is due to a decrease in one group, and increase in the other or -- as is actually the case -- increases in both groups, at difference rates.
+
+
+A closing gap could
+
+
+As evidence that women continue to outlive men, they cite the World Health Organization (WHO) [Global Health Observatory database, [“Life expectance at birth (years)”](
+https://www.who.int/data/gho/data/indicators/indicator-details/GHO/life-expectancy-at-birth-(years)).
+
+
+makes a similar adjustment in its [Gender Development Index](https://hdr.undp.org/sites/default/files/2025_HDR/hdr2025_technical_notes.pdf), using different maximum life-expectancy goalposts for women and men (e.g. Technical Note 3, *Human Development Report* 2021–22 and 2025).
+
+
+
+
+
+But the gap varies enormously from one country to another and has changed over time. That variation suggests it isn’t fixed by biology alone—and that we can learn something useful by asking what actually drives it.
+
+This post sets the stage for a short series that does exactly that: we’ll look at how the gender gap in life expectancy (and healthy life expectancy) varies across OECD countries and over time, then in later posts we’ll use causal modeling to identify which causes of death contribute most, and counterfactual analysis to ask how much of the gap could plausibly be closed. Here we introduce the problem, say where our motivation came from, and walk through the basic time series so the later results have a clear backdrop.
+
+---
+
+## The problem
+
+In rich democracies, the gap between female and male life expectancy ranges from roughly zero to more than nine years. Where the gap is large, it represents a lot of preventable death and lost healthy years among men—and often different causes (injuries, violence, substance use, suicide) than the ones that dominate at very old ages. Where the gap is small or zero, we see that big gaps are not inevitable. The Netherlands, for instance, has a gender gap in healthy life expectancy close to zero. So the right question isn’t “is there a gap?” but “why is the gap so big here and so small there, and what could we do about it?”
+
+Understanding what drives the gap is a precondition for sensible policy. If the gap were purely biological, then “adjusting” it (as some indices do) might be a statistical choice; if much of it is tied to specific causes of death that vary by country and over time, then the policy focus should be on those causes. The data we’ll show—time series of life expectancy and healthy life expectancy gaps, plus gender gaps in a set of cause-specific death rates—support the second story: the gap is highly variable and moves with patterns that causal modeling can help unpack.
+
+---
+
+## Where this is coming from
+
+Our starting point was a critical take on how the UN’s Gender Development Index (GDI) is built. In short: the GDI adjusts male life expectancy upward by five years relative to female, using different “goalposts” (e.g. female 22.5–87.5 years, male 17.5–82.5). A widely read Substack piece argued that this adjustment is barely explained and unjustified—that the gap is largely behavioural and social, not biological. We didn’t take that as proven; we wanted to see where the “five years” and the “biological advantage” story actually come from.
+
+We traced the chain of citations. The UNDP Human Development Report technical notes (2021–22 and 2025) state in a single sentence that life expectancy is “adjusted for the average five-year biological advantage that women have over men.” They give no citation, no rationale, and no reference to any external source. The World Economic Forum’s Global Gender Gap Report 2024, for its Health and Survival subindex, sets the parity benchmark for healthy life expectancy at a female-to-male ratio of 1.06—i.e. “women live five years longer than men”—and in a footnote explicitly attributes this to the UNDP’s Gender-Related Development Index and the same 87.5 / 82.5 year caps. So the chain of authority runs: **WEF → UNDP → (no further source)**. The “five-year biological advantage” is an assertion, not a cited finding.
+
+That doesn’t by itself show the gap is “behavioural” or that the adjustment is wrong. It does show that the official story rests on an uncited claim. We think it’s worth asking, with data and models, what actually drives the gap—and how much of it could feasibly be reduced. That’s what this series is about.
+
+---
+
+
+
+---
+
+## Time series view of likely contributing factors
+
+The same sources give us cause-specific death rates by sex. We can compute, for each cause, the **gender gap in the death rate** (male minus female, so positive means higher male rates) and plot how that gap has moved over 2000–2023 for selected countries. These aren’t yet the “drivers” we’ll estimate in the next post—that comes from the causal model—but they’re the raw material: the gaps in road traffic deaths, homicide, suicide, cancer, drug-disorder deaths, and COVID-19 (where applicable). Showing them here makes it plausible that the overall life-expectancy gap is a function of many such cause-specific gaps, and that those gaps differ a lot across countries and time.
+
+**[Insert: Road traffic death rate gender gap – selected countries]  
+*Figure: `figs/road_traffic_gap_timeseries_selected.png`***
+
+Road traffic injury death rates are typically much higher for men than women; the gap varies by country and has generally fallen over time in many places, consistent with safer roads and vehicles.
+
+**[Insert: Homicide death rate gender gap – selected countries]  
+*Figure: `figs/homicide_gap_timeseries_selected.png`***
+
+Homicide shows very large gender gaps (men much higher) and big cross-country variation—some countries have brought the level and the gap down, others haven’t.
+
+**[Insert: Suicide death rate gender gap – selected countries]  
+*Figure: `figs/suicide_gap_timeseries_selected.png`***
+
+Suicide death rates are higher for men in every country we look at; the gap is stable or slowly changing in many places, with notable differences across countries.
+
+**[Insert: Cancer death rate gender gap – selected countries]  
+*Figure: `figs/cancer_gap_timeseries_selected.png`***
+
+Cancer (neoplasms) gaps vary by country and over time; in some places the gap has narrowed as smoking-related cancers have declined and sex-specific screening and treatment have changed.
+
+**[Insert: Drug disorders death rate gender gap – selected countries]  
+*Figure: `figs/drug_disorders_gap_timeseries_selected.png`***
+
+Drug-use-disorder deaths show large male-female gaps in some countries and have risen in several, making them a visible part of the story in places like the United States.
+
+**[Insert: COVID-19 death rate gender gap – selected countries]  
+*Figure: `figs/covid19_gap_timeseries_selected.png`***
+
+COVID-19 added a new cause with its own gender gap; the gap spiked in the pandemic years and has since come down as the pandemic has receded.
+
+Together, these time series show that the building blocks of the life-expectancy gap—cause-specific mortality gaps—are heterogeneous and time-varying. That’s exactly the setting where a causal model can help: we can ask which of these gaps, in combination, actually predict the overall LE (and HALE) gap, and by how much.
+
+---
+
+## What’s next
+
+In the next post we’ll introduce a Bayesian hierarchical panel model that uses these cause-specific gaps (and, in later steps, other predictors) to explain variation in the life expectancy gap across countries and years. We’ll focus on **coefficients**: how much a one-standard-deviation change in each gap is associated with a change in the LE gap. That gives us a clear ranking of which causes “matter most” in a causal-effect sense. We’ll also briefly introduce **importance** (effect size × real-world variation), which helps connect the model to policy: e.g. cancer may have a moderate coefficient but high importance because its gap varies a lot. After that, we’ll do counterfactuals: how much could the gap close if we moved each cause-specific gap toward the best level observed in the OECD? And we’ll repeat the exercise for healthy life expectancy (HALE), where the drivers and trade-offs aren’t quite the same.
+
+The takeaway for this post is simple: **gender gaps in life expectancy are not inevitable**. They vary dramatically across countries and over time, and some countries have achieved near-zero gaps. That suggests targeted interventions could substantially reduce or eliminate these gaps—and the next posts will outline which levers matter most and how big the potential gains could be.
+
+---
+
+*Next: [Post 2 – Causal modeling: what drives the gender gap?]*

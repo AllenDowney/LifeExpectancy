@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="http://localhost:3006/sitemap_style.xsl" ?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>http://localhost:3006</loc>
+  </url>
+  <url>
+    <loc>http://localhost:3006/summary</loc>
+  </url>
+  <url>
+    <loc>http://localhost:3006/tech-report</loc>
+  </url>
+  <url>
+    <loc>http://localhost:3006/data-inventory</loc>
+  </url>
+  <url>
+    <loc>http://localhost:3006/neoplasms-report</loc>
+  </url>
+  <url>
+    <loc>http://localhost:3006/eda-report</loc>
+  </url>
+  <url>
+    <loc>http://localhost:3006/validation</loc>
+  </url>
+  <url>
+    <loc>http://localhost:3006/time-series-report</loc>
+  </url>
+  <url>
+    <loc>http://localhost:3006/temporal</loc>
+  </url>
+  <url>
+    <loc>http://localhost:3006/bayesian-model-report-2023</loc>
+  </url>
+  <url>
+    <loc>http://localhost:3006/blog1-time-series</loc>
+  </url>
+</urlset>
