@@ -1,6 +1,6 @@
 # The Gender Gap in Life Expectancy
 
-*This is the first in a series on gender gaps in life expectancy, what causes them, and what we can do about it.*
+*This is Part 1 in a series on gender gaps in life expectancy, what causes them, and what we can do about it.*
 
 ---
 
@@ -12,7 +12,7 @@ They explain:
 
 > "In the case of healthy life expectancy the equality benchmark is set at 1.06 to capture the fact that women tend to naturally live longer than men. As such, parity is considered as achieved if, on average, women live five years longer than men."
 
-We wrote about this adjustment in a recent report [Beyond half measures: How to improve gender gap indices](https://aibm.org/research/beyond-half-measures-how-to-improve-gender-gap-indices/).
+We wrote about this adjustment in a recent report, [Beyond half measures: How to improve gender gap indices](https://aibm.org/research/beyond-half-measures-how-to-improve-gender-gap-indices/).
 
 In a footnote, the GGGR explains that the 1.06 ratio is "based on the standards used in the UNDP’s Gender-Related Development Index, which uses 87.5 years as the maximum age for women and 82.5 years as the maximum age for men", and cites the [technical notes](https://hdr.undp.org/sites/default/files/2025_HDR/hdr2025_technical_notes.pdf) of the United Nations Development Programme [*Human Development Report 2021-2022*](https://hdr.undp.org/content/human-development-report-2021-22), which explains:
 
@@ -28,7 +28,7 @@ The following figure shows the gender gap in life expectancy for 38 OECD countri
 ```{figure} figs/le_gap_timeseries_selected.png
 :width: 80%
 
-Life expectancy gender gap over time (2000–2023), OECD countries.
+Life expectancy gender gap (2000–2023), OECD countries.
 From Our World in Data (OWID) - Combines Human Mortality Database (2025) and UN World Population Prospects (2024).
 ```
 
@@ -86,7 +86,7 @@ The following figure shows gender gaps in death rates due to drug use disorders.
 ```{figure} figs/drug_disorders_gap_timeseries_selected.png
 :width: 80%
 
-Drug use disorders death rate gender gap over time (2000–2023), selected OECD countries.
+Drug use disorders, death rate gender gap  (2000–2023), OECD countries.
 Source: Global Burden of Disease from IHME.
 ```
 
@@ -109,7 +109,7 @@ The following figure shows gender gaps in death rates due to interpersonal viole
 ```{figure} figs/homicide_gap_timeseries_selected.png
 :width: 80%
 
-Homicide death rate gender gap over time (2000–2023), selected OECD countries.
+Homicide, death rate gender gap (2000–2023), selected OECD countries.
 Source: Global Burden of Disease from IHME.
 ```
 
@@ -138,7 +138,7 @@ The following figure shows gender gaps in death rates due to self harm.
 ```{figure} figs/suicide_gap_timeseries_selected.png
 :width: 80%
 
-Self-harm death rate gender gap over time (2000–2023), selected OECD countries.
+Suicide, death rate gender gap (2000–2023), selected OECD countries.
 Source: Global Burden of Disease from IHME.
 ```
 
@@ -165,7 +165,7 @@ The following figure shows gender gaps in death rates due to road traffic.
 ```{figure} figs/road_traffic_gap_timeseries_selected.png
 :width: 80%
 
-Road traffic death rate gender gap over time (2000–2023), selected OECD countries.
+Road traffic, death rate gender gap (2000–2023), selected OECD countries.
 Source: Global Burden of Disease from IHME.
 ```
 
@@ -185,7 +185,7 @@ Adjusting for miles driven removes roughly half of the raw male–female differe
 But even per mile driven, risk for men is higher, primarily due to higher rates of speeding, alcohol impairment, and lower seatbelt use.
 
 
-## Contingency
+## Gender Gaps are Contingent
 
 In all of these cause-specific death rates, we see large differences between countries and large changes over time.
 We can identify likely causes for these differences, including
@@ -203,7 +203,7 @@ We can identify likely causes for these differences, including
 Gender gaps in cause-specific death rates are highly contingent, not natural, and not inevitable.
 And they contribute directly to gender gaps in life expectancy.
 
-## Causation
+## Gender Gaps are Causative
 
 By construction, differences in cause-specific death rates contribute to differences in age-specific death rates, which contribute to differences in period life expectancy.
 
