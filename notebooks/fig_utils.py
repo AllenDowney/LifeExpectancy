@@ -1,8 +1,9 @@
 """Figure utilities for time series plotting."""
 
+import os
 import matplotlib.pyplot as plt
 import numpy as np
-from utils import get_oecd, code_to_who_country
+from utils import get_oecd, code_to_who_country, add_title, add_subtext, add_logo, AIBM_COLORS
 
 # Color mapping for countries - ensures consistent colors across plots
 COUNTRY_COLORS = {
@@ -67,7 +68,8 @@ def get_country_color(code, default_color='gray'):
 
 
 def plot_gap_timeseries(df, gap_col, countries=None, oecd_avg=True, title=None, ylabel=None, 
-                        selected_countries=None, label_lines=True):
+                        selected_countries=None, label_lines=True, subtitle=None, subtext=None,
+                        logo=None):
     """
     Plot gap time series for selected countries and OECD average.
     
@@ -82,7 +84,7 @@ def plot_gap_timeseries(df, gap_col, countries=None, oecd_avg=True, title=None, 
     oecd_avg : bool
         Whether to include OECD average line
     title : str, optional
-        Plot title
+        Plot title (AIBM style: left-aligned)
     ylabel : str, optional
         Y-axis label
     selected_countries : list, optional
@@ -91,6 +93,13 @@ def plot_gap_timeseries(df, gap_col, countries=None, oecd_avg=True, title=None, 
     label_lines : bool
         If True, label lines directly on the right side instead of using a legend.
         If False, use a traditional legend.
+    subtitle : str, optional
+        Subtitle below main title (AIBM style)
+    subtext : str, optional
+        Source/caption text below plot (e.g., "Source: OWID")
+    logo : str or bool, optional
+        If True, add logo from logo-hq-small.png. If str, path to logo file.
+        Skipped if file does not exist.
     """
     # Filter to OECD countries
     # get_oecd expects Code as index, so set it temporarily
@@ -133,7 +142,7 @@ def plot_gap_timeseries(df, gap_col, countries=None, oecd_avg=True, title=None, 
             country_name = country_data['Country'].iloc[0]
             color = get_country_color(code)
             line = ax.plot(country_data['Year'], country_data[gap_col], 
-                          color=color, alpha=0.9, linewidth=2, 
+                          color=color, alpha=0.9, linewidth=1.5, 
                           label=country_name, zorder=2)
             
             # Store label information for later placement
@@ -152,7 +161,7 @@ def plot_gap_timeseries(df, gap_col, countries=None, oecd_avg=True, title=None, 
     if oecd_avg:
         oecd_avg_by_year = df_oecd.groupby('Year')[gap_col].mean()
         ax.plot(oecd_avg_by_year.index, oecd_avg_by_year.values,
-               color='black', linewidth=2, linestyle='--', 
+               color=AIBM_COLORS['dark_gray'], linewidth=1.5, linestyle='--', 
                label='OECD Average', zorder=2)
         if label_lines:
             last_year = oecd_avg_by_year.index.max()
@@ -162,7 +171,12 @@ def plot_gap_timeseries(df, gap_col, countries=None, oecd_avg=True, title=None, 
     # Formatting
     ax.set_xlabel('Year')
     ax.set_ylabel(ylabel or gap_col)
-    ax.set_title(title or f'{gap_col} Over Time')
+    # AIBM style: title left-aligned; use add_title for title+subtitle, else ax.set_title with loc="left"
+    plot_title = title or f'{gap_col} Over Time'
+    if subtitle is not None:
+        add_title(plot_title, subtitle, pad=25, x=0, y=1.04)
+    else:
+        ax.set_title(plot_title, loc="left")
     ax.grid(True, alpha=0.3)
     
     # Only show legend if not using direct labels
@@ -191,13 +205,27 @@ def plot_gap_timeseries(df, gap_col, countries=None, oecd_avg=True, title=None, 
                    color=label_info['color'], fontsize=9, va='center', ha='left',
                    style='italic' if 'OECD' in label_info['text'] else 'normal',
                    zorder=3)
+        
+        # Spine and ticks only up to data end (not into label area)
+        ax.spines['bottom'].set_bounds(min_year, max_year)
+        tick_step = 1 if year_range <= 5 else 5
+        ax.set_xticks(np.arange(min_year, max_year + 1, tick_step))
+    
+    # AIBM style: subtext and logo below plot (aligned with axes)
+    if subtext:
+        add_subtext(subtext, x=0, y=-0.18, align_to_axes=True)
+    if logo:
+        logo_path = logo if isinstance(logo, str) else "logo-hq-small.png"
+        if os.path.isfile(logo_path):
+            add_logo(filename=logo_path, location=(0.99, -0.21), align_to_axes=True)
     
     plt.tight_layout()
     return fig, ax
 
 
 def plot_rate_timeseries(df, rate_col, countries=None, oecd_avg=True, title=None, ylabel=None,
-                         selected_countries=None, label_lines=True):
+                         selected_countries=None, label_lines=True, subtitle=None, subtext=None,
+                         logo=None):
     """
     Plot rate time series for selected countries and OECD average.
     
@@ -262,7 +290,7 @@ def plot_rate_timeseries(df, rate_col, countries=None, oecd_avg=True, title=None
             country_name = country_data['Country'].iloc[0]
             color = get_country_color(code)
             line = ax.plot(country_data['Year'], country_data[rate_col], 
-                          color=color, alpha=0.9, linewidth=2, 
+                          color=color, alpha=0.9, linewidth=1.5, 
                           label=country_name, zorder=2)
             
             # Store label information for later placement
@@ -281,7 +309,7 @@ def plot_rate_timeseries(df, rate_col, countries=None, oecd_avg=True, title=None
     if oecd_avg:
         oecd_avg_by_year = df_oecd.groupby('Year')[rate_col].mean()
         ax.plot(oecd_avg_by_year.index, oecd_avg_by_year.values,
-               color='black', linewidth=2, linestyle='--', 
+               color=AIBM_COLORS['dark_gray'], linewidth=1.5, linestyle='--', 
                label='OECD Average', zorder=2)
         if label_lines:
             last_year = oecd_avg_by_year.index.max()
@@ -290,13 +318,18 @@ def plot_rate_timeseries(df, rate_col, countries=None, oecd_avg=True, title=None
                 'x': last_year,
                 'y': last_value,
                 'text': 'OECD Avg',
-                'color': 'black'
+                'color': AIBM_COLORS['dark_gray']
             })
     
     # Formatting
     ax.set_xlabel('Year')
     ax.set_ylabel(ylabel or rate_col)
-    ax.set_title(title or f'{rate_col} Over Time')
+    # AIBM style: title left-aligned
+    plot_title = title or f'{rate_col} Over Time'
+    if subtitle is not None:
+        add_title(plot_title, subtitle, pad=25, x=0, y=1.04)
+    else:
+        ax.set_title(plot_title, loc="left")
     ax.grid(True, alpha=0.3)
     
     # Only show legend if not using direct labels
@@ -325,6 +358,19 @@ def plot_rate_timeseries(df, rate_col, countries=None, oecd_avg=True, title=None
                    color=label_info['color'], fontsize=9, va='center', 
                    style='italic' if 'OECD' in label_info['text'] else 'normal',
                    zorder=3)
+        
+        # Spine and ticks only up to data end (not into label area)
+        ax.spines['bottom'].set_bounds(min_year, max_year)
+        tick_step = 1 if year_range <= 5 else 5
+        ax.set_xticks(np.arange(min_year, max_year + 1, tick_step))
+    
+    # AIBM style: subtext and logo below plot (aligned with axes)
+    if subtext:
+        add_subtext(subtext, x=0, y=-0.18, align_to_axes=True)
+    if logo:
+        logo_path = logo if isinstance(logo, str) else "logo-hq-small.png"
+        if os.path.isfile(logo_path):
+            add_logo(filename=logo_path, location=(0.99, -0.21), align_to_axes=True)
     
     plt.tight_layout()
     return fig, ax

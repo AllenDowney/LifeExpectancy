@@ -38,6 +38,7 @@ from utils import (
     column_name_mapping
 )
 from fig_utils import plot_gap_timeseries
+# AIBM style: each figure uses title (left-aligned), subtitle (OECD countries, years), subtext (source), logo
 
 configure_plot_style()
 
@@ -246,15 +247,16 @@ slopes_le.sort_values(by='Slope').tail(10)
 selected_countries = ['USA', 'GBR', 'NOR', 'FRA', 'CAN', 'LTU', 'JPN']
 
 # Plot Life Expectancy gap for selected countries
-# Non-selected countries will be shown in gray, selected countries in colors
-# Labels will be placed directly on the right side of the figure
 fig, ax = plot_gap_timeseries(
     le_temporal.reset_index(),
     'LE_gap',
     selected_countries=selected_countries,
-    label_lines=True,  # Use direct labels instead of legend
-    title='Life Expectancy Gender Gap Over Time: Selected Countries',
-    ylabel='Life Expectancy Gap (years)'
+    label_lines=True,
+    title='Life Expectancy Gender Gap',
+    subtitle='OECD countries, 2000–2023',
+    ylabel='Life Expectancy Gap (years)',
+    subtext='Source: Our World in Data (OWID) – Combines Human Mortality Database (2025) and UN World Population Prospects (2024).',
+    logo=True
 )
 plt.savefig('figs/le_gap_timeseries_selected.png', dpi=150, bbox_inches='tight')
 plt.show()
@@ -287,15 +289,16 @@ selected_countries = ['USA', 'NOR', 'CRI', 'CAN', 'LTU', 'MEX']
 
 
 # Plot Road Traffic gap for selected countries
-# Non-selected countries will be shown in gray, selected countries in colors
-# Labels will be placed directly on the right side of the figure
 fig, ax = plot_gap_timeseries(
     road_injuries_temporal.reset_index(),
     'Gap_RoadTraffic',
     selected_countries=selected_countries,
-    label_lines=True,  # Use direct labels instead of legend
-    title='Road Traffic Death Rate Gender Gap Over Time: Selected Countries',
-    ylabel='Road Traffic Death Rate Gap (per 100,000)'
+    label_lines=True,
+    title='Road Traffic, Death Rate Gender Gap',
+    subtitle='OECD countries, 2000–2023',
+    ylabel='Road Traffic Death Rate Gap (per 100,000)',
+    subtext='Source: Global Burden of Disease from IHME',
+    logo=True
 )
 plt.savefig('figs/road_traffic_gap_timeseries_selected.png', dpi=150, bbox_inches='tight')
 plt.show()
@@ -354,15 +357,16 @@ homicide_temporal.query('Year == 2023').sort_values(by='Gap_Homicide')
 selected_countries = ['USA', 'NOR', 'COL', 'LTU', 'MEX', 'CRI']
 
 # Plot Homicide gap for selected countries
-# Non-selected countries will be shown in gray, selected countries in colors
-# Labels will be placed directly on the right side of the figure
 fig, ax = plot_gap_timeseries(
     homicide_temporal.reset_index(),
     'Gap_Homicide',
     selected_countries=selected_countries,
-    label_lines=True,  # Use direct labels instead of legend
-    title='Homicide Death Rate Gender Gap Over Time: Selected Countries',
-    ylabel='Homicide Death Rate Gap (per 100,000)'
+    label_lines=True,
+    title='Homicide, Death Rate Gender Gap',
+    subtitle='OECD countries, 2000–2023',
+    ylabel='Homicide Death Rate Gap (per 100,000)',
+    subtext='Source: Global Burden of Disease from IHME',
+    logo=True
 )
 plt.ylim(-1, 65)
 plt.savefig('figs/homicide_gap_timeseries_selected.png', dpi=150, bbox_inches='tight')
@@ -429,15 +433,16 @@ suicide_temporal.query('Year == 2023').sort_values(by='Gap_Suicide')
 selected_countries = ['USA', 'NOR', 'TUR', 'LTU', 'CAN', 'KOR']
 
 # Plot Suicide gap for selected countries
-# Non-selected countries will be shown in gray, selected countries in colors
-# Labels will be placed directly on the right side of the figure
 fig, ax = plot_gap_timeseries(
     suicide_temporal.reset_index(),
     'Gap_Suicide',
     selected_countries=selected_countries,
-    label_lines=True,  # Use direct labels instead of legend
-    title='Suicide Death Rate Gender Gap Over Time: Selected Countries',
-    ylabel='Suicide Death Rate Gap (per 100,000)'
+    label_lines=True,
+    title='Suicide, Death Rate Gender Gap',
+    subtitle='OECD countries, 2000–2023',
+    ylabel='Suicide Death Rate Gap (per 100,000)',
+    subtext='Source: Global Burden of Disease from IHME',
+    logo=True
 )
 plt.savefig('figs/suicide_gap_timeseries_selected.png', dpi=150, bbox_inches='tight')
 plt.show()
@@ -496,15 +501,16 @@ cancer_temporal.query('Year == 2023').sort_values(by='Gap_Neoplasms')
 selected_countries = ['USA', 'NOR', 'JPN', 'LTU', 'NLD', 'COL']
 
 # Plot Cancer gap for selected countries
-# Non-selected countries will be shown in gray, selected countries in colors
-# Labels will be placed directly on the right side of the figure
 fig, ax = plot_gap_timeseries(
     cancer_temporal.reset_index(),
     'Gap_Neoplasms',
     selected_countries=selected_countries,
-    label_lines=True,  # Use direct labels instead of legend
-    title='Cancer Death Rate Gender Gap Over Time: Selected Countries',
-    ylabel='Cancer Death Rate Gap (per 100,000)'
+    label_lines=True,
+    title='Cancer, Death Rate Gender Gap',
+    subtitle='OECD countries, 2000–2023',
+    ylabel='Cancer Death Rate Gap (per 100,000)',
+    subtext='Source: Global Burden of Disease from IHME',
+    logo=True
 )
 plt.savefig('figs/cancer_gap_timeseries_selected.png', dpi=150, bbox_inches='tight')
 plt.show()
@@ -563,15 +569,16 @@ drug_disorders_temporal.query('Year == 2023').sort_values(by='Gap_DrugDisorder')
 selected_countries = ['USA', 'NOR', 'KOR', 'LTU', 'CAN', 'EST']
 
 # Plot Drug Disorders gap for selected countries
-# Non-selected countries will be shown in gray, selected countries in colors
-# Labels will be placed directly on the right side of the figure
 fig, ax = plot_gap_timeseries(
     drug_disorders_temporal.reset_index(),
     'Gap_DrugDisorder',
     selected_countries=selected_countries,
-    label_lines=True,  # Use direct labels instead of legend
-    title='Drug Disorders Death Rate Gender Gap Over Time: Selected Countries',
-    ylabel='Drug Disorders Death Rate Gap (per 100,000)'
+    label_lines=True,
+    title='Drug Use Disorders, Death Rate Gender Gap',
+    subtitle='OECD countries, 2000–2023',
+    ylabel='Drug Disorders Death Rate Gap (per 100,000)',
+    subtext='Source: Global Burden of Disease from IHME',
+    logo=True
 )
 plt.savefig('figs/drug_disorders_gap_timeseries_selected.png', dpi=150, bbox_inches='tight')
 plt.show()
@@ -630,15 +637,16 @@ covid_temporal.query('Year == 2020').sort_values(by='Gap_COVID')
 selected_countries = ['USA', 'NOR', 'KOR', 'LTU', 'CAN']
 
 # Plot COVID-19 gap for selected countries
-# Non-selected countries will be shown in gray, selected countries in colors
-# Labels will be placed directly on the right side of the figure
 fig, ax = plot_gap_timeseries(
     covid_temporal.reset_index(),
     'Gap_COVID',
     selected_countries=selected_countries,
-    label_lines=True,  # Use direct labels instead of legend
-    title='COVID-19 Death Rate Gender Gap Over Time: Selected Countries',
-    ylabel='COVID-19 Death Rate Gap (per 100,000)'
+    label_lines=True,
+    title='COVID-19, Death Rate Gender Gap',
+    subtitle='OECD countries, 2020–2023',
+    ylabel='COVID-19 Death Rate Gap (per 100,000)',
+    subtext='Source: Global Burden of Disease from IHME',
+    logo=True
 )
 plt.savefig('figs/covid19_gap_timeseries_selected.png', dpi=150, bbox_inches='tight')
 plt.show()

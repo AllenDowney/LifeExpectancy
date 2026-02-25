@@ -659,13 +659,15 @@ def remove_spines():
     ax.yaxis.set_ticks_position("left")
 
 
-def add_logo(filename="logo-hq-small.png", location=(1.0, -0.35), size=(0.5, 0.25)):
+def add_logo(filename="logo-hq-small.png", location=(1.0, -0.35), size=(0.5, 0.25), align_to_axes=False):
     """Add a logo inside an inset axis positioned relative to the main plot.
 
     Args:
         filename: path to logo image
         location: tuple of (x, y) coordinates
         size: tuple of (width, height)
+        align_to_axes: if True, position relative to axes (aligns with title/subtitle);
+            if False, position relative to figure (default)
 
     Returns:
         The inset axis containing the logo
@@ -675,13 +677,14 @@ def add_logo(filename="logo-hq-small.png", location=(1.0, -0.35), size=(0.5, 0.2
     # Create an inset axis in the given location
     ax = plt.gca()
     fig = ax.figure
+    transform = ax.transAxes if align_to_axes else fig.transFigure
     ax_inset = inset_axes(
         ax,
         width=size[0],
         height=size[1],
         loc="lower right",
         bbox_to_anchor=location,
-        bbox_transform=fig.transFigure,
+        bbox_transform=transform,
         borderpad=0,
     )
 
@@ -695,21 +698,25 @@ def add_logo(filename="logo-hq-small.png", location=(1.0, -0.35), size=(0.5, 0.2
     return ax_inset
 
 
-def add_subtext(text, x=0, y=-0.35):
+def add_subtext(text, x=0, y=-0.35, align_to_axes=False):
     """Add a text label below the current plot.
 
     Args:
         text: string
         x: x coordinate
         y: y coordinate
+        align_to_axes: if True, position relative to axes (aligns with title/subtitle);
+            if False, position relative to figure (default)
 
     Returns:
         The text object
     """
     ax = plt.gca()
     fig = ax.figure
+    transform = ax.transAxes if align_to_axes else fig.transFigure
+    va = "top" if align_to_axes else "bottom"
     return plt.figtext(
-        x, y, text, ha="left", va="bottom", fontsize=8, transform=fig.transFigure
+        x, y, text, ha="left", va=va, fontsize=8, transform=transform
     )
 
 
