@@ -70,7 +70,7 @@ from sklearn.model_selection import GridSearchCV, cross_val_score, KFold
 from sklearn.metrics import r2_score, mean_absolute_error
 
 # Prepare data: X (predictors) and y (target)
-# Predictors are already in Mid + Gap format (from eda.md)
+# Predictors are already in Mid + Gap format (from process.md)
 X = predictors.copy()
 y = target.copy()
 

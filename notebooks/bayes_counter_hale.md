@@ -537,7 +537,9 @@ plot_predicted_vs_actual_over_time(
     country_to_idx=country_to_idx,
     target_name='HALE gap',
     target_col='HALE_gap',
-    output_filename='figs/predicted_vs_actual_hale_usa.png'
+    output_filename='figs/predicted_vs_actual_hale_usa.png',
+    subtext='Source: Bayesian hierarchical panel model. IHME cause-specific mortality, IHME HALE.',
+    logo=True
 )
 ```
 

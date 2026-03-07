@@ -14,7 +14,7 @@ jupyter:
 
 # Bayesian Panel Data Model
 
-This notebook implements a Bayesian hierarchical panel model to analyze HALE and Life Expectancy gender gaps using both temporal variation and cross-country variation simultaneously. The temporal range is configurable (default: 2000-2019, can be extended to 2023 to include COVID years). Data sources: IHME HALE (2000-2023) and OWID Life Expectancy (2000-2023), both pre-cleaned in `eda.md`.
+This notebook implements a Bayesian hierarchical panel model to analyze HALE and Life Expectancy gender gaps using both temporal variation and cross-country variation simultaneously. The temporal range is configurable (default: 2000-2019, can be extended to 2023 to include COVID years). **Panel data is loaded from `process.md` output** (`interim/panel_hale.h5`, `interim/panel_le.h5`). Run `process.md` first.
 
 ## Overview
 
@@ -40,9 +40,7 @@ import arviz as az
 
 from utils import (
     decorate, underride, configure_plot_style, AIBM_COLORS,
-    load_and_inventory, compute_gender_gap, get_oecd,
-    load_ihme_indicator, column_name_mapping, oecd_codes,
-    write_html_table
+    write_html_table, code_to_who_country
 )
 
 configure_plot_style()
@@ -66,13 +64,8 @@ ip.set_custom_exc((Exception,), beep_on_error)
 
 ```python
 # ============================================================================
-# MODEL CONFIGURATION: HALE DATA SOURCE, TEMPORAL CUTOFF AND COVID DATA
+# MODEL CONFIGURATION: TEMPORAL CUTOFF AND COVID DATA
 # ============================================================================
-# Global variable: HALE data source
-# Options: 'IHME' (recommended - methodological consistency with predictors)
-#          'WHO' (for comparison/sensitivity analysis)
-HALE_DATA_SOURCE = 'IHME'
-
 # Global variable: Whether to include COVID-19 data as a predictor
 # Set to True to include COVID-19 death rates as a predictor and extend analysis to 2023
 # Set to False to exclude COVID-19 and use pre-COVID baseline (2000-2019)
@@ -89,12 +82,55 @@ CUTOFF_YEAR = 2023 if INCLUDE_COVID_DATA else 2019
 # Note: Turkey (TUR) is not in IHME HALE data, so it's automatically excluded when using IHME
 COUNTRIES_TO_EXCLUDE = ['TUR']
 
+# Predictors to include (Gap_* columns from process panel)
+# Names must match process output (see utils.column_name_mapping)
+PREDICTORS_TO_INCLUDE = [
+    'Alcohol',
+    'Suicide',
+    'Homicide',
+    'RoadTraffic',  
+    'Cardiovascular', 
+    'Diabetes',
+    'Neoplasms',
+    'ChronicRespiratory',
+    'LiverDisease',
+    'UnintentionalInjury',
+    'DrugDisorder',
+    'Childhood',        # Experiment 3b: frail male hypothesis
+    # 'MaternalDisorders',  # Experiment 3a: toggle
+    # 'ConflictTerrorism',  # Experiment 1: tested with Childhood; exclude (negligible)
+]
+if INCLUDE_COVID_DATA:
+    PREDICTORS_TO_INCLUDE = PREDICTORS_TO_INCLUDE + ['COVID']  # COVID19->COVID in process
+
 print(f"Model Configuration:")
-print(f"  HALE Data Source: {HALE_DATA_SOURCE} (IHME GBD 2023, 2000-2023)")
+print(f"  HALE Data Source: IHME (GBD 2023, 2000-2023)")
 print(f"  LE Data Source: OWID (HMD + UN WPP, 2000-2023)")
 print(f"  Include COVID Data: {INCLUDE_COVID_DATA}")
 print(f"  Cutoff Year: {CUTOFF_YEAR} (automatically set based on COVID flag)")
 print(f"  Countries Excluded: {COUNTRIES_TO_EXCLUDE}")
+print(f"  Predictors: {PREDICTORS_TO_INCLUDE}")
+```
+
+```python
+# Human-readable labels for importance tables (Gap_* variable name -> display label)
+PREDICTOR_DISPLAY_LABELS = {
+    'Gap_Alcohol': 'Alcohol',
+    'Gap_Suicide': 'Suicide',
+    'Gap_Homicide': 'Homicide',
+    'Gap_RoadTraffic': 'Road traffic',
+    'Gap_Cardiovascular': 'Cardiovascular disease',
+    'Gap_Diabetes': 'Diabetes',
+    'Gap_Neoplasms': 'Cancer',
+    'Gap_ChronicRespiratory': 'Chronic respiratory',
+    'Gap_LiverDisease': 'Liver disease',
+    'Gap_UnintentionalInjury': 'Unintentional injury',
+    'Gap_DrugDisorder': 'Drug disorders',
+    'Gap_Childhood': 'Child mortality',
+    'Gap_COVID': 'COVID-19',
+    'Gap_MaternalDisorders': 'Maternal disorders',
+    'Gap_ConflictTerrorism': 'Conflict and terrorism',
+}
 ```
 
 ```python
@@ -103,7 +139,7 @@ import os
 
 # Create descriptive log filename
 covid_suffix = 'with_covid' if INCLUDE_COVID_DATA else 'pre_covid'
-log_path = f'logs/bayesian_model_{HALE_DATA_SOURCE.lower()}_{covid_suffix}_{CUTOFF_YEAR}.txt'
+log_path = f'logs/bayesian_model_ihme_{covid_suffix}_{CUTOFF_YEAR}.txt'
 
 log_file = open(log_path, 'w')
 print(f"Logging to: {log_path}")
@@ -126,7 +162,7 @@ log_and_print("="*80)
 log_and_print("BAYESIAN PANEL MODEL - HALE AND LIFE EXPECTANCY GENDER GAPS")
 log_and_print("="*80)
 log_and_print(f"Timestamp: {pd.Timestamp.now()}")
-log_and_print(f"HALE Data Source: {HALE_DATA_SOURCE}")
+log_and_print(f"HALE Data Source: IHME")
 log_and_print(f"Include COVID Data: {INCLUDE_COVID_DATA}")
 log_and_print(f"Analysis Period: 2000-{CUTOFF_YEAR}")
 log_and_print(f"Countries Excluded: {COUNTRIES_TO_EXCLUDE}")
@@ -135,464 +171,51 @@ log_and_print("="*80)
 
 ## Data Preparation
 
-### Helper Function: Compute Temporal Gaps
+### Load Panel Data
 
-We need a function that preserves all years (not just most recent) to create panel data:
-
-```python
-def compute_temporal_gaps(df, value_col, sexes=['Male', 'Female']):
-    """
-    Compute gender gaps for all years (not just most recent).
-    
-    Parameters
-    ----------
-    df : pandas.DataFrame
-        DataFrame with Year, Code, Sex, and value_col columns
-    value_col : str
-        Name of the value column
-    sexes : list
-        List of sex values to compare
-        
-    Returns
-    -------
-    df_gaps : pandas.DataFrame
-        DataFrame with Gap and Mid columns for all years
-    """
-    return compute_gender_gap(df, value_col, sexes)
-```
-
-### Load Target Variables
-
-**Note**: Target variables are loaded from HDF5 file created by `eda.md`. The data has been pre-cleaned and filtered to OECD countries with compatible column names for direct use in the model.
-
-#### HALE Data (IHME Source)
-
-Using IHME HALE data for methodological consistency with IHME predictor indicators. See `eda.md` for data cleaning and comparison with WHO HALE data.
+Panel data is created by `process.md`. Run process first. Panels include all targets and predictors; model selects which predictors to use.
 
 ```python
-# Load pre-cleaned IHME HALE temporal data from HDF5
-# This data is already filtered to OECD countries and formatted for the model
-hdf_file = f'interim/hale_analysis_data_{CUTOFF_YEAR}.h5'  # Created by eda.md
-with pd.HDFStore(hdf_file, mode='r') as store:
-    ihme_hale_temporal = store['ihme_hale_temporal']
+# Load panels from process output
+panel_hale = pd.read_hdf('interim/panel_hale.h5', key='panel')
+panel_le = pd.read_hdf('interim/panel_le.h5', key='panel')
+
+print(f"Loaded HALE panel: {panel_hale.shape}")
+print(f"Loaded LE panel: {panel_le.shape}")
+
+# Apply country exclusions (if any)
+if COUNTRIES_TO_EXCLUDE:
+    n_before_h = len(panel_hale)
+    n_before_l = len(panel_le)
+    panel_hale = panel_hale[~panel_hale['country'].isin(COUNTRIES_TO_EXCLUDE)].copy()
+    panel_le = panel_le[~panel_le['country'].isin(COUNTRIES_TO_EXCLUDE)].copy()
+    print(f"Excluded {COUNTRIES_TO_EXCLUDE}: HALE {n_before_h} -> {len(panel_hale)}, LE {n_before_l} -> {len(panel_le)}")
 
 # Filter to cutoff year
-hale_temporal = ihme_hale_temporal[ihme_hale_temporal['Year'] <= CUTOFF_YEAR].copy()
+panel_hale = panel_hale[(panel_hale['Year'] >= 2000) & (panel_hale['Year'] <= CUTOFF_YEAR)].copy()
+panel_le = panel_le[(panel_le['Year'] >= 2000) & (panel_le['Year'] <= CUTOFF_YEAR)].copy()
 
-# Compute gaps for all years (preserve temporal structure)
-hale_temporal = compute_temporal_gaps(hale_temporal, 'HALE_Years', sexes=['Male', 'Female'])
-# Calculate gap as Female - Male (positive gap means women live longer)
-# Gap_HALE_Years is Male - Female, so we negate it
-hale_temporal['HALE_gap'] = -hale_temporal['Gap_HALE_Years']
+# Drop rows with missing target
+panel_hale = panel_hale.dropna(subset=['HALE_gap']).copy()
+panel_le = panel_le.dropna(subset=['LE_gap']).copy()
 
-print(f"HALE temporal data: {hale_temporal.shape}")
-print(f"Years: {hale_temporal['Year'].min():.0f} - {hale_temporal['Year'].max():.0f}")
-print(f"Countries: {hale_temporal['Code'].nunique()}")
-print(f"Source: IHME GBD 2023 (pre-cleaned in eda.md)")
-hale_temporal.head()
-```
+panel_hale = panel_hale.sort_values(['country', 'Year']).reset_index(drop=True)
+panel_le = panel_le.sort_values(['country', 'Year']).reset_index(drop=True)
 
-#### Life Expectancy Data (OWID Source)
-
-Using OWID Life Expectancy data for extended temporal coverage through 2023 (vs 2021 for WHO). Data combines Human Mortality Database and UN World Population Prospects.
-
-```python
-# Load pre-cleaned OWID LE temporal data from HDF5
-# This data is already filtered to OECD countries and formatted for the model
-with pd.HDFStore(hdf_file, mode='r') as store:
-    owid_le_temporal = store['owid_le_temporal']
-
-# Filter to cutoff year based on LE data availability
-# OWID LE extends to 2023, matching IHME HALE temporal coverage
-le_cutoff = min(CUTOFF_YEAR, 2023)  # OWID LE goes through 2023
-le_temporal = owid_le_temporal[owid_le_temporal['Year'] <= le_cutoff].copy()
-
-# Compute gaps for all years (preserve temporal structure)
-le_temporal = compute_temporal_gaps(le_temporal, 'LifeExpectancy_Years', sexes=['Male', 'Female'])
-# Calculate gap as Female - Male (positive gap means women live longer)
-# Gap_LifeExpectancy_Years is Male - Female, so we negate it
-le_temporal['LE_gap'] = -le_temporal['Gap_LifeExpectancy_Years']
-
-print(f"Life Expectancy temporal data: {le_temporal.shape}")
-print(f"Years: {le_temporal['Year'].min():.0f} - {le_temporal['Year'].max():.0f}")
-print(f"Countries: {le_temporal['Code'].nunique()}")
-print(f"Source: OWID (HMD + UN WPP, pre-cleaned in eda.md)")
-le_temporal.head()
+print(f"\nFinal HALE panel: {panel_hale.shape}")
+print(f"Final LE panel: {panel_le.shape}")
+panel_hale.head()
 ```
 
 ```python
 # Log data loading summary
 log_and_print("\n" + "="*80)
-log_and_print("DATA LOADING SUMMARY")
+log_and_print("PANEL DATA LOADED")
 log_and_print("="*80)
-log_and_print(f"HALE temporal data: {hale_temporal.shape[0]} rows, {hale_temporal['Code'].nunique()} countries")
-log_and_print(f"  Years: {hale_temporal['Year'].min()}-{hale_temporal['Year'].max()}")
-log_and_print(f"  Source: {HALE_DATA_SOURCE}")
-log_and_print(f"\nLife Expectancy temporal data: {le_temporal.shape[0]} rows, {le_temporal['Code'].nunique()} countries")
-log_and_print(f"  Years: {le_temporal['Year'].min()}-{le_temporal['Year'].max()}")
-log_and_print(f"  Source: OWID (HMD + UN WPP)")
-log_and_print("="*80)
-```
-
-### Load Predictor Indicators
-
-We'll load all indicators used in the final model. For panel analysis, we need to preserve all years, so we use `compute_temporal_gaps` instead of `summarize_gap`.
-
-#### Helper Function for Loading IHME Indicators
-
-```python
-def load_ihme_indicator_temporal(base_filename, value_col_name, indicator_code, indicator_name, max_year=2019):
-    """
-    Load IHME indicator data and compute temporal gaps for all years.
-    
-    Parameters
-    ----------
-    base_filename : str
-        Base filename without path, sex suffix, or extension (e.g., 'ihme_alcohol_use_disorders_deaths')
-    value_col_name : str
-        Name of the value column (e.g., 'AlcoholUseDisordersDeathRate')
-    indicator_code : str
-        Indicator code (e.g., 'IHME_ALCOHOL_USE_DISORDERS')
-    indicator_name : str
-        Human-readable indicator name
-    max_year : int, optional
-        Maximum year to include. Default is 2019.
-        
-    Returns
-    -------
-    df_temporal : pandas.DataFrame
-        DataFrame with temporal gaps computed for all years
-    """
-    
-    filename_male = f'../data/{base_filename}_male.csv'
-    filename_female = f'../data/{base_filename}_female.csv'
-    df = load_ihme_indicator(
-        filename_male, filename_female,
-        value_col_name=value_col_name,
-        indicator_code=indicator_code,
-        indicator_name=indicator_name,
-        min_year=2000,
-        max_year=max_year
-    )
-    df = df.rename(columns=column_name_mapping)
-    col = column_name_mapping.get(value_col_name, value_col_name)
-    df_temporal = compute_temporal_gaps(df, col, sexes=['Male', 'Female'])
-    return df_temporal
-```
-
-#### Alcohol Use Disorders (IHME)
-
-```python
-alcohol_temporal = load_ihme_indicator_temporal(
-    'ihme_alcohol_use_disorders_deaths',
-    'AlcoholUseDisordersDeathRate',
-    'IHME_ALCOHOL_USE_DISORDERS',
-    'Alcohol use disorders, death rate per 100,000',
-    max_year=CUTOFF_YEAR
-)
-alcohol_temporal.head()
-```
-
-#### Self-Harm (IHME)
-
-```python
-self_harm_temporal = load_ihme_indicator_temporal(
-    'ihme_self_harm_deaths',
-    'SelfHarmDeathRate',
-    'IHME_SELF_HARM',
-    'Self-harm (suicide), death rate per 100,000',
-    max_year=CUTOFF_YEAR
-)
-self_harm_temporal.head()
-```
-
-#### Interpersonal Violence (IHME)
-
-```python
-interpersonal_violence_temporal = load_ihme_indicator_temporal(
-    'ihme_interpersonal_violence_deaths',
-    'InterpersonalViolenceDeathRate',
-    'IHME_INTERPERSONAL_VIOLENCE',
-    'Interpersonal violence (homicide), death rate per 100,000',
-    max_year=CUTOFF_YEAR
-)
-interpersonal_violence_temporal.head()
-```
-
-#### Road Injuries (IHME)
-
-```python
-road_injuries_temporal = load_ihme_indicator_temporal(
-    'ihme_road_injuries_deaths',
-    'RoadInjuriesDeathRate',
-    'IHME_ROAD_INJURIES',
-    'Road injuries (road traffic crashes), death rate per 100,000',
-    max_year=CUTOFF_YEAR
-)
-road_injuries_temporal.head()
-```
-
-#### Cardiovascular Disease (IHME)
-
-```python
-cardiovascular_temporal = load_ihme_indicator_temporal(
-    'ihme_cardiovascular_deaths',
-    'CardioDeathRate',
-    'IHME_CARDIOVASCULAR',
-    'Cardiovascular diseases, death rate per 100,000',
-    max_year=CUTOFF_YEAR
-)
-cardiovascular_temporal.head()
-```
-
-#### Diabetes (IHME)
-
-```python
-diabetes_temporal = load_ihme_indicator_temporal(
-    'ihme_diabetes_deaths',
-    'DiabetesDeathRate',
-    'IHME_DIABETES_TYPE2',
-    'Diabetes mellitus type 2, death rate per 100,000',
-    max_year=CUTOFF_YEAR
-)
-diabetes_temporal.head()
-```
-
-#### Neoplasms (IHME)
-
-```python
-neoplasms_temporal = load_ihme_indicator_temporal(
-    'ihme_neoplasms_deaths',
-    'NeoplasmsDeathRate',
-    'IHME_NEOPLASMS',
-    'Neoplasms (cancer), death rate per 100,000',
-    max_year=CUTOFF_YEAR
-)
-neoplasms_temporal.head()
-```
-
-#### Chronic Respiratory Disease (IHME)
-
-```python
-chronic_respiratory_temporal = load_ihme_indicator_temporal(
-    'ihme_chronic_respiratory_deaths',
-    'ChronicRespiratoryDeathRate',
-    'IHME_CHRONIC_RESPIRATORY',
-    'Chronic respiratory diseases, death rate per 100,000',
-    max_year=CUTOFF_YEAR
-)
-chronic_respiratory_temporal.head()
-```
-
-#### Liver Disease (IHME)
-
-```python
-liver_disease_temporal = load_ihme_indicator_temporal(
-    'ihme_liver_disease_deaths',
-    'LiverDiseaseDeathRate',
-    'IHME_LIVER_DISEASE',
-    'Cirrhosis and other chronic liver diseases, death rate per 100,000',
-    max_year=CUTOFF_YEAR
-)
-liver_disease_temporal.head()
-```
-
-#### Unintentional Injuries (IHME)
-
-```python
-unintentional_injuries_temporal = load_ihme_indicator_temporal(
-    'ihme_unintentional_injuries_deaths',
-    'UnintentionalInjuriesDeathRate',
-    'IHME_UNINTENTIONAL_INJURIES',
-    'Unintentional injuries, death rate per 100,000',
-    max_year=CUTOFF_YEAR
-)
-unintentional_injuries_temporal.head()
-```
-
-#### Drug Use Disorders (IHME)
-
-```python
-drug_disorders_temporal = load_ihme_indicator_temporal(
-    'ihme_drug_disorder_deaths',
-    'DrugDisorderDeathRate',
-    'IHME_DRUG_DISORDERS',
-    'Drug use disorders, death rate per 100,000',
-    max_year=CUTOFF_YEAR
-)
-drug_disorders_temporal.head()
-```
-
-#### COVID-19 (IHME)
-
-```python
-# Load COVID-19 data (will be conditionally included in model based on INCLUDE_COVID_DATA flag)
-covid_temporal = load_ihme_indicator_temporal(
-    'ihme_covid19_deaths',
-    'COVID19DeathRate',
-    'IHME_COVID19',
-    'COVID-19, death rate per 100,000',
-    max_year=CUTOFF_YEAR
-)
-covid_temporal.head()
-```
-
-### Merge All Data into Panel Format
-
-We'll create **two separate panel datasets** to allow flexible temporal ranges:
-- **HALE model**: 2000-2023 (using IHME HALE data)
-- **Life Expectancy model**: 2000-2023 (using OWID LE data)
-
-Both models now support the full 2000-2023 temporal range for comprehensive COVID-19 analysis.
-
-```python
-# Function to merge predictor indicators
-def merge_predictor(df_temporal, indicator_name):
-    """Merge a predictor indicator into the panel dataset."""
-    # Select relevant columns (Code, Year, Mid_*, Gap_*)
-    cols_to_merge = ['Code', 'Year']
-    mid_col = [c for c in df_temporal.columns if c.startswith('Mid_')]
-    gap_col = [c for c in df_temporal.columns if c.startswith('Gap_')]
-    cols_to_merge.extend(mid_col)
-    cols_to_merge.extend(gap_col)
-    
-    df_subset = df_temporal[cols_to_merge].copy()
-    df_subset = df_subset.rename(columns={'Code': 'country'})
-    return df_subset
-
-# List of predictors to merge (same for both models)
-predictors_to_merge = [
-    (alcohol_temporal, 'Alcohol'),
-    (self_harm_temporal, 'SelfHarm'),
-    (interpersonal_violence_temporal, 'InterpersonalViolence'),
-    (road_injuries_temporal, 'RoadInjuries'),
-    (cardiovascular_temporal, 'Cardiovascular'),
-    (diabetes_temporal, 'Diabetes'),
-    (neoplasms_temporal, 'Neoplasms'),
-    (chronic_respiratory_temporal, 'ChronicRespiratory'),
-    (liver_disease_temporal, 'LiverDisease'),
-    (unintentional_injuries_temporal, 'UnintentionalInjuries'),
-    (drug_disorders_temporal, 'DrugDisorder'),
-]
-
-# Conditionally add COVID-19 data
-if INCLUDE_COVID_DATA:
-    predictors_to_merge.append((covid_temporal, 'COVID19'))
-```
-
-#### Create HALE Panel (2000-2023 for IHME data)
-
-```python
-# Start with HALE gap as base
-panel_hale = hale_temporal[['Code', 'Year', 'HALE_gap']].copy()
-panel_hale = panel_hale.rename(columns={'Code': 'country'})
-
-# Merge all predictors with left join (keep all HALE rows)
-for df_temp, name in predictors_to_merge:
-    df_merge = merge_predictor(df_temp, name)
-    panel_hale = panel_hale.merge(df_merge, on=['country', 'Year'], how='left')
-    print(f"Merged {name} into HALE panel: {len(df_merge)} rows available")
-
-print(f"\nHALE panel dataset shape: {panel_hale.shape}")
-
-# Filter to OECD countries
-panel_hale = panel_hale[panel_hale['country'].isin(oecd_codes)].copy()
-print(f"After filtering to OECD: {panel_hale.shape}")
-
-# HALE cutoff: IHME extends to 2023
-CUTOFF_YEAR_HALE = CUTOFF_YEAR
-panel_hale = panel_hale[(panel_hale['Year'] >= 2000) & (panel_hale['Year'] <= CUTOFF_YEAR_HALE)].copy()
-print(f"After filtering to 2000-{CUTOFF_YEAR_HALE}: {panel_hale.shape}")
-
-# Exclude countries
-if COUNTRIES_TO_EXCLUDE:
-    n_before = len(panel_hale)
-    panel_hale = panel_hale[~panel_hale['country'].isin(COUNTRIES_TO_EXCLUDE)].copy()
-    n_after = len(panel_hale)
-    print(f"After excluding {COUNTRIES_TO_EXCLUDE}: {panel_hale.shape} (removed {n_before - n_after} rows)")
-
-# Drop rows with missing HALE_gap (shouldn't happen but check anyway)
-n_before = len(panel_hale)
-panel_hale = panel_hale.dropna(subset=['HALE_gap']).copy()
-n_after = len(panel_hale)
-if n_before != n_after:
-    print(f"Dropped {n_before - n_after} rows with missing HALE_gap")
-
-# Sort by country and year
-panel_hale = panel_hale.sort_values(['country', 'Year']).reset_index(drop=True)
-
-print(f"\nFinal HALE panel: {panel_hale.shape}")
-print(f"Countries: {panel_hale['country'].nunique()}")
-print(f"Years: {panel_hale['Year'].min():.0f}-{panel_hale['Year'].max():.0f}")
-print(f"Missing values: {panel_hale.isnull().sum().sum()}")
-panel_hale.head()
-```
-
-#### Create Life Expectancy Panel (2000-2021 for WHO data)
-
-```python
-# Start with LE gap as base
-panel_le = le_temporal[['Code', 'Year', 'LE_gap']].copy()
-panel_le = panel_le.rename(columns={'Code': 'country'})
-
-# Merge all predictors with left join (keep all LE rows)
-for df_temp, name in predictors_to_merge:
-    df_merge = merge_predictor(df_temp, name)
-    panel_le = panel_le.merge(df_merge, on=['country', 'Year'], how='left')
-    print(f"Merged {name} into LE panel: {len(df_merge)} rows available")
-
-print(f"\nLife Expectancy panel dataset shape: {panel_le.shape}")
-
-# Filter to OECD countries
-panel_le = panel_le[panel_le['country'].isin(oecd_codes)].copy()
-print(f"After filtering to OECD: {panel_le.shape}")
-
-# LE cutoff: OWID extends to 2023 (matching IHME HALE)
-CUTOFF_YEAR_LE = CUTOFF_YEAR
-panel_le = panel_le[(panel_le['Year'] >= 2000) & (panel_le['Year'] <= CUTOFF_YEAR_LE)].copy()
-print(f"After filtering to 2000-{CUTOFF_YEAR_LE}: {panel_le.shape}")
-
-# Exclude countries
-if COUNTRIES_TO_EXCLUDE:
-    n_before = len(panel_le)
-    panel_le = panel_le[~panel_le['country'].isin(COUNTRIES_TO_EXCLUDE)].copy()
-    n_after = len(panel_le)
-    print(f"After excluding {COUNTRIES_TO_EXCLUDE}: {panel_le.shape} (removed {n_before - n_after} rows)")
-
-# Drop rows with missing LE_gap (shouldn't happen but check anyway)
-n_before = len(panel_le)
-panel_le = panel_le.dropna(subset=['LE_gap']).copy()
-n_after = len(panel_le)
-if n_before != n_after:
-    print(f"Dropped {n_before - n_after} rows with missing LE_gap")
-
-# Sort by country and year
-panel_le = panel_le.sort_values(['country', 'Year']).reset_index(drop=True)
-
-print(f"\nFinal LE panel: {panel_le.shape}")
-print(f"Countries: {panel_le['country'].nunique()}")
-print(f"Years: {panel_le['Year'].min():.0f}-{panel_le['Year'].max():.0f}")
-print(f"Missing values: {panel_le.isnull().sum().sum()}")
-panel_le.head()
-```
-
-```python
-# Log panel merge summary
-log_and_print("\n" + "="*80)
-log_and_print("PANEL DATA MERGE SUMMARY")
-log_and_print("="*80)
-log_and_print(f"HALE Panel (for HALE model):")
-log_and_print(f"  Shape: {panel_hale.shape}")
-log_and_print(f"  Countries: {panel_hale['country'].nunique()}")
+log_and_print(f"HALE: {panel_hale.shape[0]} rows, {panel_hale['country'].nunique()} countries")
 log_and_print(f"  Years: {panel_hale['Year'].min():.0f}-{panel_hale['Year'].max():.0f}")
-log_and_print(f"  Country-year combinations: {len(panel_hale)}")
-log_and_print(f"  Missing values: {panel_hale.isnull().sum().sum()}")
-log_and_print(f"\nLife Expectancy Panel (for LE model):")
-log_and_print(f"  Shape: {panel_le.shape}")
-log_and_print(f"  Countries: {panel_le['country'].nunique()}")
+log_and_print(f"LE: {panel_le.shape[0]} rows, {panel_le['country'].nunique()} countries")
 log_and_print(f"  Years: {panel_le['Year'].min():.0f}-{panel_le['Year'].max():.0f}")
-log_and_print(f"  Country-year combinations: {len(panel_le)}")
-log_and_print(f"  Missing values: {panel_le.isnull().sum().sum()}")
 log_and_print("="*80)
 ```
 
@@ -687,30 +310,9 @@ def prepare_panel_data(df, predictor_cols, target_col):
 # ============================================================================
 # MODEL CONFIGURATION
 # ============================================================================
-# Configure which Mid predictors to include in the model
-# Options: [] (baseline - Gap predictors only)
-#          ['Mid_Cardiovascular'] (add Mid_Cardiovascular)
-#          ['Mid_Cardiovascular', 'Mid_Diabetes'] (add multiple)
-#          etc.
-#
-# Testing order (from plan.md):
-#   1. Mid_Cardiovascular (r = -0.804 with Gap_Cardiovascular)
-#   2. Mid_Diabetes (r = -0.325 with Gap_Diabetes)
-#   3. Mid_ChronicRespiratory (r = -0.0787 with Gap_ChronicRespiratory)
-#   4. Mid_UnintentionalInjury (r = 0.0346 with Gap_UnintentionalInjury)
-#
-# Start with baseline: MID_PREDICTORS_TO_INCLUDE = []
-# Then test each candidate one at a time, adding to list if it improves model
-#
-# Experiment status:
-#   - Baseline ([]): ✅ COMPLETED - OPTIMAL MODEL (WAIC 75.7 HALE, -7.44 LE)
-#   - Mid_Cardiovascular: ✅ COMPLETED - worsened fit (ΔWAIC +51.3 HALE, +62.5 LE)
-#   - Mid_Diabetes: ✅ COMPLETED - worsened fit (ΔWAIC +3.1 HALE, +2.18 LE)
-#   - Mid_ChronicRespiratory: ✅ COMPLETED - worsened fit (ΔWAIC +20.8 HALE, +24.1 LE)
-#   - Mid_UnintentionalInjury: ✅ COMPLETED - worsened fit (ΔWAIC +79.3 HALE, +91.1 LE)
-#   - ALL EXPERIMENTS COMPLETE: Baseline model (Gap predictors only) is optimal
-# ============================================================================
-MID_PREDICTORS_TO_INCLUDE = []  # Final model: Gap predictors only (baseline)  
+# Mid predictors to include (e.g., ['Mid_Cardiovascular', 'Mid_Diabetes'])
+# [] = baseline (Gap predictors only)
+MID_PREDICTORS_TO_INCLUDE = []  
 
 # Global variable: Whether to include year effects (Gaussian Random Walk)
 # Set to True to include year effects to control for global temporal trends
@@ -719,7 +321,7 @@ INCLUDE_YEAR_EFFECTS = False
 
 # Helper function to generate output filenames with appropriate suffix
 def get_output_filename(base_path, mid_predictors_list=None, include_year_effects=False, 
-                        cutoff_year=None, include_covid_data=None, hale_data_source=None):
+                        cutoff_year=None, include_covid_data=None):
     """
     Generate output filename with appropriate suffixes based on configuration.
     
@@ -736,16 +338,14 @@ def get_output_filename(base_path, mid_predictors_list=None, include_year_effect
         Cutoff year for analysis. If None, uses global CUTOFF_YEAR.
     include_covid_data : bool, optional
         Whether COVID data is included. If None, uses global INCLUDE_COVID_DATA.
-    hale_data_source : str, optional
-        HALE data source ('IHME' or 'WHO'). If None, uses global HALE_DATA_SOURCE.
         
     Returns
     -------
     filename : str
         Filename with appropriate suffixes inserted before extension
         Examples:
-        - IHME, No Mid, 2019: 'beta_coefficients_hale_ihme_nomid_nogrw_y2019_nocovid.html'
-        - WHO, With COVID, 2021: 'beta_coefficients_hale_who_nomid_nogrw_y2021_covid.html'
+        - No Mid, 2019: 'beta_coefficients_hale_ihme_nomid_nogrw_y2019_nocovid.html'
+        - With COVID, 2021: 'beta_coefficients_hale_ihme_nomid_nogrw_y2021_covid.html'
     """
     import os
     path_parts = base_path.rsplit('.', 1)
@@ -756,8 +356,6 @@ def get_output_filename(base_path, mid_predictors_list=None, include_year_effect
         cutoff_year = CUTOFF_YEAR
     if include_covid_data is None:
         include_covid_data = INCLUDE_COVID_DATA
-    if hale_data_source is None:
-        hale_data_source = HALE_DATA_SOURCE
     
     # Generate Mid predictor suffix
     if mid_predictors_list is None or len(mid_predictors_list) == 0:
@@ -787,8 +385,8 @@ def get_output_filename(base_path, mid_predictors_list=None, include_year_effect
     # Generate COVID suffix
     covid_suffix = 'covid' if include_covid_data else 'nocovid'
     
-    # Generate HALE data source suffix
-    hale_suffix = hale_data_source.lower()  # 'ihme' or 'who'
+    # HALE data source (IHME only)
+    hale_suffix = 'ihme'
     
     # Combine suffixes
     if has_ext:
@@ -797,10 +395,13 @@ def get_output_filename(base_path, mid_predictors_list=None, include_year_effect
     else:
         return f"{base_path}_{hale_suffix}_{mid_suffix}_{grw_suffix}_{year_suffix}_{covid_suffix}"
 
-# Prepare predictor columns (Gap predictors + selected Mid predictors)
-# Note: Both panels have the same predictor columns, so we can use either to get the list
-# Start with all Gap predictors
-predictor_cols = [col for col in panel_hale.columns if col.startswith('Gap_')]
+# Prepare predictor columns from PREDICTORS_TO_INCLUDE (Gap_* columns from process panel)
+predictor_cols = [f'Gap_{p}' for p in PREDICTORS_TO_INCLUDE]
+
+# Verify all requested predictors exist in panel
+missing = [c for c in predictor_cols if c not in panel_hale.columns]
+if missing:
+    raise ValueError(f"Predictors not found in panel (run process.md first): {missing}")
 
 # Add selected Mid predictors
 if MID_PREDICTORS_TO_INCLUDE:
@@ -822,7 +423,9 @@ print(f"Predictors: {sorted(predictor_cols)}")
 
 ```python
 # Prepare data for HALE gap model (uses panel_hale)
-panel_hale_model = panel_hale.rename(columns={'Year': 'year'})
+# Drop rows with missing predictor values
+panel_hale_model = panel_hale.dropna(subset=predictor_cols).copy()
+panel_hale_model = panel_hale_model.rename(columns={'Year': 'year'})
 
 data_hale = prepare_panel_data(
     panel_hale_model,
@@ -842,7 +445,9 @@ if COUNTRIES_TO_EXCLUDE:
 
 ```python
 # Prepare data for Life Expectancy gap model (uses panel_le)
-panel_le_model = panel_le.rename(columns={'Year': 'year'})
+# Drop rows with missing predictor values
+panel_le_model = panel_le.dropna(subset=predictor_cols).copy()
+panel_le_model = panel_le_model.rename(columns={'Year': 'year'})
 
 data_le = prepare_panel_data(
     panel_le_model,
@@ -954,31 +559,6 @@ def build_random_intercept_panel_model(data, include_year_effects=False):
     return model
 ```
 
-```python
-def add_log_likelihood_to_trace(model, trace):
-    """
-    Compute and add log-likelihood to trace for nutpie sampler.
-    
-    Note: nutpie doesn't save log-likelihood by default, so we need to
-    compute it manually after sampling.
-    
-    Parameters
-    ----------
-    model : pymc.Model
-        PyMC model object
-    trace : arviz.InferenceData
-        Posterior trace from MCMC sampling
-        
-    Returns
-    -------
-    trace : arviz.InferenceData
-        Trace with log-likelihood added
-    """
-    with model:
-        pm.compute_log_likelihood(trace)
-    return trace
-```
-
 ## HALE Gap Model
 
 ### Build Model
@@ -1002,7 +582,8 @@ with model_hale:
     )
 
 # Add log-likelihood for WAIC/LOO computation (nutpie doesn't save it by default)
-trace_hale = add_log_likelihood_to_trace(model_hale, trace_hale)
+with model_hale:
+    pm.compute_log_likelihood(trace_hale)
 ```
 
 ```python
@@ -1095,11 +676,33 @@ importance_table_hale = importance_table_hale.loc[
     importance_summary_hale.sort_values('Importance_mean', ascending=False).index
 ].reset_index(drop=True)
 
+# Create human-readable version for HTML export
+importance_table_hale_display = importance_table_hale.copy()
+importance_table_hale_display['Cause'] = importance_table_hale_display['Predictor'].map(
+    lambda x: PREDICTOR_DISPLAY_LABELS.get(x, x)
+)
+importance_table_hale_display = importance_table_hale_display[['Cause', 'SD_original', 'Beta_standardized', 'Importance']].rename(
+    columns={'SD_original': 'Standard deviation', 'Beta_standardized': 'Coefficient'}
+)
+
 print("Importance Measures on Original Scale (HALE Gap Model):")
 print(importance_table_hale.to_string(index=False))
 
-# Write to HTML
-write_html_table(importance_table_hale, get_output_filename('tables/importance_measures_hale.html', MID_PREDICTORS_TO_INCLUDE, INCLUDE_YEAR_EFFECTS))
+# Log for experiments (coefficients and importance)
+log_and_print("\n" + "="*80)
+log_and_print("HALE GAP MODEL - COEFFICIENTS (β mean ± sd, 94% HDI)")
+log_and_print("="*80)
+for pred in beta_summary_hale.index:
+    r = beta_summary_hale.loc[pred]
+    log_and_print(f"  {pred}: β={r['mean']:.4f} ± {r['sd']:.4f}, 94% HDI [{r['hdi_3%']:.4f}, {r['hdi_97%']:.4f}]")
+log_and_print("\nHALE GAP MODEL - IMPORTANCE (ranked)")
+log_and_print("-"*80)
+for _, row in importance_table_hale.iterrows():
+    log_and_print(f"  {row['Predictor']}: {row['Importance']}")
+log_and_print("="*80)
+
+# Write to HTML (human-readable labels)
+write_html_table(importance_table_hale_display, get_output_filename('tables/importance_measures_hale.html', MID_PREDICTORS_TO_INCLUDE, INCLUDE_YEAR_EFFECTS))
 ```
 
 ```python
@@ -1211,148 +814,6 @@ alpha_corr_top10_hale
 write_html_table(alpha_corr_top10_hale, get_output_filename('tables/alpha_correlations_top10_hale.html', MID_PREDICTORS_TO_INCLUDE, INCLUDE_YEAR_EFFECTS))
 ```
 
-### Comparison with Cross-Sectional Elastic Net Model
-
-```python
-def plot_bayesian_elasticnet_comparison(beta_samples_df, elastic_net_coefs, common_predictors,
-                                        title, output_filename, n_rows=5, n_cols=4):
-    """
-    Create comparison visualization showing posterior distributions vs Elastic Net coefficients.
-    
-    Parameters
-    ----------
-    beta_samples_df : pd.DataFrame
-        DataFrame with posterior samples (columns = predictors, rows = samples)
-    elastic_net_coefs : pd.DataFrame
-        DataFrame with Elastic Net coefficients (indexed by predictor)
-    common_predictors : list
-        List of common predictors between Bayesian and Elastic Net models
-    title : str
-        Title for the plot
-    output_filename : str
-        Filename to save the figure
-    n_rows : int
-        Number of rows in subplot grid (default: 5)
-    n_cols : int
-        Number of columns in subplot grid (default: 4)
-    """
-    n_plots = n_rows * n_cols
-    
-    # Select predictors to plot (prioritize those with non-zero EN coefficients)
-    predictors_to_plot = elastic_net_coefs.loc[common_predictors].sort_values(
-        'ElasticNet_Coefficient', key=abs, ascending=False
-    ).head(n_plots).index.tolist()
-    
-    # If we have fewer predictors than subplots, use all predictors
-    if len(common_predictors) < n_plots:
-        predictors_to_plot = common_predictors
-        n_rows = int(np.ceil(len(predictors_to_plot) / n_cols))
-    
-    fig, axes = plt.subplots(n_rows, n_cols, figsize=(16, 20))
-    axes = axes.flatten() if n_rows > 1 else [axes] if n_cols == 1 else axes.flatten()
-    
-    for i, pred in enumerate(predictors_to_plot):
-        ax = axes[i]
-        
-        # Get posterior samples for this predictor
-        posterior_samples = beta_samples_df[pred].values
-        
-        # Get Elastic Net coefficient
-        en_coef = elastic_net_coefs.loc[pred, 'ElasticNet_Coefficient']
-        
-        # Plot posterior distribution with HDI using az.plot_dist
-        az.plot_dist(posterior_samples, ax=ax, color=AIBM_COLORS['crimson'])
-        
-        # Add vertical line for Elastic Net coefficient
-        ax.axvline(en_coef, color=AIBM_COLORS['blue'], linestyle='--', linewidth=2, 
-                   label=f'Elastic Net: {en_coef:.3f}')
-        
-        # Add vertical line for posterior mean
-        posterior_mean = posterior_samples.mean()
-        ax.axvline(posterior_mean, color=AIBM_COLORS['green'], linestyle='-', linewidth=2,
-                   label=f'Posterior mean: {posterior_mean:.3f}')
-        
-        ax.set_xlabel('Coefficient')
-        ax.set_ylabel('Density')
-        ax.set_title(pred, fontsize=10)
-        ax.legend(fontsize=8)
-        ax.grid(True, alpha=0.3)
-    
-    # Hide unused subplots
-    for i in range(len(predictors_to_plot), len(axes)):
-        axes[i].set_visible(False)
-    
-    plt.suptitle(title, fontsize=14, y=0.995)
-    plt.tight_layout()
-    # Update output filename with suffix
-    output_filename_suffixed = get_output_filename(output_filename, MID_PREDICTORS_TO_INCLUDE, INCLUDE_YEAR_EFFECTS)
-    plt.savefig(output_filename_suffixed, dpi=300, bbox_inches='tight')
-    plt.show()
-```
-
-```python
-# Load Elastic Net coefficients from cross-sectional model
-# Always compare with 2019 Elastic Net results as baseline, regardless of CUTOFF_YEAR
-elastic_net_cutoff_year = 2019  # Always use 2019 for comparison baseline
-elastic_net_coefs_hale = pd.read_csv(f'../data/elasticnet_coefficients_hale_{elastic_net_cutoff_year}.csv')
-elastic_net_coefs_hale = elastic_net_coefs_hale.set_index('Predictor')
-
-print(f"Loaded {len(elastic_net_coefs_hale)} Elastic Net coefficients for HALE")
-print(f"Bayesian model has {len(data_hale['meta']['predictors'])} predictors")
-```
-
-```python
-# Extract posterior samples for beta coefficients
-beta_extracted_hale = az.extract(trace_hale)
-
-# Create DataFrame with predictor names
-beta_samples_df_hale = pd.DataFrame(
-    beta_extracted_hale['beta'].T,
-    columns=data_hale["meta"]["predictors"]
-)
-
-print(f"Posterior samples shape: {beta_samples_df_hale.shape}")
-```
-
-```python
-# Match predictors between Bayesian and Elastic Net models
-# Find common predictors
-common_predictors = set(beta_samples_df_hale.columns) & set(elastic_net_coefs_hale.index)
-common_predictors = sorted(list(common_predictors))
-
-print(f"Common predictors: {len(common_predictors)}")
-print(f"Predictors only in Bayesian model: {len(set(beta_samples_df_hale.columns) - set(elastic_net_coefs_hale.index))}")
-print(f"Predictors only in Elastic Net model: {len(set(elastic_net_coefs_hale.index) - set(beta_samples_df_hale.columns))}")
-```
-
-```python
-# Create comparison visualization using the function
-plot_bayesian_elasticnet_comparison(
-    beta_samples_df_hale,
-    elastic_net_coefs_hale,
-    common_predictors,
-    title='Bayesian Posterior Distributions vs Elastic Net Coefficients (HALE Gap)',
-    output_filename='figs/bayesian_elasticnet_comparison_hale.png'
-)
-```
-
-```python
-# Create summary comparison table
-comparison_table_hale = pd.DataFrame({
-    'Predictor': common_predictors,
-    'ElasticNet_Coefficient': [elastic_net_coefs_hale.loc[p, 'ElasticNet_Coefficient'] for p in common_predictors],
-    'Bayesian_Mean': [beta_samples_df_hale[p].mean() for p in common_predictors],
-    'Bayesian_Std': [beta_samples_df_hale[p].std() for p in common_predictors],
-    'Bayesian_CI_Lower': [np.percentile(beta_samples_df_hale[p].values, 2.5) for p in common_predictors],
-    'Bayesian_CI_Upper': [np.percentile(beta_samples_df_hale[p].values, 97.5) for p in common_predictors],
-    'Difference': [beta_samples_df_hale[p].mean() - elastic_net_coefs_hale.loc[p, 'ElasticNet_Coefficient'] 
-                   for p in common_predictors]
-})
-
-comparison_table_hale = comparison_table_hale.sort_values('ElasticNet_Coefficient', key=abs, ascending=False)
-comparison_table_hale.head(20)
-```
-
 ## Life Expectancy Gap Model
 
 ### Build Model
@@ -1376,7 +837,8 @@ with model_le:
     )
 
 # Add log-likelihood for WAIC/LOO computation (nutpie doesn't save it by default)
-trace_le = add_log_likelihood_to_trace(model_le, trace_le)
+with model_le:
+    pm.compute_log_likelihood(trace_le)
 ```
 
 ```python
@@ -1469,11 +931,33 @@ importance_table_le = importance_table_le.loc[
     importance_summary_le.sort_values('Importance_mean', ascending=False).index
 ].reset_index(drop=True)
 
+# Create human-readable version for HTML export
+importance_table_le_display = importance_table_le.copy()
+importance_table_le_display['Cause'] = importance_table_le_display['Predictor'].map(
+    lambda x: PREDICTOR_DISPLAY_LABELS.get(x, x)
+)
+importance_table_le_display = importance_table_le_display[['Cause', 'SD_original', 'Beta_standardized', 'Importance']].rename(
+    columns={'SD_original': 'Standard deviation', 'Beta_standardized': 'Coefficient'}
+)
+
 print("Importance Measures on Original Scale (Life Expectancy Gap Model):")
 print(importance_table_le.to_string(index=False))
 
-# Write to HTML
-write_html_table(importance_table_le, get_output_filename('tables/importance_measures_le.html', MID_PREDICTORS_TO_INCLUDE, INCLUDE_YEAR_EFFECTS))
+# Log for experiments (coefficients and importance)
+log_and_print("\n" + "="*80)
+log_and_print("LIFE EXPECTANCY GAP MODEL - COEFFICIENTS (β mean ± sd, 94% HDI)")
+log_and_print("="*80)
+for pred in beta_summary_le.index:
+    r = beta_summary_le.loc[pred]
+    log_and_print(f"  {pred}: β={r['mean']:.4f} ± {r['sd']:.4f}, 94% HDI [{r['hdi_3%']:.4f}, {r['hdi_97%']:.4f}]")
+log_and_print("\nLIFE EXPECTANCY GAP MODEL - IMPORTANCE (ranked)")
+log_and_print("-"*80)
+for _, row in importance_table_le.iterrows():
+    log_and_print(f"  {row['Predictor']}: {row['Importance']}")
+log_and_print("="*80)
+
+# Write to HTML (human-readable labels)
+write_html_table(importance_table_le_display, get_output_filename('tables/importance_measures_le.html', MID_PREDICTORS_TO_INCLUDE, INCLUDE_YEAR_EFFECTS))
 ```
 
 ```python
@@ -1583,71 +1067,6 @@ alpha_corr_top10_le
 ```python
 # Write alpha correlations table to HTML
 write_html_table(alpha_corr_top10_le, get_output_filename('tables/alpha_correlations_top10_le.html', MID_PREDICTORS_TO_INCLUDE, INCLUDE_YEAR_EFFECTS))
-```
-
-### Comparison with Cross-Sectional Elastic Net Model
-
-```python
-# Load Elastic Net coefficients from cross-sectional model
-# Always compare with 2019 Elastic Net results as baseline, regardless of CUTOFF_YEAR
-elastic_net_cutoff_year = 2019  # Always use 2019 for comparison baseline
-elastic_net_coefs_le = pd.read_csv(f'../data/elasticnet_coefficients_le_{elastic_net_cutoff_year}.csv')
-elastic_net_coefs_le = elastic_net_coefs_le.set_index('Predictor')
-
-print(f"Loaded {len(elastic_net_coefs_le)} Elastic Net coefficients for Life Expectancy")
-print(f"Bayesian model has {len(data_le['meta']['predictors'])} predictors")
-```
-
-```python
-# Extract posterior samples for beta coefficients
-beta_extracted_le = az.extract(trace_le)
-
-# Create DataFrame with predictor names
-beta_samples_df_le = pd.DataFrame(
-    beta_extracted_le['beta'].T,
-    columns=data_le["meta"]["predictors"]
-)
-
-print(f"Posterior samples shape: {beta_samples_df_le.shape}")
-```
-
-```python
-# Match predictors between Bayesian and Elastic Net models
-# Find common predictors
-common_predictors_le = set(beta_samples_df_le.columns) & set(elastic_net_coefs_le.index)
-common_predictors_le = sorted(list(common_predictors_le))
-
-print(f"Common predictors: {len(common_predictors_le)}")
-print(f"Predictors only in Bayesian model: {len(set(beta_samples_df_le.columns) - set(elastic_net_coefs_le.index))}")
-print(f"Predictors only in Elastic Net model: {len(set(elastic_net_coefs_le.index) - set(beta_samples_df_le.columns))}")
-```
-
-```python
-# Create comparison visualization using the function
-plot_bayesian_elasticnet_comparison(
-    beta_samples_df_le,
-    elastic_net_coefs_le,
-    common_predictors_le,
-    title='Bayesian Posterior Distributions vs Elastic Net Coefficients (Life Expectancy Gap)',
-    output_filename='figs/bayesian_elasticnet_comparison_le.png'
-)
-```
-
-```python
-# Create summary comparison table
-comparison_table_le = pd.DataFrame({
-    'Predictor': common_predictors_le,
-    'ElasticNet_Coefficient': [elastic_net_coefs_le.loc[p, 'ElasticNet_Coefficient'] for p in common_predictors_le],
-    'Bayesian_Mean': [beta_samples_df_le[p].mean() for p in common_predictors_le],
-    'Bayesian_Std': [beta_samples_df_le[p].std() for p in common_predictors_le],
-    'Bayesian_CI_Lower': [np.percentile(beta_samples_df_le[p].values, 2.5) for p in common_predictors_le],
-    'Bayesian_CI_Upper': [np.percentile(beta_samples_df_le[p].values, 97.5) for p in common_predictors_le],
-    'Difference': [beta_samples_df_le[p].mean() - elastic_net_coefs_le.loc[p, 'ElasticNet_Coefficient'] 
-                   for p in common_predictors_le]
-})
-
-comparison_table_le = comparison_table_le.sort_values('ElasticNet_Coefficient', key=abs, ascending=False)
-comparison_table_le.head(20)
 ```
 
 ## Model Evaluation: Posterior Predictive Checks, WAIC, and LOO-CV
@@ -2155,6 +1574,13 @@ model_comparison = pd.DataFrame({
 
 print("Model Comparison Summary:")
 print(model_comparison.to_string(index=False))
+
+# Log for experiments
+log_and_print("\n" + "="*80)
+log_and_print("MODEL COMPARISON SUMMARY")
+log_and_print("="*80)
+log_and_print(model_comparison.to_string(index=False))
+log_and_print("="*80)
 ```
 
 ```python
@@ -2638,7 +2064,7 @@ else:
 grw_suffix = 'yesgrw' if INCLUDE_YEAR_EFFECTS else 'nogrw'
 year_suffix = f'y{CUTOFF_YEAR}'
 covid_suffix = 'covid' if INCLUDE_COVID_DATA else 'nocovid'
-hale_suffix = HALE_DATA_SOURCE.lower()  # 'ihme' or 'who'
+hale_suffix = 'ihme'
 suffix = f'_{hale_suffix}_{mid_suffix}_{grw_suffix}_{year_suffix}_{covid_suffix}'
 ```
 
@@ -2674,7 +2100,7 @@ meta_hale = {
     'years': data_hale['meta']['years'].tolist(),
     'predictors': data_hale['meta']['predictors'],
     'model_config': {
-        'hale_data_source': HALE_DATA_SOURCE,
+        'hale_data_source': 'IHME',
         'mid_predictors_included': MID_PREDICTORS_TO_INCLUDE,
         'include_year_effects': INCLUDE_YEAR_EFFECTS,
         'countries_excluded': COUNTRIES_TO_EXCLUDE,
@@ -2697,7 +2123,7 @@ meta_le = {
     'years': data_le['meta']['years'].tolist(),
     'predictors': data_le['meta']['predictors'],
     'model_config': {
-        'hale_data_source': HALE_DATA_SOURCE,
+        'hale_data_source': 'IHME',
         'mid_predictors_included': MID_PREDICTORS_TO_INCLUDE,
         'include_year_effects': INCLUDE_YEAR_EFFECTS,
         'countries_excluded': COUNTRIES_TO_EXCLUDE,
@@ -2739,46 +2165,31 @@ print(f"  Years: {panel_le['Year'].min():.0f}-{panel_le['Year'].max():.0f}")
 ### Summary
 
 ```python
-print("\n" + "="*60)
-print("Summary of Saved Files for Counterfactual Analysis")
-print("="*60)
-print(f"\nOutput directory: {output_dir}")
-print(f"\nFiles saved:")
-print(f"  1. HALE trace (NetCDF): {trace_filename_hale.name}")
-print(f"  2. Life Expectancy trace (NetCDF): {trace_filename_le.name}")
-print(f"  3. HALE metadata (JSON): {meta_filename_hale.name}")
-print(f"  4. Life Expectancy metadata (JSON): {meta_filename_le.name}")
-print(f"  5. HALE panel dataset (HDF5): {panel_hale_filename.name}")
-print(f"  6. LE panel dataset (HDF5): {panel_le_filename.name}")
-print(f"\nNote: Model objects are not saved (PyMC models cannot be pickled).")
-print(f"      The traces and metadata contain all information needed for counterfactual analysis.")
-print(f"\nModel configuration:")
-print(f"  - HALE data source: {HALE_DATA_SOURCE} (IHME GBD 2023)")
-print(f"  - LE data source: OWID (HMD + UN WPP)")
-print(f"  - HALE years: {panel_hale['Year'].min():.0f}-{panel_hale['Year'].max():.0f}")
-print(f"  - LE years: {panel_le['Year'].min():.0f}-{panel_le['Year'].max():.0f}")
-print(f"  - Include COVID data: {INCLUDE_COVID_DATA}")
-print(f"  - Mid predictors included: {MID_PREDICTORS_TO_INCLUDE}")
-print(f"  - Year effects included: {INCLUDE_YEAR_EFFECTS}")
-print(f"  - Countries excluded: {COUNTRIES_TO_EXCLUDE}")
-print(f"\nAll files are ready for counterfactual analysis in bayes_counter.md")
-```
-
-```python
-# Log final summary
-log_and_print("\n" + "="*80)
-log_and_print("FILES SAVED")
-log_and_print("="*80)
-log_and_print(f"Output directory: {output_dir}")
-log_and_print(f"  1. HALE trace: {trace_filename_hale.name}")
-log_and_print(f"  2. Life Expectancy trace: {trace_filename_le.name}")
-log_and_print(f"  3. HALE metadata: {meta_filename_hale.name}")
-log_and_print(f"  4. Life Expectancy metadata: {meta_filename_le.name}")
-log_and_print(f"  5. HALE panel dataset: {panel_hale_filename.name}")
-log_and_print(f"  6. LE panel dataset: {panel_le_filename.name}")
-log_and_print("="*80)
+log_and_print("\n" + "="*60)
+log_and_print("Summary of Saved Files for Counterfactual Analysis")
+log_and_print("="*60)
+log_and_print(f"\nOutput directory: {output_dir}")
+log_and_print(f"\nFiles saved:")
+log_and_print(f"  1. HALE trace (NetCDF): {trace_filename_hale.name}")
+log_and_print(f"  2. Life Expectancy trace (NetCDF): {trace_filename_le.name}")
+log_and_print(f"  3. HALE metadata (JSON): {meta_filename_hale.name}")
+log_and_print(f"  4. Life Expectancy metadata (JSON): {meta_filename_le.name}")
+log_and_print(f"  5. HALE panel dataset (HDF5): {panel_hale_filename.name}")
+log_and_print(f"  6. LE panel dataset (HDF5): {panel_le_filename.name}")
+log_and_print(f"\nNote: Model objects are not saved (PyMC models cannot be pickled).")
+log_and_print(f"      The traces and metadata contain all information needed for counterfactual analysis.")
+log_and_print(f"\nModel configuration:")
+log_and_print(f"  - HALE data source: IHME (GBD 2023)")
+log_and_print(f"  - LE data source: OWID (HMD + UN WPP)")
+log_and_print(f"  - HALE years: {panel_hale['Year'].min():.0f}-{panel_hale['Year'].max():.0f}")
+log_and_print(f"  - LE years: {panel_le['Year'].min():.0f}-{panel_le['Year'].max():.0f}")
+log_and_print(f"  - Include COVID data: {INCLUDE_COVID_DATA}")
+log_and_print(f"  - Mid predictors included: {MID_PREDICTORS_TO_INCLUDE}")
+log_and_print(f"  - Year effects included: {INCLUDE_YEAR_EFFECTS}")
+log_and_print(f"  - Countries excluded: {COUNTRIES_TO_EXCLUDE}")
+log_and_print(f"\nAll files are ready for counterfactual analysis in bayes_counter.md")
+log_and_print("="*60)
 log_and_print(f"\nNotebook completed successfully: {pd.Timestamp.now()}")
-log_and_print("="*80)
 
 # Close log file
 log_file.close()
