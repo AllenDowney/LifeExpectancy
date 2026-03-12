@@ -152,7 +152,7 @@ Source: Bayesian hierarchical panel model. IHME cause-specific mortality, OWID L
 
 In the United States, the model tracks the observed gaps closely, including the COVID period and the opioid-driven increase.
 In Iceland and Lithuania, there are some large changes in the life expectancy gap that are not explained by changes in death rate gaps.
-It may be that small countries have more variability over time (the United States is almost 1000 times more populous than Iceland and more than 100 times more populous that Lithuania).
+Small countries might vary more over time (the United States is almost 1000 times more populous than Iceland and over 100 times more populous than Lithuania).
 
 ### Variations
 

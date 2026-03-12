@@ -43,8 +43,10 @@ import json
 from utils import (
     decorate, configure_plot_style, AIBM_COLORS,
     code_to_who_country, codes_to_country_names,
-    write_html_table
+    write_html_table,
+    log_and_print, set_log_file
 )
+from fig_utils import PREDICTOR_LABELS
 from counterfactual_utils import (
     compute_importance_summary,
     create_counterfactual_visualizations,
@@ -73,10 +75,10 @@ configure_plot_style()
 #   '2019_nocovid' - Pre-COVID baseline (2000-2019, no COVID-19 predictor)
 #   '2021_covid'   - WHO LE, extended analysis (2000-2021, includes COVID-19 predictor)
 #   '2023_covid'   - OWID LE, full COVID period (2000-2023, includes COVID-19 predictor) - RECOMMENDED
-#   'legacy'       - Legacy model (older format, if exists)
-MODEL_VERSION = '2019_nocovid'  
-MODEL_VERSION = '2021_covid'
 MODEL_VERSION = '2023_covid'  # New default - uses OWID LE data through 2023
+
+# Country for counterfactual analysis (ISO 3-letter code: USA, LTU, NLD, etc.)
+COUNTRY_CODE = 'USA'
 
 # Map model version to suffix
 MODEL_SUFFIX_MAP = {
@@ -89,9 +91,23 @@ MODEL_SUFFIX_MAP = {
 # Get the suffix for the selected model version
 MODEL_SUFFIX = MODEL_SUFFIX_MAP.get(MODEL_VERSION, '_ihme_nomid_nogrw_y2023_covid')
 
-print(f"Model Configuration:")
-print(f"  Selected version: {MODEL_VERSION}")
-print(f"  Model suffix: {MODEL_SUFFIX}")
+# Setup logging
+import os
+os.makedirs('logs', exist_ok=True)
+log_path = f'logs/bayes_counter_le_{MODEL_VERSION}_{COUNTRY_CODE.lower()}.txt'
+log_file = open(log_path, 'w')
+log_file.write("Bayesian Counterfactual Analysis: Life Expectancy Gap\n")
+log_file.write("=" * 80 + "\n")
+log_file.write(f"Model version: {MODEL_VERSION}\n")
+log_file.write(f"Country: {COUNTRY_CODE}\n")
+log_file.write(f"Started: {pd.Timestamp.now()}\n")
+log_file.write("=" * 80 + "\n\n")
+set_log_file(log_file)
+log_and_print(f"Model Configuration:")
+log_and_print(f"  Selected version: {MODEL_VERSION}")
+log_and_print(f"  Model suffix: {MODEL_SUFFIX}")
+log_and_print(f"  Country: {COUNTRY_CODE} ({code_to_who_country.get(COUNTRY_CODE, COUNTRY_CODE)})")
+log_and_print(f"  Logging to: {log_path}")
 
 # Path to saved results
 results_dir = Path('interim')
@@ -104,21 +120,21 @@ meta_filename = results_dir / f'metadata_le{MODEL_SUFFIX}.json'
 with open(meta_filename, 'r') as f:
     metadata = json.load(f)
 
-print("Metadata loaded:")
-print(f"  Countries: {len(metadata['countries'])}")
-print(f"  Years: {len(metadata['years'])} (range: {min(metadata['years'])}-{max(metadata['years'])})")
-print(f"  Predictors: {len(metadata['predictors'])}")
-print(f"  Model config: {metadata['model_config']}")
+log_and_print("Metadata loaded:")
+log_and_print(f"  Countries: {len(metadata['countries'])}")
+log_and_print(f"  Years: {len(metadata['years'])} (range: {min(metadata['years'])}-{max(metadata['years'])})")
+log_and_print(f"  Predictors: {len(metadata['predictors'])}")
+log_and_print(f"  Model config: {metadata['model_config']}")
 ```
 
 ```python
 # Load trace (posterior samples)
 trace_filename = nc_dir / f'trace_le{MODEL_SUFFIX}.nc'
 trace = az.from_netcdf(trace_filename)
-print(f"\nTrace loaded from: {trace_filename}")
-print(f"Number of chains: {trace.posterior.sizes['chain']}")
-print(f"Number of draws per chain: {trace.posterior.sizes['draw']}")
-print(f"Total samples: {trace.posterior.sizes['chain'] * trace.posterior.sizes['draw']}")
+log_and_print(f"\nTrace loaded from: {trace_filename}")
+log_and_print(f"Number of chains: {trace.posterior.sizes['chain']}")
+log_and_print(f"Number of draws per chain: {trace.posterior.sizes['draw']}")
+log_and_print(f"Total samples: {trace.posterior.sizes['chain'] * trace.posterior.sizes['draw']}")
 ```
 
 ```python
@@ -131,18 +147,18 @@ else:
     panel_filename = results_dir / f'panel_dataset{MODEL_SUFFIX}.h5'
 
 panel_df = pd.read_hdf(panel_filename, key='panel_data')
-print(f"\nPanel dataset loaded from: {panel_filename}")
-print(f"Shape: {panel_df.shape}")
-print(f"Columns: {list(panel_df.columns)[:10]}...")  # Show first 10 columns
+log_and_print(f"\nPanel dataset loaded from: {panel_filename}")
+log_and_print(f"Shape: {panel_df.shape}")
+log_and_print(f"Columns: {list(panel_df.columns)[:10]}...")  # Show first 10 columns
 ```
 
 ```python
 # Verify data alignment
-print("\nData verification:")
-print(f"  Panel countries: {panel_df['country'].nunique()}")
-print(f"  Metadata countries: {len(metadata['countries'])}")
-print(f"  Panel years: {sorted(panel_df['Year'].unique())[:5]}...")  # Show first 5
-print(f"  Metadata years: {metadata['years'][:5]}...")  # Show first 5
+log_and_print("\nData verification:")
+log_and_print(f"  Panel countries: {panel_df['country'].nunique()}")
+log_and_print(f"  Metadata countries: {len(metadata['countries'])}")
+log_and_print(f"  Panel years: {sorted(panel_df['Year'].unique())[:5]}...")  # Show first 5
+log_and_print(f"  Metadata years: {metadata['years'][:5]}...")  # Show first 5
 ```
 
 ## Extract Transformation Parameters
@@ -162,11 +178,11 @@ years = np.array(metadata['years'])
 country_to_idx = {c: i for i, c in enumerate(countries)}
 year_to_idx = {y: i for i, y in enumerate(years)}
 
-print("Transformation parameters:")
-print(f"  X_mean shape: {X_mean.shape}")
-print(f"  X_std shape: {X_std.shape}")
-print(f"  y_mean: {y_mean:.4f} years")
-print(f"  Number of predictors: {len(predictors)}")
+log_and_print("Transformation parameters:")
+log_and_print(f"  X_mean shape: {X_mean.shape}")
+log_and_print(f"  X_std shape: {X_std.shape}")
+log_and_print(f"  y_mean: {y_mean:.4f} years")
+log_and_print(f"  Number of predictors: {len(predictors)}")
 ```
 
 ## Gap Extremes Table
@@ -180,8 +196,32 @@ gap_extremes = compute_gap_extremes(panel_df)
 # Display as DataFrame
 gap_extremes_df = pd.DataFrame(gap_extremes).T
 gap_extremes_df = gap_extremes_df.sort_index()
-print(f"Found {len(gap_extremes)} gap predictors")
+log_and_print(f"Found {len(gap_extremes)} gap predictors")
 gap_extremes_df
+```
+
+### Presentation Version for Blog
+
+Minimums only, with country names and human-readable cause labels:
+
+```python
+# Build presentation table: minimums only, country names, human-readable labels
+gap_extremes_presentation = []
+for gap_pred, ext in gap_extremes.items():
+    cause_label = PREDICTOR_LABELS.get(gap_pred, gap_pred.replace('Gap_', '').replace('_', ' '))
+    country_name = code_to_who_country.get(ext['min_country'], ext['min_country'])
+    gap_extremes_presentation.append({
+        'Cause': cause_label,
+        'Best attainable gap': round(ext['min_gap'], 2),
+        'Country': country_name,
+        'Year': ext['min_year']
+    })
+
+gap_extremes_blog_df = pd.DataFrame(gap_extremes_presentation).sort_values('Cause')
+gap_extremes_blog_df = gap_extremes_blog_df.reset_index(drop=True)
+write_html_table(gap_extremes_blog_df, 'tables/gap_extremes_min_blog_le.html')
+log_and_print(f"Saved presentation table to: tables/gap_extremes_min_blog_le.html")
+gap_extremes_blog_df
 ```
 
 ## Counterfactual Prediction Function
@@ -193,8 +233,8 @@ The counterfactual prediction function is imported from `counterfactual_utils`. 
 Test the function with a simple example:
 
 ```python
-# Test with USA in 2019, Alcohol gap
-test_country = 'USA'
+# Test with selected country and year, Alcohol gap
+test_country = COUNTRY_CODE
 test_year = 2019
 test_predictor = 'Gap_Alcohol'
 
@@ -204,42 +244,42 @@ result = counterfactual_predictions_bayesian(
     country_to_idx, year_to_idx
 )
 
-print(f"Counterfactual Analysis: {code_to_who_country.get(test_country, test_country)} ({test_country}) in {test_year}")
-print(f"Indicator: {result['indicator']}")
-print(f"\nCurrent {result['indicator']} gap (predictor): {result['current_gap']:.3f}")
-print(f"Note: This is the gap for the {result['indicator']} predictor, not the Life Expectancy gap itself")
+log_and_print(f"Counterfactual Analysis: {code_to_who_country.get(test_country, test_country)} ({test_country}) in {test_year}")
+log_and_print(f"Indicator: {result['indicator']}")
+log_and_print(f"\nCurrent {result['indicator']} gap (predictor): {result['current_gap']:.3f}")
+log_and_print(f"Note: This is the gap for the {result['indicator']} predictor, not the Life Expectancy gap itself")
 if result['target_country']:
-    print(f"Target gap: {result['target_gap']:.3f} (from {code_to_who_country.get(result['target_country'], result['target_country'])} in {result['target_year']})")
+    log_and_print(f"Target gap: {result['target_gap']:.3f} (from {code_to_who_country.get(result['target_country'], result['target_country'])} in {result['target_year']})")
 else:
-    print(f"Target gap: {result['target_gap']:.3f} (set to zero)")
-print(f"\nPredicted Life Expectancy gap (original, before counterfactual):")
-print(f"  Mean: {result['original_summary']['mean']:.3f} years")
-print(f"  94% HDI: [{result['original_summary']['hdi_3%']:.3f}, {result['original_summary']['hdi_97%']:.3f}]")
-print(f"\nPredicted Life Expectancy gap (counterfactual, after adjustment):")
-print(f"  Mean: {result['counterfactual_summary']['mean']:.3f} years")
-print(f"  94% HDI: [{result['counterfactual_summary']['hdi_3%']:.3f}, {result['counterfactual_summary']['hdi_97%']:.3f}]")
-print(f"\nChange in Life Expectancy gap:")
-print(f"  Mean: {result['change_summary']['mean']:.3f} years")
-print(f"  94% HDI: [{result['change_summary']['hdi_3%']:.3f}, {result['change_summary']['hdi_97%']:.3f}]")
+    log_and_print(f"Target gap: {result['target_gap']:.3f} (set to zero)")
+log_and_print(f"\nPredicted Life Expectancy gap (original, before counterfactual):")
+log_and_print(f"  Mean: {result['original_summary']['mean']:.3f} years")
+log_and_print(f"  94% HDI: [{result['original_summary']['hdi_3%']:.3f}, {result['original_summary']['hdi_97%']:.3f}]")
+log_and_print(f"\nPredicted Life Expectancy gap (counterfactual, after adjustment):")
+log_and_print(f"  Mean: {result['counterfactual_summary']['mean']:.3f} years")
+log_and_print(f"  94% HDI: [{result['counterfactual_summary']['hdi_3%']:.3f}, {result['counterfactual_summary']['hdi_97%']:.3f}]")
+log_and_print(f"\nChange in Life Expectancy gap:")
+log_and_print(f"  Mean: {result['change_summary']['mean']:.3f} years")
+log_and_print(f"  94% HDI: [{result['change_summary']['hdi_3%']:.3f}, {result['change_summary']['hdi_97%']:.3f}]")
 ```
 
-## Spot Check: Actual vs Predicted Life Expectancy Gap for USA (2019)
+## Spot Check: Actual vs Predicted Life Expectancy Gap
 
 Verify that the predicted Life Expectancy gap matches expectations and compare with the actual value:
 
 ```python
-# Get actual Life Expectancy gap for USA in 2019
-usa_2019_mask = (panel_df['country'] == 'USA') & (panel_df['Year'] == 2019)
-if usa_2019_mask.any():
-    actual_le_gap = panel_df[usa_2019_mask]['LE_gap'].iloc[0]
-    print(f"Actual Life Expectancy gap for USA (2019): {actual_le_gap:.3f} years")
+# Get actual Life Expectancy gap for selected country in test year
+test_mask = (panel_df['country'] == COUNTRY_CODE) & (panel_df['Year'] == test_year)
+if test_mask.any():
+    actual_le_gap = panel_df[test_mask]['LE_gap'].iloc[0]
+    log_and_print(f"Actual Life Expectancy gap for {code_to_who_country.get(COUNTRY_CODE, COUNTRY_CODE)} ({COUNTRY_CODE}) in {test_year}: {actual_le_gap:.3f} years")
 else:
-    print("Warning: No data found for USA in 2019")
+    log_and_print(f"Warning: No data found for {COUNTRY_CODE} in {test_year}")
     actual_le_gap = None
 
 # Compute predicted Life Expectancy gap using the same method as counterfactual function
 # Get current country-year row
-current_row = panel_df[usa_2019_mask].iloc[0]
+current_row = panel_df[test_mask].iloc[0]
 
 # Get transformation parameters
 X_mean = np.array(metadata['X_mean'])
@@ -249,7 +289,7 @@ predictors = metadata['predictors']
 countries = np.array(metadata['countries'])
 
 # Get country index
-country_idx_val = country_to_idx['USA']
+country_idx_val = country_to_idx[COUNTRY_CODE]
 
 # Build predictor vector (standardized)
 X_current = np.array([current_row[p] for p in predictors])
@@ -268,25 +308,25 @@ pred_original = pred_centered + y_mean
 pred_mean = np.mean(pred_original)
 pred_hdi = az.hdi(pred_original, hdi_prob=0.94)
 
-print(f"\nPredicted Life Expectancy gap for USA (2019):")
-print(f"  Mean: {pred_mean:.3f} years")
-print(f"  94% HDI: [{pred_hdi[0]:.3f}, {pred_hdi[1]:.3f}]")
+log_and_print(f"\nPredicted Life Expectancy gap for {code_to_who_country.get(COUNTRY_CODE, COUNTRY_CODE)} ({COUNTRY_CODE}) in {test_year}:")
+log_and_print(f"  Mean: {pred_mean:.3f} years")
+log_and_print(f"  94% HDI: [{pred_hdi[0]:.3f}, {pred_hdi[1]:.3f}]")
 
 if actual_le_gap is not None:
     residual = actual_le_gap - pred_mean
-    print(f"\nResidual (Actual - Predicted): {residual:.3f} years")
-    print(f"  This should match the residual from the residual analysis section")
-    print(f"  (within rounding error)")
+    log_and_print(f"\nResidual (Actual - Predicted): {residual:.3f} years")
+    log_and_print(f"  This should match the residual from the residual analysis section")
+    log_and_print(f"  (within rounding error)")
     
 # Also verify this matches the counterfactual function's original prediction
 # (using the test result from above)
-print(f"\n" + "="*60)
-print("Verification: Compare with counterfactual function output")
-print("="*60)
-print(f"Counterfactual function 'original_prediction' mean: {result['original_summary']['mean']:.3f} years")
-print(f"Spot check computed prediction mean: {pred_mean:.3f} years")
-print(f"Difference: {abs(result['original_summary']['mean'] - pred_mean):.6f} years")
-print(f"  (Should be < 0.001, i.e., essentially identical)")
+log_and_print(f"\n" + "="*60)
+log_and_print("Verification: Compare with counterfactual function output")
+log_and_print("="*60)
+log_and_print(f"Counterfactual function 'original_prediction' mean: {result['original_summary']['mean']:.3f} years")
+log_and_print(f"Spot check computed prediction mean: {pred_mean:.3f} years")
+log_and_print(f"Difference: {abs(result['original_summary']['mean'] - pred_mean):.6f} years")
+log_and_print(f"  (Should be < 0.001, i.e., essentially identical)")
 ```
 
 ## Compute Importance Measures
@@ -299,15 +339,17 @@ importance_summary = compute_importance_summary(trace, metadata)
 importance_summary
 ```
 
-## Counterfactual Analysis for All Predictors: United States
+## Counterfactual Analysis for All Predictors
 
-Generate counterfactual predictions for all gap predictors for USA using the latest available year:
+Generate counterfactual predictions for all gap predictors for the selected country using the latest available year:
 
 ```python
-# Determine latest available year for USA
-usa_data = panel_df[panel_df['country'] == 'USA'].copy()
-latest_year = max(usa_data['Year'].unique())
-print(f"Using {latest_year} as the reference year for counterfactual analysis")
+# Determine latest available year for selected country
+country_data = panel_df[panel_df['country'] == COUNTRY_CODE].copy()
+latest_year = max(country_data['Year'].unique())
+country_name = code_to_who_country.get(COUNTRY_CODE, COUNTRY_CODE)
+country_lower = COUNTRY_CODE.lower()
+log_and_print(f"Using {latest_year} as the reference year for counterfactual analysis")
 
 # Generate counterfactual results for all predictors
 gap_predictors = [col for col in panel_df.columns if col.startswith('Gap_')]
@@ -316,13 +358,13 @@ counterfactual_results = []
 for gap_pred in gap_predictors:
     try:
         result = counterfactual_predictions_bayesian(
-            'USA', latest_year, gap_pred,
+            COUNTRY_CODE, latest_year, gap_pred,
             trace, metadata, panel_df, gap_extremes,
             country_to_idx, year_to_idx
         )
         counterfactual_results.append(result)
     except (KeyError, ValueError) as e:
-        print(f"Warning: Skipping {gap_pred}: {e}")
+        log_and_print(f"Warning: Skipping {gap_pred}: {e}")
         continue
 
 # Format into table using helper function
@@ -330,26 +372,60 @@ counterfactuals, counterfactuals_full = format_counterfactual_table(
     counterfactual_results, importance_summary, code_to_who_country, target_name='Life Expectancy gap'
 )
 
-print(f"Counterfactual Analysis: United States (USA) in {latest_year}")
-print("="*80)
-print(f"\nNumber of indicators analyzed: {len(counterfactuals)}")
-print(f"\nResults (sorted by importance):")
+log_and_print(f"Counterfactual Analysis: {country_name} ({COUNTRY_CODE}) in {latest_year}")
+log_and_print("="*80)
+log_and_print(f"\nNumber of indicators analyzed: {len(counterfactuals)}")
+log_and_print(f"\nResults (sorted by importance):")
 counterfactuals
 ```
 
 ```python
 # Write counterfactual table to HTML
-output_filename = f'tables/counterfactuals_usa_{latest_year}_le_bayesian.html'
+output_filename = f'tables/counterfactuals_{country_lower}_{latest_year}_le_bayesian.html'
 write_html_table(counterfactuals, output_filename)
-print(f"Saved counterfactual table to: {output_filename}")
+log_and_print(f"Saved counterfactual table to: {output_filename}")
+```
+
+### Presentation Version for Blog
+
+Death rate gap (not Indicator), human-readable labels, no index, last column shows mean only (no error bounds):
+
+```python
+# Build presentation table from counterfactuals_full
+change_col = 'Change in Life Expectancy gap (years)'
+counterfactuals_presentation = counterfactuals_full[
+    ['Indicator', 'Current gap', 'Target gap', 'Target Country-Year', 'Change mean']
+].copy()
+# Rename columns for blog
+counterfactuals_presentation = counterfactuals_presentation.rename(columns={
+    'Indicator': 'Death rate gap',
+    'Change mean': change_col
+})
+# Apply human-readable labels to Death rate gap column
+counterfactuals_presentation['Death rate gap'] = counterfactuals_presentation['Death rate gap'].apply(
+    lambda x: PREDICTOR_LABELS.get(f'Gap_{x}', x)
+)
+# Format change as mean only (2 decimal places)
+counterfactuals_presentation[change_col] = counterfactuals_presentation[change_col].apply(
+    lambda x: f'{x:.2f}'
+)
+# Reset index to remove integer index (when written to HTML, index=False in write_html_table handles this)
+counterfactuals_blog_filename = f'tables/counterfactuals_{country_lower}_{latest_year}_le_blog.html'
+write_html_table(counterfactuals_presentation.reset_index(drop=True), counterfactuals_blog_filename)
+log_and_print(f"Saved presentation table to: {counterfactuals_blog_filename}")
+counterfactuals_presentation
 ```
 
 ```python
 # Forest Plot: All Indicators
 plot_counterfactual_forest(
     counterfactual_results,
-    output_prefix=f'counterfactual_effects_usa_{latest_year}_le',
-    target_name='Life Expectancy gap'
+    output_prefix=f'counterfactual_effects_{country_lower}_{latest_year}_le',
+    target_name='Life Expectancy gap',
+    country=COUNTRY_CODE,
+    year=latest_year,
+    subtext='Source: Bayesian hierarchical panel model. IHME cause-specific mortality, OWID Life Expectancy.',
+    logo=True
 )
 ```
 
@@ -357,8 +433,12 @@ plot_counterfactual_forest(
 # Two-Panel Plot: Gap-Closing vs Gap-Widening
 plot_counterfactual_by_type(
     counterfactual_results,
-    output_prefix=f'counterfactual_effects_usa_{latest_year}_le',
-    target_name='Life Expectancy gap'
+    output_prefix=f'counterfactual_effects_{country_lower}_{latest_year}_le',
+    target_name='Life Expectancy gap',
+    country=COUNTRY_CODE,
+    year=latest_year,
+    subtext='Source: Bayesian hierarchical panel model. IHME cause-specific mortality, OWID Life Expectancy.',
+    logo=True
 )
 ```
 
@@ -366,8 +446,12 @@ plot_counterfactual_by_type(
 # Bar Chart: Sorted by Magnitude
 plot_counterfactual_bar(
     counterfactual_results,
-    output_prefix=f'counterfactual_effects_usa_{latest_year}_le',
-    target_name='Life Expectancy gap'
+    output_prefix=f'counterfactual_effects_{country_lower}_{latest_year}_le',
+    target_name='Life Expectancy gap',
+    country=COUNTRY_CODE,
+    year=latest_year,
+    subtext='Source: Bayesian hierarchical panel model. IHME cause-specific mortality, OWID Life Expectancy.',
+    logo=True
 )
 ```
 
@@ -381,31 +465,31 @@ Compute aggregate effects (sum of gap-closing and gap-widening indicators) using
 gap_closing = counterfactuals_full[counterfactuals_full['Change mean'] < 0].copy()
 gap_widening = counterfactuals_full[counterfactuals_full['Change mean'] > 0].copy()
 
-print("Gap-Closing Indicators (negative change = reduces Life Expectancy gap):")
-print(f"  Number of indicators: {len(gap_closing)}")
+log_and_print("Gap-Closing Indicators (negative change = reduces Life Expectancy gap):")
+log_and_print(f"  Number of indicators: {len(gap_closing)}")
 if len(gap_closing) > 0:
     total_closing = gap_closing['Change mean'].sum()
-    print(f"  Total effect (sum of means): {total_closing:.3f} years")
-    print(f"  Indicators: {', '.join(gap_closing['Indicator'].tolist())}")
+    log_and_print(f"  Total effect (sum of means): {total_closing:.3f} years")
+    log_and_print(f"  Indicators: {', '.join(gap_closing['Indicator'].tolist())}")
 
-print(f"\nGap-Widening Indicators (positive change = increases Life Expectancy gap):")
-print(f"  Number of indicators: {len(gap_widening)}")
+log_and_print(f"\nGap-Widening Indicators (positive change = increases Life Expectancy gap):")
+log_and_print(f"  Number of indicators: {len(gap_widening)}")
 if len(gap_widening) > 0:
     total_widening = gap_widening['Change mean'].sum()
-    print(f"  Total effect (sum of means): {total_widening:.3f} years")
-    print(f"  Indicators: {', '.join(gap_widening['Indicator'].tolist())}")
+    log_and_print(f"  Total effect (sum of means): {total_widening:.3f} years")
+    log_and_print(f"  Indicators: {', '.join(gap_widening['Indicator'].tolist())}")
 
 # Compute net effect
 net_effect = counterfactuals_full['Change mean'].sum()
-print(f"\nNet Effect (all indicators combined): {net_effect:.3f} years")
-print(f"\nNote: These are point estimates (means). For uncertainty quantification,")
-print(f"      we would need to compute the posterior distribution of the sum.")
+log_and_print(f"\nNet Effect (all indicators combined): {net_effect:.3f} years")
+log_and_print(f"\nNote: These are point estimates (means). For uncertainty quantification,")
+log_and_print(f"      we would need to compute the posterior distribution of the sum.")
 ```
 
 ```python
 # Verify that the sum of predictor contributions equals the predicted gap
-# Get USA data for latest year
-usa_latest = panel_df[(panel_df['country'] == 'USA') & (panel_df['Year'] == latest_year)].iloc[0]
+# Get selected country data for latest year
+country_latest = panel_df[(panel_df['country'] == COUNTRY_CODE) & (panel_df['Year'] == latest_year)].iloc[0]
 
 # Get transformation parameters
 X_mean = np.array(metadata['X_mean'])
@@ -415,10 +499,10 @@ predictors = metadata['predictors']
 countries = np.array(metadata['countries'])
 
 # Get country index
-country_idx_val = country_to_idx['USA']
+country_idx_val = country_to_idx[COUNTRY_CODE]
 
 # Build predictor vector (standardized)
-X_current = np.array([usa_latest[p] for p in predictors])
+X_current = np.array([country_latest[p] for p in predictors])
 X_current_std = (X_current - X_mean) / X_std
 
 # Extract posterior samples
@@ -444,16 +528,16 @@ sum_predictor_contributions = np.sum(predictor_contributions)
 # So: sum(X*β) = predicted_gap - α_i - y_mean
 expected_sum = predicted_gap - alpha_i_mean - y_mean
 
-print(f"\nVerification: Sum of Predictor Contributions")
-print(f"="*60)
-print(f"Predicted gap: {predicted_gap:.6f} years")
-print(f"Country intercept (α_i): {alpha_i_mean:.6f} years")
-print(f"Global mean (y_mean): {y_mean:.6f} years")
-print(f"Sum of predictor contributions (X*β): {sum_predictor_contributions:.6f} years")
-print(f"Expected sum (predicted - α_i - y_mean): {expected_sum:.6f} years")
-print(f"Difference: {abs(sum_predictor_contributions - expected_sum):.6f} years")
-print(f"\n✓ Verification: Sum of contributions matches predicted gap structure")
-print(f"  (within numerical precision)")
+log_and_print(f"\nVerification: Sum of Predictor Contributions")
+log_and_print(f"="*60)
+log_and_print(f"Predicted gap: {predicted_gap:.6f} years")
+log_and_print(f"Country intercept (α_i): {alpha_i_mean:.6f} years")
+log_and_print(f"Global mean (y_mean): {y_mean:.6f} years")
+log_and_print(f"Sum of predictor contributions (X*β): {sum_predictor_contributions:.6f} years")
+log_and_print(f"Expected sum (predicted - α_i - y_mean): {expected_sum:.6f} years")
+log_and_print(f"Difference: {abs(sum_predictor_contributions - expected_sum):.6f} years")
+log_and_print(f"\n✓ Verification: Sum of contributions matches predicted gap structure")
+log_and_print(f"  (within numerical precision)")
 ```
 
 ```python
@@ -462,7 +546,7 @@ print(f"  (within numerical precision)")
 # When gap = 0 in original scale, standardized value = (0 - X_mean) / X_std = -X_mean / X_std
 
 # Build predictor vector with all gaps set to zero (in original scale)
-X_all_zero = usa_latest[predictors].copy()
+X_all_zero = country_latest[predictors].copy()
 # Set all gap predictors to zero
 for pred in predictors:
     if pred.startswith('Gap_'):
@@ -506,49 +590,49 @@ for gap_idx in gap_indices:
     change = (X_j_std_zero - X_j_std_current) * beta_mean[gap_idx]
     expected_counterfactual_sum += change
 
-print(f"\nVerification: Counterfactual Effects vs Predicted Gap")
-print(f"="*60)
-print(f"Current predicted gap: {predicted_gap:.6f} years")
-print(f"Predicted gap if all gaps were zero: {predicted_if_all_zero:.6f} years")
-print(f"Expected if all standardized predictors zero (α_i + y_mean): {expected_if_all_zero:.6f} years")
-print(f"Difference (current - all gaps zero): {difference_current_vs_zero:.6f} years")
-print(f"Sum of predictor contributions (X*β): {sum_predictor_contributions:.6f} years")
-print(f"Sum of counterfactual effects (from counterfactual analysis): {sum_counterfactual_effects:.6f} years")
-print(f"Expected sum of counterfactual effects (computed from standardization): {expected_counterfactual_sum:.6f} years")
-print(f"\nNote: Counterfactual effects account for Mid adjustments when gaps are set to zero,")
-print(f"      which may cause differences from the simple standardization calculation.")
+log_and_print(f"\nVerification: Counterfactual Effects vs Predicted Gap")
+log_and_print(f"="*60)
+log_and_print(f"Current predicted gap: {predicted_gap:.6f} years")
+log_and_print(f"Predicted gap if all gaps were zero: {predicted_if_all_zero:.6f} years")
+log_and_print(f"Expected if all standardized predictors zero (α_i + y_mean): {expected_if_all_zero:.6f} years")
+log_and_print(f"Difference (current - all gaps zero): {difference_current_vs_zero:.6f} years")
+log_and_print(f"Sum of predictor contributions (X*β): {sum_predictor_contributions:.6f} years")
+log_and_print(f"Sum of counterfactual effects (from counterfactual analysis): {sum_counterfactual_effects:.6f} years")
+log_and_print(f"Expected sum of counterfactual effects (computed from standardization): {expected_counterfactual_sum:.6f} years")
+log_and_print(f"\nNote: Counterfactual effects account for Mid adjustments when gaps are set to zero,")
+log_and_print(f"      which may cause differences from the simple standardization calculation.")
 ```
 
-## Predicted vs Actual Life Expectancy Gap Over Time: United States
+## Predicted vs Actual Life Expectancy Gap Over Time
 
-Plot the predicted vs actual Life Expectancy gap over time for the United States to visualize model fit:
+Plot the predicted vs actual Life Expectancy gap over time to visualize model fit:
 
 ```python
-# Plot predicted vs actual Life Expectancy gap for USA over time
+# Plot predicted vs actual Life Expectancy gap over time
 plot_predicted_vs_actual_over_time(
-    country='USA',
+    country=COUNTRY_CODE,
     trace=trace,
     metadata=metadata,
     panel_df=panel_df,
     country_to_idx=country_to_idx,
     target_name='Life Expectancy gap',
     target_col='LE_gap',
-    output_filename='figs/predicted_vs_actual_le_usa.png',
+    output_filename=f'figs/predicted_vs_actual_le_{country_lower}.png',
     subtext='Source: Bayesian hierarchical panel model. IHME cause-specific mortality, OWID Life Expectancy.',
     logo=True
 )
 ```
 
-## Positive-Contributing Factors Over Time: United States
+## Positive-Contributing Factors Over Time
 
-Create a stacked area chart showing the contribution of each gap-closing factor over time for the USA, along with predicted and actual totals. This analysis excludes COVID-19 from gap-closing factors since it widens the gap.
+Create a stacked area chart showing the contribution of each gap-closing factor over time, along with predicted and actual totals. This analysis excludes COVID-19 from gap-closing factors since it widens the gap.
 
 ```python
 # Compute positive contributions over time
 # Reference year will be automatically set to the latest available year
 # Use the pre-computed counterfactuals_full to ensure exact consistency with aggregate effects
 contributions_df = compute_positive_contributions_over_time(
-    country='USA',
+    country=COUNTRY_CODE,
     trace=trace,
     metadata=metadata,
     panel_df=panel_df,
@@ -565,9 +649,9 @@ contributions_df.head()
 
 ```python
 # Write contributions dataframe to HTML table
-output_filename = 'tables/positive_contributions_usa_le_over_time.html'
+output_filename = f'tables/positive_contributions_{country_lower}_le_over_time.html'
 write_html_table(contributions_df, output_filename)
-print(f"Saved contributions table to: {output_filename}")
+log_and_print(f"Saved contributions table to: {output_filename}")
 ```
 
 ```python
@@ -575,8 +659,10 @@ print(f"Saved contributions table to: {output_filename}")
 plot_positive_contributions_stacked_area(
     contributions_df,
     target_name='Life Expectancy gap',
-    country='USA',
-    output_filename='figs/positive_contributions_stacked_area_usa_le.png'
+    country=COUNTRY_CODE,
+    output_filename=f'figs/positive_contributions_stacked_area_{country_lower}_le.png',
+    subtext='Source: Bayesian hierarchical panel model. IHME cause-specific mortality, OWID Life Expectancy.',
+    logo=True
 )
 ```
 
@@ -585,8 +671,10 @@ plot_positive_contributions_stacked_area(
 plot_positive_contributions_percentage(
     contributions_df,
     target_name='Life Expectancy gap',
-    country='USA',
-    output_filename='figs/positive_contributions_percentage_usa_le.png'
+    country=COUNTRY_CODE,
+    output_filename=f'figs/positive_contributions_percentage_{country_lower}_le.png',
+    subtext='Source: Bayesian hierarchical panel model. IHME cause-specific mortality, OWID Life Expectancy.',
+    logo=True
 )
 ```
 

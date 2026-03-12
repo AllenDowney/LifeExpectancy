@@ -30,6 +30,10 @@ project:
       title: Bayesian Panel Data Model (2000-2023, IHME HALE)
     - file: blog1_time_series.md
       title: "Blog Post 1: Time Series Analysis"
+    - file: blog2_model.md
+      title: "Blog Post 2: Causal Modeling"
+    - file: blog3_outline.md
+      title: "Blog Post 3: Counterfactuals (Outline)"
 
 site:
   template: book-theme

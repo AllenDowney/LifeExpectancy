@@ -1935,12 +1935,12 @@ column_name_mapping = {
 }
 
 
-def load_ihme_indicator(filename_male, filename_female, value_col_name, indicator_code, indicator_name, min_year=2000, max_year=2019):
+def load_ihme_indicator(filename_male, filename_female, value_col_name, indicator_code, indicator_name, min_year=2000, max_year=2019, age_filter='All ages'):
     """
     Load IHME indicator data from separate male and female files and convert to WHO-compatible format.
     
     Converts IHME CSV format (Location=country name, Sex="Male"/"Female") to WHO format
-    (Country=country code, Sex="Male"/"Female", etc.). Filters to specified year range.
+    (Country=country code, Sex="Male"/"Female", etc.). Filters to specified year range and age group.
     
     Parameters
     ----------
@@ -1958,6 +1958,8 @@ def load_ihme_indicator(filename_male, filename_female, value_col_name, indicato
         Minimum year to include (default: 2000).
     max_year : int, optional
         Maximum year to include (default: 2019).
+    age_filter : str, optional
+        Age group to filter (default: 'All ages'). Use '<5 years' for under-5 mortality.
         
     Returns
     -------
@@ -1975,15 +1977,16 @@ def load_ihme_indicator(filename_male, filename_female, value_col_name, indicato
         'United States of America': 'United States'
     }
     
-    def process_ihme_file(filename, sex_value, year_min, year_max):
+    def process_ihme_file(filename, sex_value, year_min, year_max, age_val):
         """Helper function to process a single IHME file."""
         df = pd.read_csv(filename)
         
         # Filter to year range (exclude 2020+ for COVID-19 reasons by default)
         df = df.query('Year >= @year_min and Year <= @year_max')
         
-        # Filter to "All ages"
-        df = df.query('Age == "All ages"')
+        # Filter to specified age group
+        if 'Age' in df.columns:
+            df = df[df['Age'] == age_val]
         
         # Map IHME country names to WHO country names
         df['Location'] = df['Location'].replace(ihme_country_name_mapping)
@@ -2015,8 +2018,8 @@ def load_ihme_indicator(filename_male, filename_female, value_col_name, indicato
         return df[columns_to_keep].copy()
     
     # Load and process both files
-    df_male = process_ihme_file(filename_male, 'Male', min_year, max_year)
-    df_female = process_ihme_file(filename_female, 'Female', min_year, max_year)
+    df_male = process_ihme_file(filename_male, 'Male', min_year, max_year, age_filter)
+    df_female = process_ihme_file(filename_female, 'Female', min_year, max_year, age_filter)
     
     # Concatenate male and female data
     df = pd.concat([df_male, df_female], ignore_index=True)
@@ -2025,3 +2028,161 @@ def load_ihme_indicator(filename_male, filename_female, value_col_name, indicato
     df = df.sort_values(['Country', 'Sex', 'Year']).reset_index(drop=True)
     
     return df
+
+
+def raw_to_temporal_gaps(df, value_col_name, mapping=None, sexes=None):
+    """
+    Transform raw IHME data (from load_ihme_indicator) to temporal format with Mid_*, Gap_*.
+    
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Raw DataFrame from load_ihme_indicator with Code, Year, Sex, value_col_name.
+    value_col_name : str
+        Name of the value column (e.g., 'AlcoholUseDisordersDeathRate').
+    mapping : dict, optional
+        Mapping from original to short column names. If None, uses column_name_mapping.
+    sexes : list of str, optional
+        Sex values to compare (default: ['Male', 'Female']).
+        
+    Returns
+    -------
+    df_temporal : pandas.DataFrame
+        DataFrame with Code, Year, Mid_*, Gap_* for all years.
+    """
+    if mapping is None:
+        mapping = column_name_mapping
+    sexes = sexes or ['Male', 'Female']
+    df = df.rename(columns=mapping)
+    col = mapping.get(value_col_name, value_col_name)
+    return compute_gender_gap(df, col, sexes)
+
+
+def load_ihme_indicator_temporal(base_filename, value_col_name, indicator_code, indicator_name,
+                                 max_year=2023, age_filter='All ages', data_dir='../data'):
+    """
+    Load IHME indicator data and compute temporal gaps for all years.
+    
+    Thin wrapper: loads via load_ihme_indicator, then transforms via raw_to_temporal_gaps.
+    
+    Parameters
+    ----------
+    base_filename : str
+        Base filename without path, sex suffix, or extension (e.g., 'ihme_alcohol_use_disorders_deaths')
+    value_col_name : str
+        Name of the value column (e.g., 'AlcoholUseDisordersDeathRate')
+    indicator_code : str
+        Indicator code (e.g., 'IHME_ALCOHOL_USE_DISORDERS')
+    indicator_name : str
+        Human-readable indicator name
+    max_year : int, optional
+        Maximum year to include (default: 2023)
+    age_filter : str, optional
+        Age group to filter (default: 'All ages'). Use '<5 years' for under-5 mortality.
+    data_dir : str, optional
+        Directory containing IHME CSV files (default: '../data' for notebooks/)
+        
+    Returns
+    -------
+    df_temporal : pandas.DataFrame
+        DataFrame with Code, Year, Mid_*, Gap_* for all years
+    """
+    filename_male = f'{data_dir}/{base_filename}_male.csv'
+    filename_female = f'{data_dir}/{base_filename}_female.csv'
+    df = load_ihme_indicator(
+        filename_male, filename_female,
+        value_col_name=value_col_name,
+        indicator_code=indicator_code,
+        indicator_name=indicator_name,
+        min_year=2000,
+        max_year=max_year,
+        age_filter=age_filter
+    )
+    return raw_to_temporal_gaps(df, value_col_name)
+
+
+def convert_ihme_hale_to_who_format(df):
+    """
+    Convert IHME HALE data to WHO-compatible format.
+
+    IHME format: location_name, year, sex_name, val, upper, lower
+    WHO format: Code, Year, Sex, HALE_Years, Country (plus optional metadata columns)
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        IHME HALE raw data (e.g., from IHME-GBD CSV)
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with Code, Year, Sex, HALE_Years, Country and optional metadata
+    """
+    who_country_to_code = {country: code for code, country in code_to_who_country.items()}
+    ihme_country_name_mapping = {
+        'Republic of Korea': 'South Korea',
+        'United States of America': 'United States',
+        'Türkiye': 'Turkey'
+    }
+    df = df.copy().query('year >= 2000')
+    df['location_name'] = df['location_name'].replace(ihme_country_name_mapping)
+    df['Code'] = df['location_name'].map(who_country_to_code)
+    df = df[df['Code'].notna()].copy()
+    df['Sex'] = df['sex_name'].map({'Male': 'Male', 'Female': 'Female', 'Both': 'Both'})
+    rename_map = {
+        'year': 'Year',
+        'val': 'HALE_Years',
+        'location_name': 'Country'
+    }
+    if 'upper' in df.columns:
+        rename_map['upper'] = 'HALE_Years_High'
+    if 'lower' in df.columns:
+        rename_map['lower'] = 'HALE_Years_Low'
+    df = df.rename(columns=rename_map)
+    df['IndicatorCode'] = 'IHME_HALE'
+    df['IndicatorName'] = 'Healthy life expectancy (HALE) at birth (years) - IHME'
+    df['CountryCode'] = 'COUNTRY'
+    columns_to_keep = [
+        'IndicatorCode', 'IndicatorName', 'Code', 'CountryCode', 'Year', 'Sex',
+        'HALE_Years', 'HALE_Years_Low', 'HALE_Years_High', 'Country'
+    ]
+    df = df[[c for c in columns_to_keep if c in df.columns]].copy()
+    df = df.sort_values(['Country', 'Sex', 'Year']).reset_index(drop=True)
+    return df
+
+
+def convert_owid_le_to_temporal_format(df, min_year=2000, max_year=2023):
+    """
+    Convert OWID Life Expectancy data to temporal format for Bayesian model.
+
+    OWID format: Entity, Code, Year, life_expectancy__sex_female__age_0, life_expectancy__sex_male__age_0
+    Target format: Code, Year, Sex, LifeExpectancy_Years (long format)
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        OWID LE data
+    min_year : int
+        Minimum year to include (default: 2000)
+    max_year : int
+        Maximum year to include (default: 2023)
+
+    Returns
+    -------
+    pd.DataFrame
+        Long-format DataFrame with Code, Year, Sex, LifeExpectancy_Years
+    """
+    df = df[(df['Year'] >= min_year) & (df['Year'] <= max_year)].copy()
+    df = df[df['Code'].isin(oecd_codes)].copy()
+
+    male_df = df[['Code', 'Year', 'life_expectancy__sex_male__age_0']].copy()
+    male_df['Sex'] = 'Male'
+    male_df = male_df.rename(columns={'life_expectancy__sex_male__age_0': 'LifeExpectancy_Years'})
+
+    female_df = df[['Code', 'Year', 'life_expectancy__sex_female__age_0']].copy()
+    female_df['Sex'] = 'Female'
+    female_df = female_df.rename(columns={'life_expectancy__sex_female__age_0': 'LifeExpectancy_Years'})
+
+    df_temporal = pd.concat([male_df, female_df], ignore_index=True)
+    df_temporal = df_temporal.sort_values(['Code', 'Sex', 'Year']).reset_index(drop=True)
+    return df_temporal
