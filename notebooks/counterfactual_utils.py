@@ -123,25 +123,23 @@ def counterfactual_predictions_bayesian(
     
     # Determine target gap
     if target_zero:
-        # Always target zero gap
         target_gap = 0.0
         target_country = ""
         target_year = None
     else:
-        # Determine target gap based on current gap sign
+        # Use best attainable from gap_extremes
         if current_gap > 0:
-            # Positive gap: find minimum gap (best case: smallest positive gap)
             target_gap = gap_extremes[gap_predictor]['min_gap']
             target_country = gap_extremes[gap_predictor]['min_country']
             target_year = gap_extremes[gap_predictor]['min_year']
         else:
-            # Negative gap: find maximum gap (best case: largest positive gap)
             target_gap = gap_extremes[gap_predictor]['max_gap']
             target_country = gap_extremes[gap_predictor]['max_country']
             target_year = gap_extremes[gap_predictor]['max_year']
         
-        # If target gap has opposite sign of current gap, set target to zero
-        if (current_gap > 0 and target_gap < 0) or (current_gap < 0 and target_gap > 0):
+        # If best attainable has opposite sign (e.g. min is negative when reducing a positive gap),
+        # use zero instead — we want to eliminate the gap, not reverse it
+        if (current_gap >= 0 and target_gap < 0) or (current_gap <= 0 and target_gap > 0):
             target_gap = 0.0
             target_country = ""
             target_year = None
@@ -375,6 +373,91 @@ def plot_counterfactual_forest(
     
     plt.tight_layout()
     filename = f'figs/{output_prefix}_bayesian.png'
+    plt.savefig(filename, dpi=150, bbox_inches='tight')
+    plt.show()
+    return filename
+
+
+def plot_country_intercepts(
+    trace, metadata,
+    target_name='Life Expectancy gap',
+    output_prefix='country_intercepts',
+    subtext=None,
+    logo=False
+):
+    """
+    Create forest plot of country intercepts (random effects) with 94% credible intervals.
+
+    Similar in style to plot_counterfactual_forest: horizontal plot with error bars,
+    vertical line at zero (grand mean), AIBM styling.
+
+    Parameters
+    ----------
+    trace : arviz.InferenceData
+        Posterior trace from MCMC sampling
+    metadata : dict
+        Metadata with 'countries' and 'y_mean'
+    target_name : str
+        Name of target variable for axis label
+    output_prefix : str
+        Prefix for output filename; figure saved to figs/{output_prefix}_intercepts.png
+    subtext : str, optional
+        Source/caption below plot (AIBM style)
+    logo : bool, optional
+        If True, add AIBM logo
+
+    Returns
+    -------
+    str
+        Path to saved figure file
+    """
+    countries = np.array(metadata['countries'])
+
+    # Extract alpha samples: (n_samples, n_countries)
+    alpha_samples = trace.posterior['alpha'].values.reshape(-1, len(countries))
+
+    # Compute mean and 94% HDI per country (alpha is in centered space)
+    alpha_mean = alpha_samples.mean(axis=0)
+    hdi_vals = np.percentile(alpha_samples, [3, 97], axis=0)
+    alpha_lower = hdi_vals[0]
+    alpha_upper = hdi_vals[1]
+
+    # Sort by mean intercept (descending: highest baseline first)
+    sort_idx = np.argsort(alpha_mean)[::-1]
+    countries_sorted = countries[sort_idx]
+    alpha_mean_sorted = alpha_mean[sort_idx]
+    alpha_lower_sorted = alpha_lower[sort_idx]
+    alpha_upper_sorted = alpha_upper[sort_idx]
+
+    # Forest plot
+    fig, ax = plt.subplots(figsize=(7, 9))
+    y_pos = np.arange(len(countries_sorted))
+    colors = [AIBM_COLORS['crimson'] if x < 0 else AIBM_COLORS['blue']
+              for x in alpha_mean_sorted]
+
+    for i in range(len(countries_sorted)):
+        ax.errorbar(alpha_mean_sorted[i], i,
+                    xerr=[[alpha_mean_sorted[i] - alpha_lower_sorted[i]],
+                          [alpha_upper_sorted[i] - alpha_mean_sorted[i]]],
+                    fmt='d', color=colors[i], capsize=4, capthick=1,
+                    markersize=4, elinewidth=1)
+
+    ax.axvline(x=0, color='gray', linestyle='--', linewidth=1, alpha=0.7)
+    ax.set_yticks(y_pos)
+    ax.set_yticklabels([code_to_who_country.get(c, c) for c in countries_sorted])
+    ax.set_ylim(len(countries_sorted) - 0.5, -0.5)  # Tighten y-axis to data (no extra margin)
+    ax.set_xlabel(f'Country intercept (years)')
+    add_title('Country Intercepts', 
+              f'{target_name} random effects by country, 94% credible intervals', 
+              pad=25, x=0, y=1.01)
+
+    if subtext:
+        add_subtext(subtext, x=0, y=-0.06, align_to_axes=True)
+    if logo and os.path.isfile('logo-hq-small.png'):
+        add_logo(filename='logo-hq-small.png', location=(0.99, -0.06), align_to_axes=True)
+
+    plt.tight_layout()
+    filename = f'figs/{output_prefix}_intercepts.png'
     plt.savefig(filename, dpi=150, bbox_inches='tight')
     plt.show()
     return filename
@@ -915,7 +998,7 @@ def compute_positive_contributions_over_time(
     country, trace, metadata, panel_df, gap_extremes,
     country_to_idx, year_to_idx, target_name='gap',
     target_col=None, reference_year=None, counterfactual_results=None,
-    counterfactuals_full=None
+    counterfactuals_full=None, target_zero=False
 ):
     """
     Compute positive-contributing factors (gap-closing) over time for a country.
@@ -951,6 +1034,9 @@ def compute_positive_contributions_over_time(
         Pre-computed full counterfactuals DataFrame. If provided, will be used
         to identify gap-closing factors (ensures exact consistency with aggregate effects).
         Takes precedence over counterfactual_results if both are provided.
+    target_zero : bool, default False
+        If True, use zero as target gap for each factor. If False, use best attainable
+        from gap_extremes (consistent with aggregate effects and forest plot).
         
     Returns
     -------
@@ -977,6 +1063,7 @@ def compute_positive_contributions_over_time(
     
     print(f"Computing contributions for {country} across {len(country_years)} years...")
     print(f"Using {reference_year} as reference year for identifying gap-closing factors")
+    print(f"Target: {'zero' if target_zero else 'best attainable'} (consistent with aggregate effects)")
     
     # Identify gap-closing factors
     if counterfactuals_full is not None:
@@ -1080,7 +1167,7 @@ def compute_positive_contributions_over_time(
                 country, year, gap_pred,
                 trace, metadata, panel_df, gap_extremes,
                 country_to_idx, year_to_idx,
-                target_zero=True
+                target_zero=target_zero
             )
             # Contribution is the absolute value of the change (since change is negative)
             contribution = abs(result['change_summary']['mean'])
@@ -1107,7 +1194,7 @@ def plot_positive_contributions_stacked_area(
     output_filename=None,
     subtext=None,
     logo=False,
-    show_predicted_actual=True,
+    show_predicted_actual=False,
     direct_labels=True
 ):
     """
@@ -1170,20 +1257,23 @@ def plot_positive_contributions_stacked_area(
     # Direct labels for stacked areas: midpoint of each band at right edge
     x_min_data = contributions_df.index.min()
     x_max_data = contributions_df.index.max()
-    # y offsets to nudge overlapping labels (data units)
-    label_nudge = {'UnintentionalInjury': 0.06, 'COVID': 0.14}  
+    # y offsets to nudge overlapping labels (data units) - per country, add as needed
+    label_nudge_by_country = {
+        'USA': {'UnintentionalInjury': 0.06, 'COVID': 0.14},
+        # Add other countries: 'COUNTRY': {'Factor': nudge, ...}
+    }
+    nudges = label_nudge_by_country.get(country, {})
     if direct_labels:
         cumsum = 0.0
         label_data = []
         for i, factor in enumerate(factor_cols_sorted):
             val = contributions_df[factor].iloc[-1]
-            if val >= 0.01:  # Skip only negligible slivers (include COVID)
-                mid_y = cumsum + val / 2.0 + label_nudge.get(factor, 0)
-                label = PREDICTOR_LABELS.get(f'Gap_{factor}', factor.replace('_', ' '))
-                label_data.append({'x': x_max_data, 
-                                   'y': mid_y, 
-                                   'text': label, 
-                                   'color': AIBM_COLORS['dark_gray']})
+            mid_y = cumsum + val / 2.0 + nudges.get(factor, 0)
+            label = PREDICTOR_LABELS.get(f'Gap_{factor}', factor.replace('_', ' '))
+            label_data.append({'x': x_max_data, 
+                               'y': mid_y, 
+                               'text': label, 
+                               'color': AIBM_COLORS['dark_gray']})
             cumsum += val
         add_direct_line_labels(ax, label_data, x_min=x_min_data, x_max=x_max_data)
 
@@ -1199,7 +1289,7 @@ def plot_positive_contributions_stacked_area(
     data_max = contributions_df[factor_cols_sorted].sum(axis=1).max()
     if show_predicted_actual:
         data_max = max(data_max, contributions_df['Actual Total'].max(), contributions_df['Predicted Total'].max())
-    ylim_top = min(4.25, max(4.0, data_max * 1.05))
+    ylim_top = data_max * 1.05
     ax.set_ylim(0, ylim_top)
 
     # Integer y-ticks only (no 0.5, 1.5, etc.) and remove 0 (collides with first date)
@@ -1221,7 +1311,7 @@ def plot_positive_contributions_stacked_area(
             # Only legend for Predicted/Actual; areas are direct-labeled
             handles, leg_labels = ax.get_legend_handles_labels()
             keep = [h for h, l in zip(handles, leg_labels) if l in ('Predicted Total', 'Actual Total')]
-            ax.legend(handles=keep, bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=9, ncol=1)
+            # ax.legend(handles=keep, bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=9, ncol=1)
         else:
             ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=9, ncol=1)
     # Grid at integer ticks only, extend only to 2023 (not into label area)

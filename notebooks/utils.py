@@ -1375,10 +1375,12 @@ def fmt_3sig(x):
     """
     if pd.isna(x):
         return ""
-    try:
-        return f"{float(x):.3g}"
-    except Exception:
-        return x  # leave strings untouched
+    if isinstance(x, float):
+        try:
+            return f"{x:.3g}"
+        except Exception:
+            return x
+    return x
 
 
 def style_correlations(styler, df):

@@ -16,7 +16,7 @@ PREDICTOR_LABELS = {
     'Gap_Cardiovascular': 'Cardiovascular',
     'Gap_Diabetes': 'Diabetes',
     'Gap_Neoplasms': 'Cancer',
-    'Gap_ChronicRespiratory': 'Chronic Respiratory',
+    'Gap_ChronicRespiratory': 'Lung Disease',
     'Gap_LiverDisease': 'Liver Disease',
     'Gap_UnintentionalInjury': 'Injury',
     'Gap_DrugDisorder': 'Drug Disorders',

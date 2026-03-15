@@ -49,10 +49,8 @@ from utils import (
 from fig_utils import PREDICTOR_LABELS
 from counterfactual_utils import (
     compute_importance_summary,
-    create_counterfactual_visualizations,
     plot_counterfactual_forest,
-    plot_counterfactual_by_type,
-    plot_counterfactual_bar,
+    plot_country_intercepts,
     format_counterfactual_table,
     compute_gap_extremes,
     counterfactual_predictions_bayesian,
@@ -67,9 +65,9 @@ configure_plot_style()
 
 ## Load Saved Model Results
 
-```python
+```python tags=["parameters"]
 # ============================================================================
-# MODEL CONFIGURATION: Select which model version to use
+# MODEL CONFIGURATION: Select which model version to use (override with papermill -p COUNTRY_CODE NLD)
 # ============================================================================
 # Options:
 #   '2019_nocovid' - Pre-COVID baseline (2000-2019, no COVID-19 predictor)
@@ -206,18 +204,22 @@ Minimums only, with country names and human-readable cause labels:
 
 ```python
 # Build presentation table: minimums only, country names, human-readable labels
+# Exclude MaternalDisorders and ConflictTerrorism (not in model)
+model_gap_predictors = [p for p in metadata['predictors'] if p.startswith('Gap_')]
+gap_extremes_model = {k: v for k, v in gap_extremes.items() if k in model_gap_predictors}
 gap_extremes_presentation = []
-for gap_pred, ext in gap_extremes.items():
+for gap_pred, ext in gap_extremes_model.items():
     cause_label = PREDICTOR_LABELS.get(gap_pred, gap_pred.replace('Gap_', '').replace('_', ' '))
     country_name = code_to_who_country.get(ext['min_country'], ext['min_country'])
     gap_extremes_presentation.append({
         'Cause': cause_label,
-        'Best attainable gap': round(ext['min_gap'], 2),
+        'Minimum gap': round(ext['min_gap'], 2),
         'Country': country_name,
-        'Year': ext['min_year']
+        'Year': str(int(ext['min_year']))  # string to avoid scientific notation in HTML
     })
 
-gap_extremes_blog_df = pd.DataFrame(gap_extremes_presentation).sort_values('Cause')
+gap_extremes_blog_df = pd.DataFrame(gap_extremes_presentation).sort_values('Minimum gap',
+                                                                           ascending=False)
 gap_extremes_blog_df = gap_extremes_blog_df.reset_index(drop=True)
 write_html_table(gap_extremes_blog_df, 'tables/gap_extremes_min_blog_le.html')
 log_and_print(f"Saved presentation table to: tables/gap_extremes_min_blog_le.html")
@@ -392,17 +394,19 @@ Death rate gap (not Indicator), human-readable labels, no index, last column sho
 
 ```python
 # Build presentation table from counterfactuals_full
-change_col = 'Change in Life Expectancy gap (years)'
+change_col = 'Change in LE gap (years)'
 counterfactuals_presentation = counterfactuals_full[
     ['Indicator', 'Current gap', 'Target gap', 'Target Country-Year', 'Change mean']
 ].copy()
 # Rename columns for blog
 counterfactuals_presentation = counterfactuals_presentation.rename(columns={
-    'Indicator': 'Death rate gap',
+    'Indicator': 'Cause',
     'Change mean': change_col
 })
+# Sort by change (ascending: largest gap-closing first, then gap-widening)
+counterfactuals_presentation = counterfactuals_presentation.sort_values(change_col)
 # Apply human-readable labels to Death rate gap column
-counterfactuals_presentation['Death rate gap'] = counterfactuals_presentation['Death rate gap'].apply(
+counterfactuals_presentation['Cause'] = counterfactuals_presentation['Cause'].apply(
     lambda x: PREDICTOR_LABELS.get(f'Gap_{x}', x)
 )
 # Format change as mean only (2 decimal places)
@@ -430,30 +434,17 @@ plot_counterfactual_forest(
 ```
 
 ```python
-# Two-Panel Plot: Gap-Closing vs Gap-Widening
-plot_counterfactual_by_type(
-    counterfactual_results,
-    output_prefix=f'counterfactual_effects_{country_lower}_{latest_year}_le',
+# Country Intercepts Forest Plot
+plot_country_intercepts(
+    trace,
+    metadata,
     target_name='Life Expectancy gap',
-    country=COUNTRY_CODE,
-    year=latest_year,
+    output_prefix=f'country_intercepts_le',
     subtext='Source: Bayesian hierarchical panel model. IHME cause-specific mortality, OWID Life Expectancy.',
     logo=True
 )
 ```
 
-```python
-# Bar Chart: Sorted by Magnitude
-plot_counterfactual_bar(
-    counterfactual_results,
-    output_prefix=f'counterfactual_effects_{country_lower}_{latest_year}_le',
-    target_name='Life Expectancy gap',
-    country=COUNTRY_CODE,
-    year=latest_year,
-    subtext='Source: Bayesian hierarchical panel model. IHME cause-specific mortality, OWID Life Expectancy.',
-    logo=True
-)
-```
 
 ## Aggregate Effects
 
@@ -484,6 +475,47 @@ net_effect = counterfactuals_full['Change mean'].sum()
 log_and_print(f"\nNet Effect (all indicators combined): {net_effect:.3f} years")
 log_and_print(f"\nNote: These are point estimates (means). For uncertainty quantification,")
 log_and_print(f"      we would need to compute the posterior distribution of the sum.")
+
+# Predicted gap for summary (from counterfactual results)
+predicted_gap = counterfactual_results[0]['original_summary']['mean'] if counterfactual_results else None
+
+# Top gap-closing factor (largest effect)
+if len(gap_closing) > 0:
+    top_row = gap_closing.loc[gap_closing['Change mean'].idxmin()]
+    top_factor = top_row['Indicator']
+    top_effect = float(top_row['Change mean'])
+    top_factor_label = PREDICTOR_LABELS.get(f'Gap_{top_factor}', top_factor)
+else:
+    top_factor = top_factor_label = None
+    top_effect = None
+
+total_gap_reducing = abs(total_closing) if len(gap_closing) > 0 else 0.0
+pct_of_gap = 100 * total_gap_reducing / predicted_gap if predicted_gap and predicted_gap > 0 else None
+
+# Update country summary JSON (add or replace this country)
+summary_path = Path('tables/country_summary_le.json')
+if summary_path.exists():
+    with open(summary_path) as f:
+        summary = json.load(f)
+else:
+    summary = {}
+summary[COUNTRY_CODE] = {
+    'country_name': country_name,
+    'current_gap': round(predicted_gap, 3) if predicted_gap is not None else None,
+    'top_factor': top_factor,
+    'top_factor_label': top_factor_label,
+    'top_effect': round(top_effect, 3) if top_effect is not None else None,
+    'total_gap_reducing': round(total_gap_reducing, 3),
+    'pct_of_gap': round(pct_of_gap, 1) if pct_of_gap is not None else None,
+    'total_gap_widening': round(gap_widening['Change mean'].sum(), 3) if len(gap_widening) > 0 else 0.0,
+    'net_effect': round(net_effect, 3),
+    'n_gap_closing': len(gap_closing),
+    'n_gap_widening': len(gap_widening),
+    'latest_year': int(latest_year),
+}
+with open(summary_path, 'w') as f:
+    json.dump(summary, f, indent=2)
+log_and_print(f"\nUpdated country summary: {summary_path}")
 ```
 
 ```python
@@ -645,6 +677,69 @@ contributions_df = compute_positive_contributions_over_time(
 )
 
 contributions_df.head()
+```
+
+```python
+# Total contribution of gap-closing factors: compare contributions_df vs aggregate effects
+# Both use best attainable (consistent); contributions_df recomputes per year for the time series
+gap_closing_cols = [c for c in contributions_df.columns if c not in ['Predicted Total', 'Actual Total']]
+contrib_total_latest = contributions_df[gap_closing_cols].iloc[-1].sum()  # Latest year
+latest_contrib_year = contributions_df.index[-1]
+
+log_and_print(f"\nTotal gap-closing contribution (contributions_df, {latest_contrib_year}): {contrib_total_latest:.3f} years")
+log_and_print(f"  Sum of columns: {', '.join(gap_closing_cols)}")
+log_and_print(f"\nAggregate effects (counterfactuals_full, best attainable, {latest_year}): {abs(total_closing):.3f} years")
+log_and_print(f"  Difference: {contrib_total_latest - abs(total_closing):.3f} years")
+log_and_print(f"\nBoth use best attainable from gap_extremes; small differences may arise from year alignment.")
+
+# Factor-by-factor comparison (contributions_df vs counterfactuals_full)
+log_and_print(f"\nFactor-by-factor comparison ({latest_contrib_year}):")
+for ind in gap_closing_cols:
+    contrib_val = contributions_df[ind].iloc[-1]
+    cf_row = gap_closing[gap_closing['Indicator'] == ind]
+    cf_val = abs(cf_row['Change mean'].iloc[0]) if len(cf_row) > 0 else np.nan
+    diff = contrib_val - cf_val if not np.isnan(cf_val) else np.nan
+    log_and_print(f"  {ind}: contrib={contrib_val:.3f}, counterfactual={cf_val:.3f}, diff={diff:.3f}")
+```
+
+```python
+# For this country: factor whose potential contribution increased/decreased most (2000 vs 2023)
+year_start, year_end = 2000, 2023
+factor_cols = [c for c in contributions_df.columns if c not in ['Predicted Total', 'Actual Total']]
+y_start = year_start if year_start in contributions_df.index else contributions_df.index.min()
+y_end = year_end if year_end in contributions_df.index else contributions_df.index.max()
+get_label = lambda f: PREDICTOR_LABELS.get(f'Gap_{f}', f.replace('_', ' '))
+
+if y_start != y_end:
+    contrib_s = contributions_df.loc[y_start, factor_cols]
+    contrib_e = contributions_df.loc[y_end, factor_cols]
+    changes = contrib_e - contrib_s
+    idx_max = changes.idxmax()
+    idx_min = changes.idxmin()
+    change_row = {
+        'Country': country_name,
+        'Largest increase': get_label(idx_max),
+        'Increase (yr)': round(changes[idx_max], 3),
+        'Largest decrease': get_label(idx_min),
+        'Decrease (yr)': round(changes[idx_min], 3),
+        'Years': f'{int(y_start)}–{int(y_end)}'
+    }
+    # Update shared JSON (each papermill run adds/updates this country)
+    change_path = Path('tables/contribution_changes_2000_2023_le.json')
+    if change_path.exists():
+        with open(change_path) as f:
+            change_data = json.load(f)
+    else:
+        change_data = {}
+    change_data[COUNTRY_CODE] = change_row
+    with open(change_path, 'w') as f:
+        json.dump(change_data, f, indent=2)
+    change_df = pd.DataFrame(change_data.values())
+    write_html_table(change_df, 'tables/contribution_changes_2000_2023_le.html')
+    log_and_print(f"Updated contribution changes: {change_path}")
+    change_row
+else:
+    log_and_print(f"Skipped contribution change (single year: {y_start})")
 ```
 
 ```python
