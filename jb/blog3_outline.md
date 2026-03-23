@@ -18,6 +18,12 @@ Present the counterfactual analysis that estimates how much of the life expectan
 
 - **Question**: What would happen to a country's life expectancy gap if we reduced each cause-specific gender gap to the best level achieved by any OECD country in the dataset?
 - **"Best attainable"**: For each cause, we find the minimum gap observed across all 37 countries and 24 years. If Iceland achieved a small road traffic gap, we assume it's possible for others.
+
+Table: Minimum gap by cause across OECD countries (country and year where each minimum occurs).
+
+```{include} tables/gap_extremes_min_blog_le.html
+```
+
 - **Conservative approach**: We adjust only the *gap* (male–female difference in death rates), not overall death rates. We're not assuming countries can achieve Iceland's overall traffic safety — only that they could achieve Iceland's *gender parity* in traffic deaths.
 - **Prediction**: Using the Bayesian model from Blog 2, we predict how the life expectancy gap would change if each predictor were adjusted to its best attainable value (holding others constant). Results include 94% credible intervals.
 
@@ -25,17 +31,37 @@ Present the counterfactual analysis that estimates how much of the life expectan
 
 - **Why the US**: Promised in Blog 2; also OECD-average gap (~5 years) with distinctive drivers (opioid epidemic, homicide, road traffic).
 - **Current gap** (2023): ~5.4 years predicted
-- **Counterfactual impacts** (largest first, from latest run):
-  - Road traffic (→ Iceland 2017): largest single impact
-  - Drug disorders (→ Japan 2013): second largest — illustrates country-specificity
-  - Suicide (→ Greece 2002)
-  - Homicide (→ zero)
-  - Liver disease, Neoplasms, Alcohol, Unintentional injury, COVID
-- **Gap-widening (competing risks)**: Cardiovascular, Chronic respiratory, Diabetes
-- **Totals**: ~3.1 years gap-closing potential; ~0.5 years gap-widening; **net ~2.5 years reduction**
-- **Interpretation**: Multiple interventions together could close roughly half the gap. Drug disorders rank high despite low global importance because the US is far from best attainable.
+
+Table: Counterfactual impacts for USA 2023 (sorted by magnitude).
+
+```{include} tables/counterfactuals_usa_2023_le_blog.html
+```
+
+Figure: Counterfactual effects by cause, USA 2023 (gap-closing vs gap-widening, 94% credible intervals).
+
+```{figure} figs/counterfactual_effects_usa_2023_le_bayesian.png
+:width: 80%
+
+Counterfactual effects: hypothetical change in life expectancy gap for each cause-specific death rate, USA (2023), 94% credible intervals.
+```
+
+Figure: Positive contributions to the life expectancy gap over time, USA (2000–2023).
+
+```{figure} figs/positive_contributions_stacked_area_usa_le.png
+:width: 80%
+
+Stacked positive contributions to the life expectancy gap, USA (2000–2023).
+```
 
 ### 4. High-Gap Countries (Lithuania, Latvia, Estonia)
+
+Figure: Country intercepts (random effects) from the hierarchical model—each country’s baseline gap when predictors are at their mean, 94% credible intervals.
+
+```{figure} figs/country_intercepts_le_intercepts.png
+:width: 80%
+
+Country intercepts (random effects): deviation from grand mean, 94% credible intervals.
+```
 
 - **Context**: In 2023 these Baltic countries had the largest gaps in the OECD (>8 years). Blog 1: "A ferry from Tallinn to Stockholm travels 240 miles and closes the gender gap from 8.1 years in Estonia to 3.7 years in Sweden."
 - **Question**: Which causes drive their large gaps? Which offer the largest opportunities to close them?
@@ -53,86 +79,24 @@ Present the counterfactual analysis that estimates how much of the life expectan
 
 - **Country-specific prioritization**: The counterfactual ranking differs by country. Road traffic may be top everywhere it's poor; drug disorders matter most where the epidemic hit; suicide matters where rates are high.
 - **Feasibility**: Evidence from other countries that it's achievable. Clear causal pathways.
-- **Competing risks**: Cardiovascular, diabetes, chronic respiratory — eliminating these gaps could widen the LE gap. Interpretation: these affect overall mortality but have complex relationships with gender gaps; not a reason to ignore them for health policy, but a nuance for gap-focused interventions.
+- **Competing risks**: Cardiovascular, diabetes, lung disease — eliminating these gaps could widen the LE gap. Interpretation: these affect overall mortality but have complex relationships with gender gaps; not a reason to ignore them for health policy, but a nuance for gap-focused interventions.
 - **Key message**: A substantial portion of the gender gap could be closed through targeted interventions. The roadmap is country-specific.
-
----
-
-## Figures and Tables
-
-### Forest Plot
-
-Counterfactual effects for each cause-specific death rate gap, USA 2023. Gap-closing indicators (negative change) in red; gap-widening (competing risks) in blue.
-
-```{figure} figs/counterfactual_effects_usa_2023_le_bayesian.png
-:width: 80%
-
-Counterfactual effects: hypothetical change in life expectancy gap for each cause-specific death rate, USA (2023), 94% credible intervals.
-```
-
-### Counterfactual Bar Chart
-
-Impact of each intervention sorted by magnitude; distinguishes gap-closing vs gap-widening.
-
-```{figure} figs/counterfactual_effects_usa_2023_le_bar_bayesian.png
-:width: 80%
-
-Counterfactual effects sorted by magnitude, USA (2023), 94% credible intervals.
-```
-
-### Stacked Area Chart
-
-Positive contributions to the life expectancy gap over time; stacked areas with predicted and actual totals.
-
-```{figure} figs/positive_contributions_stacked_area_usa_le.png
-:width: 80%
-
-Stacked positive contributions to the life expectancy gap, USA (2000–2023).
-```
-
-### Presentation Table: Gap Extremes
-
-Minimum gaps by cause across OECD countries; country names and human-readable labels.
-
-```{include} tables/gap_extremes_min_blog_le.html
-```
-
-### Presentation Table: Counterfactuals
-
-Counterfactual impacts (mean only) for blog; first column "Death rate gap".
-
-```{include} tables/counterfactuals_usa_2023_le_blog.html
-```
-
-### Full Counterfactual Table
-
-Full table with target country-year and credible intervals.
-
-```{include} tables/counterfactuals_usa_2023_le_bayesian.html
-```
-
-### If Including Multiple Countries
-
-| Asset | Source | Notes |
-|-------|--------|-------|
-| **Counterfactual comparison** | To be generated | USA vs Lithuania vs Netherlands: top 5–6 impacts side-by-side |
-| **Summary table** | To be generated | Current gap, net potential reduction, top 3 drivers for each country |
-
----
-
-## Country Selection Rationale
-
-| Country | 2023 Gap | Rationale |
-|---------|----------|-----------|
-| **United States** | ~5.0 years | Primary case; OECD average; distinctive drivers (opioids, homicide, road traffic) |
-| **Lithuania** (or Latvia) | >8 years | Highest gaps; Baltic story; large historical improvements |
-| **Netherlands** (or Norway) | <3.5 years | Low-gap benchmark; shows model applies across spectrum |
 
 ---
 
 ## Key Message
 
 A substantial portion of the gender gap in life expectancy could be closed through targeted interventions. Country-specific counterfactual analysis shows that prioritization depends on how far each country is from best attainable levels — not just on global importance. Road traffic safety offers the largest single impact in the United States; drug disorders and suicide are also critical. High-gap countries like Lithuania have different drivers and opportunities; low-gap countries like the Netherlands show that near-zero gaps are achievable.
+
+---
+
+## Completed Since Last Update
+
+- [x] **Factor change analysis (2000 vs 2023)**: For each country, compute which factor's contribution increased or decreased the most between 2000 and 2023. Per-country logic in `bayes_counter_le.md`; each papermill run updates `tables/contribution_changes_2000_2023_le.json` and regenerates the HTML table.
+- [x] **Collated contribution changes by region**: `jb/contribution_changes_2000_2023.md` with tables organized by region for all 37 countries.
+- [x] **Road traffic European analysis**: `extract_factor_changes.py` extracts Road Traffic contribution change (2000→2023) for 26 European countries from positive_contributions HTML; outputs CSV (`tables/road_traffic_gap_change_europe.csv`) and markdown (`jb/road_traffic_gap_change_europe.md`).
+- [x] **Road traffic dumbbell plot**: `notebooks/road_traffic_dumbbell.md` reads the CSV and creates horizontal dumbbell plot (square = 2000, left-pointing triangle = 2023, gray connecting lines, AIBM style). Output: `figs/road_traffic_dumbbell_europe.png`.
+- [x] **Blog integration**: Replaced the road traffic table in `blog3_counterfactual.md` with the dumbbell figure in the "Success Story: Road Traffic in Europe" section.
 
 ---
 

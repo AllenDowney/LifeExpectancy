@@ -4,7 +4,7 @@
 
 ---
 
-In the [previous article](https://allendowney.substack.com/p/what-drives-the-life-expectancy-gender-gap), we built a model to estimate how gender gaps in cause-specific death rates affect the life expectancy gap.
+In the [previous article](https://allendowney.substack.com/p/what-drives-the-life-expectancy-gender), we built a model to estimate how gender gaps in cause-specific death rates affect the life expectancy gap.
 We identified the factors with the largest coefficients and the highest importance — cancer, cardiovascular disease, homicide, and others.
 
 But the most important factor overall might not be the most important factor for a particular country.
@@ -89,115 +89,80 @@ Stacked positive contributions to the life expectancy gap, USA (2000–2023).
 
 The total contribution has generally increased, driven by a large increase in the contribution of drug disorders and smaller increases in the contributions of suicide and road traffic.
 
-## Priorities Depend on Where You Stand
+## Different Factors Lead in Different Countries
 
-The following table summarizes counterfactual analysis for all 37 OECD countries, sorted by the current life expectancy gap.
-For each country it reports the factor with the largest potential impact, size of that effect, total gap-reducing potential, and that total as a percentage of the current gap.
+For each country, we identified leading factors, which include the factor that makes the largest contribution to the life expectancy gap, and any additional factors with a contribution at least half as big.
 
-```{include} ../notebooks/tables/country_summary_le.html
-```
+Starting in North America, the following list shows the current gender gap in each country, the leading factors, and how much of the gap could be closed if each factor was lowered to the smallest observed value.
 
-For each country, we identified leading factors, which include the top factor and any additional factors that are at least half as big.
+- **United States** (5.37 years): Road Traffic (-0.81), Drug Disorders (-0.77), Suicide (-0.52)
+- **Canada** (4.61 years): Drug Disorders (-0.51), Cancer (-0.36), Suicide (-0.34)
 
-### The Americas
+In every Latin American country, road traffic is a leading factor; in Mexico and Colombia, homicide is the top factor.
 
-In the United States, as we've seen, the leading factors are road traffic, drug disorders, and suicide.
-Drug disorders are the top factor in Canada.
-The only other countries where drug disorders are a leading factor are the United Kingdom and Sweden.
-
-| Country | Current gap | Leading factors (effect in years) |
-|---------|-------------|------------------------------------|
-| United States | 5.37 | Road Traffic (-0.81), Drug Disorders (-0.77), Suicide (-0.52) |
-| Canada | 4.61 | Drug Disorders (-0.51), Cancer (-0.36), Suicide (-0.34) |
-
-In every Latin American country, road traffic is a leading factor, and in Mexico and Colombia, homicide makes the list.
-
-| Country | Current gap | Leading factors (effect in years) |
-|---------|-------------|------------------------------------|
-| Colombia | 6.03 | Homicide (-1.61), Road Traffic (-1.48) |
-| Costa Rica | 6.01 | Road Traffic (-1.77) |
-| Mexico | 4.93 | Homicide (-1.32), Road Traffic (-1.06), Liver Disease (-0.75) |
-| Chile | 4.60 | Road Traffic (-0.88), Liver Disease (-0.45) |
-
-### Northern Europe
+- **Colombia** (6.03 years): Homicide (-1.61), Road Traffic (-1.48)
+- **Costa Rica** (6.01 years): Road Traffic (-1.77)
+- **Mexico** (4.93 years): Homicide (-1.32), Road Traffic (-1.06), Liver Disease (-0.75)
+- **Chile** (4.60 years): Road Traffic (-0.88), Liver Disease (-0.45)
 
 In every Northern European country, suicide is a leading factor, and in most cancer is as well.
 
-| Country | Current gap | Leading factors (effect in years) |
-|---------|-------------|------------------------------------|
-| Finland | 5.76 | Lung Disease (-0.56), Liver Disease (-0.47), Suicide (-0.39) |
-| Denmark | 3.93 | Cancer (-0.47), Suicide (-0.26), Alcohol (-0.25), Liver Disease (-0.24) |
-| Norway | 3.61 | Cancer (-0.33), Suicide (-0.23) |
-| Sweden | 3.45 | Suicide (-0.28), Drug Disorders (-0.15), Cancer (-0.14) |
-| Iceland | 3.25 | Suicide (-0.37), Cancer (-0.21) |
+- **Finland** (5.76 years): Lung Disease (-0.56), Liver Disease (-0.47), Suicide (-0.39)
+- **Denmark** (3.93 years): Cancer (-0.47), Suicide (-0.26), Alcohol (-0.25), Liver Disease (-0.24)
+- **Norway** (3.61 years): Cancer (-0.33), Suicide (-0.23)
+- **Sweden** (3.45 years): Suicide (-0.28), Drug Disorders (-0.15), Cancer (-0.14)
+- **Iceland** (3.25 years): Suicide (-0.37), Cancer (-0.21)
 
-### Baltic Countries
+Compared to Northern Europe, the life expectancy gaps are bigger in Baltic Countries, but the leading factors are similar, including cancer and suicide.
 
-Compared to the rest of Northern Europe, the life expectancy gaps are bigger in Baltic Countries,  but the leading factors are similar, including cancer and suicide.
-
-| Country | Current gap | Leading factors (effect in years) |
-|---------|-------------|------------------------------------|
-| Latvia | 9.73 | Cancer (-0.95), Suicide (-0.83), Road Traffic (-0.71), Cardiovascular (-0.59), Lung Disease (-0.53) |
-| Lithuania | 8.78 | Suicide (-1.17), Cancer (-0.87), Liver Disease (-0.60) |
-| Estonia | 8.71 | Liver Disease (-0.71), Cancer (-0.66), Suicide (-0.60), Lung Disease (-0.50), Alcohol (-0.48), Cardiovascular (-0.44) |
-
-### Western Europe
+- **Latvia** (9.73 years): Cancer (-0.95), Suicide (-0.83), Road Traffic (-0.71), Cardiovascular (-0.59), Lung Disease (-0.53)
+- **Lithuania** (8.78 years): Suicide (-1.17), Cancer (-0.87), Liver Disease (-0.60)
+- **Estonia** (8.71 years): Liver Disease (-0.71), Cancer (-0.66), Suicide (-0.60), Lung Disease (-0.50), Alcohol (-0.48), Cardiovascular (-0.44)
 
 The life expectancy gaps in Western Europe are among the smallest.
 Cancer is a leading factor in every country; suicide, lung disease, and liver disease are also common.
 
-| Country | Current gap | Leading factors (effect in years) |
-|---------|-------------|------------------------------------|
-| France | 6.17 | Cancer (-0.84), Suicide (-0.53) |
-| Portugal | 5.92 | Cancer (-1.19) |
-| Spain | 5.29 | Cancer (-0.94), Lung Disease (-0.71) |
-| Germany | 4.81 | Cancer (-0.58), Suicide (-0.44), Liver Disease (-0.42), Lung Disease (-0.35) |
-| Austria | 4.77 | Suicide (-0.55), Cancer (-0.44), Liver Disease (-0.38) |
-| Italy | 4.43 | Cancer (-0.67), Lung Disease (-0.45), Road Traffic (-0.34) |
-| Belgium | 4.38 | Lung Disease (-0.61), Cancer (-0.50), Suicide (-0.50) |
-| United Kingdom | 3.96 | Cancer (-0.36), Suicide (-0.21), Drug Disorders (-0.21), Liver Disease (-0.20) |
-| Switzerland | 3.87 | Cancer (-0.41), Suicide (-0.28) |
-| Ireland | 3.84 | Cancer (-0.30), Suicide (-0.19) |
-| Netherlands | 3.40 | Cancer (-0.49) |
-| Luxembourg | 3.39 | Liver Disease (-0.27), Cancer (-0.26), Suicide (-0.17), Lung Disease (-0.17), Cardiovascular (-0.15) |
-
-### Eastern Europe
+- **France** (6.17 years): Cancer (-0.84), Suicide (-0.53)
+- **Portugal** (5.92 years): Cancer (-1.19)
+- **Spain** (5.29 years): Cancer (-0.94), Lung Disease (-0.71)
+- **Germany** (4.81 years): Cancer (-0.58), Suicide (-0.44), Liver Disease (-0.42), Lung Disease (-0.35)
+- **Austria** (4.77 years): Suicide (-0.55), Cancer (-0.44), Liver Disease (-0.38)
+- **Italy** (4.43 years): Cancer (-0.67), Lung Disease (-0.45), Road Traffic (-0.34)
+- **Belgium** (4.38 years): Lung Disease (-0.61), Cancer (-0.50), Suicide (-0.50)
+- **United Kingdom** (3.96 years): Cancer (-0.36), Suicide (-0.21), Drug Disorders (-0.21), Liver Disease (-0.20)
+- **Switzerland** (3.87 years): Cancer (-0.41), Suicide (-0.28)
+- **Ireland** (3.84 years): Cancer (-0.30), Suicide (-0.19)
+- **Netherlands** (3.40 years): Cancer (-0.49)
+- **Luxembourg** (3.39 years): Liver Disease (-0.27), Cancer (-0.26), Suicide (-0.17), Lung Disease (-0.17), Cardiovascular (-0.15)
 
 In Eastern Europe, cancer, suicide and liver disease are leading factors in every country.
 
-| Country | Current gap | Leading factors (effect in years) |
-|---------|-------------|------------------------------------|
-| Poland | 7.16 | Suicide (-0.66), Cancer (-0.59), Liver Disease (-0.58), Alcohol (-0.48), Road Traffic (-0.42) |
-| Slovakia | 6.79 | Liver Disease (-0.78), Cancer (-0.67), Suicide (-0.48) |
-| Hungary | 6.24 | Liver Disease (-0.94), Suicide (-0.61), Cancer (-0.53) |
-| Czechia | 5.60 | Cancer (-0.53), Suicide (-0.49), Liver Disease (-0.46), Lung Disease (-0.43), Road Traffic (-0.30) |
-| Slovenia | 5.50 | Cancer (-0.68), Suicide (-0.68), Alcohol (-0.46), Cardiovascular (-0.43), Liver Disease (-0.39), Lung Disease (-0.35) |
-
-### Other Countries
+- **Poland** (7.16 years): Suicide (-0.66), Cancer (-0.59), Liver Disease (-0.58), Alcohol (-0.48), Road Traffic (-0.42)
+- **Slovakia** (6.79 years): Liver Disease (-0.78), Cancer (-0.67), Suicide (-0.48)
+- **Hungary** (6.24 years): Liver Disease (-0.94), Suicide (-0.61), Cancer (-0.53)
+- **Czechia** (5.60 years): Cancer (-0.53), Suicide (-0.49), Liver Disease (-0.46), Lung Disease (-0.43), Road Traffic (-0.30)
+- **Slovenia** (5.50 years): Cancer (-0.68), Suicide (-0.68), Alcohol (-0.46), Cardiovascular (-0.43), Liver Disease (-0.39), Lung Disease (-0.35)
 
 The patterns in other OECD countries are similar to Western Europe, where cancer and suicide are often leading factors, along with road traffic.
 
-| Country | Current gap | Leading factors (effect in years) |
-|---------|-------------|------------------------------------|
-| Australia | 4.04 | Cancer (-0.50), Suicide (-0.34) |
-| New Zealand | 3.67 | Cancer (-0.31), Suicide (-0.30), Road Traffic (-0.30) |
-| Greece | 5.73 | Cancer (-1.11), Road Traffic (-0.61) |
-| Japan | 6.88 | Lung Disease (-1.19), Cancer (-1.17) |
-| South Korea | 6.78 | Cancer (-0.80), Suicide (-0.75) |
-| Israel | 3.69 | Road Traffic (-0.18), Cancer (-0.17), Suicide (-0.11) |
+- **Australia** (4.04 years): Cancer (-0.50), Suicide (-0.34)
+- **New Zealand** (3.67 years): Cancer (-0.31), Suicide (-0.30), Road Traffic (-0.30)
+- **Greece** (5.73 years): Cancer (-1.11), Road Traffic (-0.61)
+- **Japan** (6.88 years): Lung Disease (-1.19), Cancer (-1.17)
+- **South Korea** (6.78 years): Cancer (-0.80), Suicide (-0.75)
+- **Israel** (3.69 years): Road Traffic (-0.18), Cancer (-0.17), Suicide (-0.11)
 
+Nine of the thirteen factors in the model appear as a leading factor in at least one country: cancer, cardiovascular disease, homicide, suicide, road traffic, liver disease, lung disease, alcohol, and drug disorders.
+Only four did not: unintentional injury, COVID-19, childhood mortality, and diabetes -- although COVID was a leading factor in some countries during the peak of the pandemic.
 
 ## Success Story: Road Traffic in Europe
 
-If you still think there's nothing we can do about the life expectancy gender gap, Europe provides a clear counterexample.
+Road traffic is a leading factor in only four countries in the European Union (EU), and it is not the top factor in any.
+That might not be a coincidence: In the early 2000s, the EU launched a coordinated effort to reduce traffic fatalities.
+A 2001 transport policy set the goal of cutting road deaths in half by 2010, and the European Road Safety Action Programme (2003–2010) promoted stronger enforcement of speeding and drunk-driving laws, expanded seatbelt use, safer road design, and improved vehicle safety standards.
+A follow-on program (2011–2020), added focus on safer infrastructure, protection for pedestrians and cyclists, and vehicle features like automatic emergency braking and lane-departure warnings.
 
-Beginning in the early 2000s, the European Union launched a coordinated effort to reduce traffic fatalities. A 2001 transport policy set the goal of cutting road deaths in half by 2010, and the European Road Safety Action Programme (2003–2010) promoted stronger enforcement of speeding and drunk-driving laws, expanded seatbelt use, safer road design, and improved vehicle safety standards.
-
-A follow-on strategy, Road Safety Policy Orientations (2011–2020), continued these efforts while adding new priorities such as safer infrastructure, protection for pedestrians and cyclists, and vehicle technologies like automatic emergency braking and lane-departure warnings.
-
-Together these policies contributed to large declines in traffic mortality across Europe.
-
-Traffic safety improved for everyone, but because traffic death rates are higher for men, the reductions were larger for men.
+These policies were not targeted specifically to men, but because traffic death rates are higher for men, the reduction in their rates was larger.
 As a result, in every European country the contribution of traffic deaths to the life expectancy gap declined between 2000 and 2023.
 The following figure shows these changes.
 
@@ -208,31 +173,50 @@ name: road-traffic-dumbbell
 Change in road traffic contribution to the life expectancy gender gap (2000–2023), European OECD countries.
 ```
 
-
 The changes are largest in Eastern and Southern Europe, where traffic death rates were highest.
-In five countries these road safety polcies closed the life expectancy gap by more than a year.
-In another eleven countries, it is more more 0.5 years.
+In five countries the life expectancy gap due to traffic decreased by more than a year.
+In another eleven countries, it decreased by more than 0.5 years.
 And in six countries, the remaining contribution is less than 0.1 years -- which shows that it is possible to eliminate the gender gap in road traffic deaths.
-
-Notably, none of the policies that improved road safety in Europe were targeted specifically to men.
-
-Notably, none of the policies that improved road safety in Europe were targeted specifically to men. Improving safety for everyone decreases death rate gaps and their contribution to the life expectancy gap.
-
 
 ## Amenable to Change
 
+Road traffic in Europe is an example of how public health and safety policies can reduce the life expectancy gap.
+It it likely that the other causes of death that contribute to the life expectancy gap are similarly amenable to intervention.
 
-## Summary
+**Drug disorders**: The opioid epidemic in the United States and Canada was avoidable.
+Other high-income countries avoided epidemics on the same scale by maintaining stricter controls on opioid prescribing, implementing prescription monitoring systems earlier, limiting pharmaceutical marketing, and expanding harm-reduction measures. 
+Deaths due to drug disorders have started to decline in the United States and Canada, although the causes are not yet clear.
+If these trends continue, we expect this component of the life expectancy gap to decrease.
 
-A substantial portion of the gender gap in life expectancy could be closed through targeted interventions.
-Country-specific counterfactual analysis shows that prioritization depends on how far each country is from best attainable levels — not just on global importance.
+**Alcohol**: The Baltic countries and Poland implemented alcohol control policies—including tax increases, availability restrictions, and marketing limits—that reduced alcohol-attributable mortality and contributed to declines in liver disease and suicide.
+In general, a decrease in rates of alcohol abuse directly reduces the contribution of alcohol-related mortality and indirectly decreases the contributions of homicide, suicide, road traffic, liver disease, and cancer. 
+In many OECD countries, [alcohol use has been falling](https://www.oecd.org/en/publications/2025/11/health-at-a-glance-2025_a894f72e/full-report/alcohol-consumption_f009f222.html), with lower rates of drinking among recent cohorts, compared with previous generations.
+If these patterns persist, alcohol-related mortality may decrease as well.
 
-For the United States, road traffic safety offers the largest single impact, followed by drug disorder prevention and suicide prevention.
-Multiple interventions together could close roughly half the gap.
-High-gap countries like Lithuania have different drivers and opportunities; low-gap countries like the Netherlands show that near-zero gaps are achievable.
+**Smoking**: [Smoking rates have declined in most OECD countries](https://www.oecd.org/en/publications/health-at-a-glance-2025_8f9e3f98-en/full-report/smoking-and-vaping_23b355e4.html#indicator-d1e20246-98cbd291e0), driven by tobacco control policies: higher taxes, smoke-free laws, advertising bans, graphic health warnings on packaging, and restrictions on sales to minors.
+Because smoking contributes to lung disease, cardiovascular disease, and several cancers, these declines are expected to reduce smoking-related mortality over time.
+Because more men smoke, falling rates have already contributed to reductions in the life expectancy gap in many countries.
 
+**Cancer**: According to [this recent study across 200 countries](https://www.nature.com/articles/s41591-026-04219-7) almost 40% of new cancers are preventable, attributable to factors including smoking and alcohol, obesity and lack of exercise, air pollution, sun exposure, infection, and occupational exposure.
+Like smoking and alcohol abuse, many of these factors are amenable to public health and safety policies.
+The paper notes that the proportion of preventable cancers is higher in men, which suggests that interventions that reduce death rates due to cancer would likely have a larger effect on men and reduce the life expectancy gap.
 
-## Country Baseline Differences
+**Suicide**: In most OECD countries, the contribution of suicide to the life expectancy gap decreased between 2000 and 2023.
+The biggest declines were in the Baltic and Central European countries, due to improving economic conditions after the post-Soviet transition, stronger alcohol control policies, and the adoption of national suicide-prevention strategies. 
+Similar declines occurred in Finland, Ireland, and Japan following coordinated public health interventions.
+
+The contribution of suicide increased by 0.11–0.14 years in the United States, Mexico, and Costa Rica, and by 0.34 years in South Korea.
+In the United States, rising suicide mortality has been concentrated among middle-aged men in economically declining regions; it is associated with job loss, substance abuse, social isolation, and uneven access to mental-health care.
+In South Korea, suicide rates rose sharply after the Asian financial crisis of the late 1990s and have remained high; it has been attributed to economic insecurity, workplace and educational pressures, and population aging, along with limited mental-health services and stigma surrounding treatment.
+
+**Homicide**: In most OECD countries homicide contributes less than 0.05 years to the life expectancy gap, and changes since 2000 are small.
+The largest decline was in Colombia, where the contribution fell from 4.17 years to 1.61 years, due to state security policies, the demobilization of paramilitary groups, reduction of armed conflict culminating in the 2016 peace agreement with the FARC, along with violence-prevention efforts in major cities.
+In Estonia, Latvia, and Lithuania the contribution decreased by 0.25--0.52 years as economic conditions stabilized and institutions strengthened after the post-Soviet transition. 
+The contribution of homicide increased by 0.3 years in Costa Rica and 0.7 years in Mexico due to increasing violence associated with organized crime and drug-trafficking.
+
+These example show that causes of the life expectancy gap are contingent: they depend on economic and social conditions, and they are amenable to the effect of public health and safety policies.
+
+## Technical Note: Country-specific intercepts
 
 NOTE: a possible explanation for the intercepts is unmodeled interactions
 
