@@ -1,43 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="http://localhost:3025/sitemap_style.xsl" ?>
+<?xml-stylesheet type="text/xsl" href="http://localhost:3026/sitemap_style.xsl" ?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>http://localhost:3025</loc>
+    <loc>http://localhost:3026</loc>
   </url>
   <url>
-    <loc>http://localhost:3025/summary</loc>
+    <loc>http://localhost:3026/summary</loc>
   </url>
   <url>
-    <loc>http://localhost:3025/tech-report</loc>
+    <loc>http://localhost:3026/tech-report</loc>
   </url>
   <url>
-    <loc>http://localhost:3025/data-inventory</loc>
+    <loc>http://localhost:3026/data-inventory</loc>
   </url>
   <url>
-    <loc>http://localhost:3025/neoplasms-report</loc>
+    <loc>http://localhost:3026/neoplasms-report</loc>
   </url>
   <url>
-    <loc>http://localhost:3025/eda-report</loc>
+    <loc>http://localhost:3026/eda-report</loc>
   </url>
   <url>
-    <loc>http://localhost:3025/validation</loc>
+    <loc>http://localhost:3026/validation</loc>
   </url>
   <url>
-    <loc>http://localhost:3025/time-series-report</loc>
+    <loc>http://localhost:3026/time-series-report</loc>
   </url>
   <url>
-    <loc>http://localhost:3025/temporal</loc>
+    <loc>http://localhost:3026/temporal</loc>
   </url>
   <url>
-    <loc>http://localhost:3025/bayesian-model-report-2023</loc>
+    <loc>http://localhost:3026/bayesian-model-report-2023</loc>
   </url>
   <url>
-    <loc>http://localhost:3025/blog1-time-series</loc>
+    <loc>http://localhost:3026/blog1-time-series</loc>
   </url>
   <url>
-    <loc>http://localhost:3025/blog2-model</loc>
+    <loc>http://localhost:3026/blog2-model</loc>
   </url>
   <url>
-    <loc>http://localhost:3025/blog3-counterfactual</loc>
+    <loc>http://localhost:3026/blog3-counterfactual</loc>
+  </url>
+  <url>
+    <loc>http://localhost:3026/blog4-international</loc>
   </url>
 </urlset>
