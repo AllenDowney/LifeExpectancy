@@ -26,6 +26,18 @@ The panel data approach provides more statistical power and allows us to model h
 - Uses both within-country and between-country variation
 - Controls for time-invariant country-level factors
 
+**Run headlessly (jupytext + papermill):** from a terminal (adjust `~/LifeExpectancy` if your clone is elsewhere):
+
+```
+cd ~/LifeExpectancy/notebooks && conda activate LifeExpectancy && \
+  jupytext --to ipynb bayesian_model.md --output bayesian_model.ipynb && \
+  papermill bayesian_model.ipynb bayesian_model_executed.ipynb
+```
+
+The parameters cell sets `FORCE_RUN = False` by default (reuse `nc/trace_hale*.nc` / `trace_le*.nc` when present). Append e.g. `-p FORCE_RUN True` on the `papermill` line to ignore cache and resample.
+
+MCMC and post-processing can take a long time; the executed notebook is `notebooks/bayesian_model_executed.ipynb`.
+
 ```python
 %load_ext autoreload
 %autoreload 2
@@ -42,6 +54,7 @@ from utils import (
     decorate, underride, configure_plot_style, AIBM_COLORS,
     write_html_table, code_to_who_country
 )
+from model_utils import load_idata_or_sample
 
 configure_plot_style()
 ```
@@ -110,6 +123,11 @@ print(f"  Include COVID Data: {INCLUDE_COVID_DATA}")
 print(f"  Cutoff Year: {CUTOFF_YEAR} (automatically set based on COVID flag)")
 print(f"  Countries Excluded: {COUNTRIES_TO_EXCLUDE}")
 print(f"  Predictors: {PREDICTORS_TO_INCLUDE}")
+```
+
+```python tags=["parameters"]
+# Papermill: `-p FORCE_RUN True` forces new MCMC even when `nc/trace_*.nc` exists
+FORCE_RUN = False
 ```
 
 ```python
@@ -572,18 +590,33 @@ else:
     print("Year effects (GRW): NOT INCLUDED")
 ```
 
+```python
+# NetCDF paths for posterior cache (same stem logic as end-of-notebook exports)
+from pathlib import Path
+
+nc_dir = Path('nc')
+nc_dir.mkdir(parents=True, exist_ok=True)
+trace_filename_hale = nc_dir / f"{get_output_filename('trace_hale', MID_PREDICTORS_TO_INCLUDE, INCLUDE_YEAR_EFFECTS)}.nc"
+trace_filename_le = nc_dir / f"{get_output_filename('trace_le', MID_PREDICTORS_TO_INCLUDE, INCLUDE_YEAR_EFFECTS)}.nc"
+suffix = get_output_filename('', MID_PREDICTORS_TO_INCLUDE, INCLUDE_YEAR_EFFECTS)
+```
+
 ### Sample from Posterior
 
 ```python
-# Sample from HALE model
+# Sample or load cached HALE posterior (see papermill parameter FORCE_RUN)
 with model_hale:
-    trace_hale = pm.sample(
-        nuts_sampler='nutpie'
+    trace_hale = load_idata_or_sample(
+        model_hale,
+        str(trace_filename_hale),
+        force_run=FORCE_RUN,
+        nuts_sampler='nutpie',
     )
 
-# Add log-likelihood for WAIC/LOO computation (nutpie doesn't save it by default)
+# Log-likelihood for WAIC/LOO (skip if already in NetCDF from a prior run)
 with model_hale:
-    pm.compute_log_likelihood(trace_hale)
+    if "log_likelihood" not in trace_hale.groups():
+        pm.compute_log_likelihood(trace_hale)
 ```
 
 ```python
@@ -738,6 +771,10 @@ plt.show()
 
 ### Correlations
 
+#### Top 10 posterior correlations between slope pairs (β), HALE
+
+Pearson **r** between MCMC draws for each pair of standardized slope coefficients; pairs ranked by **|r|** (strongest linear association in either direction). A heatmap and pair plot for a selected set of causes are computed for the **LE** model only (see below).
+
 ```python
 # Extract posterior samples for beta coefficients (if not already done)
 beta_extracted_hale = az.extract(trace_hale)
@@ -765,15 +802,27 @@ beta_corr_df_hale = pd.DataFrame(beta_corr_long)
 beta_corr_df_hale['Abs_Correlation'] = beta_corr_df_hale['Correlation'].abs()
 beta_corr_top10_hale = beta_corr_df_hale.nlargest(10, 'Abs_Correlation')[
     ['Predictor1', 'Predictor2', 'Correlation']
-].sort_values('Correlation', key=abs, ascending=False)
+].sort_values('Correlation', key=abs, ascending=False).reset_index(drop=True)
 
-print("Top 10 correlations among beta coefficients (HALE):")
-beta_corr_top10_hale
+beta_corr_top10_hale_display = pd.DataFrame({
+    'Rank': range(1, len(beta_corr_top10_hale) + 1),
+    'Cause 1': beta_corr_top10_hale['Predictor1'].map(lambda x: PREDICTOR_DISPLAY_LABELS.get(x, x)),
+    'Cause 2': beta_corr_top10_hale['Predictor2'].map(lambda x: PREDICTOR_DISPLAY_LABELS.get(x, x)),
+    'r': beta_corr_top10_hale['Correlation'],
+})
+
+print('Top 10 β-posterior correlations (HALE gender gap), by |r|:')
+for _, row in beta_corr_top10_hale_display.iterrows():
+    print(f"  {row['Rank']:>2}. r={row['r']:+.3f}   {row['Cause 1']}  ↔  {row['Cause 2']}")
+beta_corr_top10_hale_display
 ```
 
 ```python
 # Write beta correlations table to HTML
-write_html_table(beta_corr_top10_hale, get_output_filename('tables/beta_correlations_top10_hale.html', MID_PREDICTORS_TO_INCLUDE, INCLUDE_YEAR_EFFECTS))
+write_html_table(
+    beta_corr_top10_hale_display,
+    get_output_filename('tables/beta_correlations_top10_hale.html', MID_PREDICTORS_TO_INCLUDE, INCLUDE_YEAR_EFFECTS),
+)
 ```
 
 ```python
@@ -830,15 +879,18 @@ else:
 ### Sample from Posterior
 
 ```python
-# Sample from Life Expectancy model
+# Sample or load cached LE posterior (same FORCE_RUN; paths set with HALE block above)
 with model_le:
-    trace_le = pm.sample(
-        nuts_sampler='nutpie'
+    trace_le = load_idata_or_sample(
+        model_le,
+        str(trace_filename_le),
+        force_run=FORCE_RUN,
+        nuts_sampler='nutpie',
     )
 
-# Add log-likelihood for WAIC/LOO computation (nutpie doesn't save it by default)
 with model_le:
-    pm.compute_log_likelihood(trace_le)
+    if "log_likelihood" not in trace_le.groups():
+        pm.compute_log_likelihood(trace_le)
 ```
 
 ```python
@@ -993,6 +1045,10 @@ plt.show()
 
 ### Correlations
 
+#### Top 10 posterior correlations between slope pairs (β), life expectancy
+
+Same definition as HALE: **r** across MCMC draws per pair, ranked by **|r|**.
+
 ```python
 # Extract posterior samples for beta coefficients (if not already done)
 beta_extracted_le = az.extract(trace_le)
@@ -1020,15 +1076,121 @@ beta_corr_df_le = pd.DataFrame(beta_corr_long)
 beta_corr_df_le['Abs_Correlation'] = beta_corr_df_le['Correlation'].abs()
 beta_corr_top10_le = beta_corr_df_le.nlargest(10, 'Abs_Correlation')[
     ['Predictor1', 'Predictor2', 'Correlation']
-].sort_values('Correlation', key=abs, ascending=False)
+].sort_values('Correlation', key=abs, ascending=False).reset_index(drop=True)
 
-print("Top 10 correlations among beta coefficients (Life Expectancy):")
-beta_corr_top10_le
+beta_corr_top10_le_display = pd.DataFrame({
+    'Rank': range(1, len(beta_corr_top10_le) + 1),
+    'Cause 1': beta_corr_top10_le['Predictor1'].map(lambda x: PREDICTOR_DISPLAY_LABELS.get(x, x)),
+    'Cause 2': beta_corr_top10_le['Predictor2'].map(lambda x: PREDICTOR_DISPLAY_LABELS.get(x, x)),
+    'r': beta_corr_top10_le['Correlation'],
+})
+
+print('Top 10 β-posterior correlations (LE gender gap), by |r|:')
+for _, row in beta_corr_top10_le_display.iterrows():
+    print(f"  {row['Rank']:>2}. r={row['r']:+.3f}   {row['Cause 1']}  ↔  {row['Cause 2']}")
+beta_corr_top10_le_display
 ```
 
 ```python
 # Write beta correlations table to HTML
-write_html_table(beta_corr_top10_le, get_output_filename('tables/beta_correlations_top10_le.html', MID_PREDICTORS_TO_INCLUDE, INCLUDE_YEAR_EFFECTS))
+write_html_table(
+    beta_corr_top10_le_display,
+    get_output_filename('tables/beta_correlations_top10_le.html', MID_PREDICTORS_TO_INCLUDE, INCLUDE_YEAR_EFFECTS),
+)
+```
+
+#### Posterior correlation among selected slopes (β), LE model
+
+Causes chosen so the pair grid includes the **strongest negative** posterior associations among $\beta$ (MCMC draws; standardized predictors) in exploratory runs.
+
+**Heatmap** (correlation coefficients) and **pair plot** (KDE on diagonal, scatters off-diagonal) use the columns below.
+
+```python
+from fig_utils import (
+    plot_beta_posterior_correlation_heatmap,
+    plot_beta_posterior_joint_grid_strongest_negative,
+    plot_beta_posterior_pair_scatter,
+)
+
+BETA_CORR_SELECTED_COLS_LE = [
+    'Gap_Neoplasms',
+    'Gap_ChronicRespiratory',
+    'Gap_Homicide',
+    'Gap_Childhood',
+    'Gap_Suicide',
+    'Gap_UnintentionalInjury',
+    'Gap_RoadTraffic',
+    'Gap_Cardiovascular',
+]
+
+_missing_sel_le = [c for c in BETA_CORR_SELECTED_COLS_LE if c not in beta_samples_df_le.columns]
+if _missing_sel_le:
+    raise ValueError(f'β posterior subset (LE): columns not in model: {_missing_sel_le}')
+
+_beta_pair_labels_le = [PREDICTOR_DISPLAY_LABELS.get(c, c) for c in BETA_CORR_SELECTED_COLS_LE]
+
+beta_corr_selected_le = beta_samples_df_le[BETA_CORR_SELECTED_COLS_LE].corr()
+
+fig, _ = plot_beta_posterior_correlation_heatmap(
+    beta_corr_selected_le,
+    title='Posterior correlation of slope parameters',
+    subtitle='Life expectancy gender gap model — selected causes',
+    subtext='Pearson r between MCMC draws of β (standardized predictors). Source: OWID LE panel.',
+    logo=True,
+    display_labels=_beta_pair_labels_le,
+)
+plt.savefig(
+    get_output_filename('figs/beta_posterior_corr_selected_le.png', MID_PREDICTORS_TO_INCLUDE, INCLUDE_YEAR_EFFECTS),
+    dpi=300,
+    bbox_inches='tight',
+)
+plt.show()
+```
+
+```python
+fig = plot_beta_posterior_pair_scatter(
+    beta_samples_df_le,
+    BETA_CORR_SELECTED_COLS_LE,
+    title='Posterior joint distribution of slope parameters',
+    subtitle='Life expectancy gender gap model — selected causes',
+    subtext='Each point is one posterior draw. Source: OWID LE panel.',
+    display_labels=_beta_pair_labels_le,
+    logo=True,
+)
+plt.savefig(
+    get_output_filename('figs/beta_posterior_pair_selected_le.png', MID_PREDICTORS_TO_INCLUDE, INCLUDE_YEAR_EFFECTS),
+    dpi=300,
+    bbox_inches='tight',
+)
+plt.show()
+```
+
+Joint distributions for the **nine** predictor pairs with the **most negative** posterior correlation among $\beta$ (full predictor set, not only the selected-cause block). Each panel is a scatter of MCMC draws; label shows Pearson **r** between those draws.
+
+```python
+fig, neg_pairs_top9_le = plot_beta_posterior_joint_grid_strongest_negative(
+    beta_samples_df_le,
+    n_panels=9,
+    n_rows=3,
+    n_cols=3,
+    title='Strongest negative posterior slope associations',
+    subtitle='Life expectancy gender gap — most negative pairwise correlations (MCMC draws)',
+    subtext='Each panel: joint scatter for one pair of standardized slopes. OWID LE panel.',
+    label_map=PREDICTOR_DISPLAY_LABELS,
+    logo=True,
+    figsize=(8, 8),
+)
+print('3×3 grid panels (most negative r first):')
+for i, (a, b, r) in enumerate(neg_pairs_top9_le, 1):
+    la = PREDICTOR_DISPLAY_LABELS.get(a, a)
+    lb = PREDICTOR_DISPLAY_LABELS.get(b, b)
+    print(f'  {i}. r={r:+.3f}  {la}  vs  {lb}')
+plt.savefig(
+    get_output_filename('figs/beta_posterior_joint_negcorr_3x3_le.png', MID_PREDICTORS_TO_INCLUDE, INCLUDE_YEAR_EFFECTS),
+    dpi=300,
+    bbox_inches='tight',
+)
+plt.show()
 ```
 
 ```python
@@ -2038,54 +2200,17 @@ Save all necessary data for counterfactual analysis in a separate notebook:
 import json
 from pathlib import Path
 
-# Output directories (must exist)
+# Output directory for panels and metadata (``suffix``, ``trace_filename_*``, ``nc_dir`` set before sampling)
 output_dir = Path('interim')
-nc_dir = Path('nc')
-
-# Generate filename suffix based on model configuration
-# Construct suffix directly from configuration (matching get_output_filename logic)
-if MID_PREDICTORS_TO_INCLUDE is None or len(MID_PREDICTORS_TO_INCLUDE) == 0:
-    mid_suffix = 'nomid'
-else:
-    # Create short names for each Mid predictor (matching get_output_filename)
-    short_names = {
-        'Mid_Cardiovascular': 'cardio',
-        'Mid_Diabetes': 'diabetes',
-        'Mid_ChronicRespiratory': 'respiratory',
-        'Mid_UnintentionalInjury': 'unintentional',
-        'Mid_Neoplasms': 'neoplasms',
-    }
-    mid_parts = []
-    for mid_pred in sorted(MID_PREDICTORS_TO_INCLUDE):
-        short_name = short_names.get(mid_pred, mid_pred.replace('Mid_', '').lower())
-        mid_parts.append(short_name)
-    mid_suffix = 'mid' + '_'.join(mid_parts)
-
-grw_suffix = 'yesgrw' if INCLUDE_YEAR_EFFECTS else 'nogrw'
-year_suffix = f'y{CUTOFF_YEAR}'
-covid_suffix = 'covid' if INCLUDE_COVID_DATA else 'nocovid'
-hale_suffix = 'ihme'
-suffix = f'_{hale_suffix}_{mid_suffix}_{grw_suffix}_{year_suffix}_{covid_suffix}'
 ```
 
-### Save Traces (NetCDF Format)
+### Traces (NetCDF on disk)
+
+Posterior draws are written by `load_idata_or_sample` when `FORCE_RUN` is True or the cache file is missing. Do **not** delete `nc/trace_*.nc` here when re-running with cached chains.
 
 ```python
-# Save HALE trace to NetCDF
-trace_filename_hale = nc_dir / f'trace_hale{suffix}.nc'
-# Delete file if it exists to avoid locking issues
-if trace_filename_hale.exists():
-    trace_filename_hale.unlink()
-trace_hale.to_netcdf(trace_filename_hale)
-print(f"Saved HALE trace to: {trace_filename_hale}")
-
-# Save Life Expectancy trace to NetCDF
-trace_filename_le = nc_dir / f'trace_le{suffix}.nc'
-# Delete file if it exists to avoid locking issues
-if trace_filename_le.exists():
-    trace_filename_le.unlink()
-trace_le.to_netcdf(trace_filename_le)
-print(f"Saved Life Expectancy trace to: {trace_filename_le}")
+print(f"HALE trace: {trace_filename_hale.resolve()}")
+print(f"LE trace:   {trace_filename_le.resolve()}")
 ```
 
 ### Save Metadata

@@ -57,7 +57,8 @@ from counterfactual_utils import (
     plot_predicted_vs_actual_over_time,
     compute_positive_contributions_over_time,
     plot_positive_contributions_stacked_area,
-    plot_positive_contributions_percentage
+    plot_positive_contributions_percentage,
+    publish_datawrapper_table,
 )
 
 configure_plot_style()
@@ -67,7 +68,9 @@ configure_plot_style()
 
 ```python tags=["parameters"]
 # ============================================================================
-# MODEL CONFIGURATION: Select which model version to use (override with papermill -p COUNTRY_CODE NLD)
+# MODEL CONFIGURATION: Override with papermill, e.g.:
+#   papermill ... -p COUNTRY_CODE USA -p UPLOAD_TO_DATAWRAPPER True
+# Or: make papermill-bayes-counter-le
 # ============================================================================
 # Options:
 #   '2019_nocovid' - Pre-COVID baseline (2000-2019, no COVID-19 predictor)
@@ -77,6 +80,10 @@ MODEL_VERSION = '2023_covid'  # New default - uses OWID LE data through 2023
 
 # Country for counterfactual analysis (ISO 3-letter code: USA, LTU, NLD, etc.)
 COUNTRY_CODE = 'USA'
+
+# If True, upload blog tables to Datawrapper (requires DATAWRAPPER_API_TOKEN; pip install datawrapper).
+# See datawrapper.md. Default False so CI and papermill runs do not call the API.
+UPLOAD_TO_DATAWRAPPER = False
 
 # Map model version to suffix
 MODEL_SUFFIX_MAP = {
@@ -223,6 +230,22 @@ gap_extremes_blog_df = pd.DataFrame(gap_extremes_presentation).sort_values('Mini
 gap_extremes_blog_df = gap_extremes_blog_df.reset_index(drop=True)
 write_html_table(gap_extremes_blog_df, 'tables/gap_extremes_min_blog_le.html')
 log_and_print(f"Saved presentation table to: tables/gap_extremes_min_blog_le.html")
+
+if UPLOAD_TO_DATAWRAPPER:
+    if not os.getenv('DATAWRAPPER_API_TOKEN'):
+        log_and_print('[Datawrapper] Skipping gap extremes: DATAWRAPPER_API_TOKEN not set')
+    else:
+        dw_info = publish_datawrapper_table(
+            gap_extremes_blog_df,
+            title='',
+            intro=(
+                'Minimum cause-specific death rate gaps (male minus female) by country-year, '
+                'training sample. IHME cause-specific mortality, OWID life expectancy.'
+            ),
+        )
+        log_and_print(f"[Datawrapper] Gap extremes — publish: {dw_info['public_url']}")
+        log_and_print(f"[Datawrapper] Gap extremes — edit: {dw_info['edit_url']}")
+
 gap_extremes_blog_df
 ```
 
@@ -409,7 +432,9 @@ counterfactuals_presentation = counterfactuals_presentation.sort_values(change_c
 counterfactuals_presentation['Cause'] = counterfactuals_presentation['Cause'].apply(
     lambda x: PREDICTOR_LABELS.get(f'Gap_{x}', x)
 )
-# Format change as mean only (2 decimal places)
+# Numeric copy for Datawrapper (string cells are typed as text and skip number formats)
+counterfactuals_for_datawrapper = counterfactuals_presentation.copy()
+# Format change as mean only (2 decimal places) for HTML / blog table
 counterfactuals_presentation[change_col] = counterfactuals_presentation[change_col].apply(
     lambda x: f'{x:.2f}'
 )
@@ -417,6 +442,25 @@ counterfactuals_presentation[change_col] = counterfactuals_presentation[change_c
 counterfactuals_blog_filename = f'tables/counterfactuals_{country_lower}_{latest_year}_le_blog.html'
 write_html_table(counterfactuals_presentation.reset_index(drop=True), counterfactuals_blog_filename)
 log_and_print(f"Saved presentation table to: {counterfactuals_blog_filename}")
+
+# Upload presentation table for whichever country this run uses (see datawrapper.md for token).
+if UPLOAD_TO_DATAWRAPPER:
+    if not os.getenv('DATAWRAPPER_API_TOKEN'):
+        log_and_print('[Datawrapper] Skipping counterfactuals blog table: DATAWRAPPER_API_TOKEN not set')
+    else:
+        dw_info = publish_datawrapper_table(
+            counterfactuals_for_datawrapper.reset_index(drop=True),
+            title='',
+            intro=(
+                f'{country_name} ({COUNTRY_CODE}) {latest_year}: counterfactual effect on predicted '
+                f'life expectancy gender gap if each cause matched the best observed country-year gap. '
+                f'Bayesian hierarchical model; IHME, OWID.'
+            ),
+            column_number_formats={'Change in LE gap (years)': '0.00'},
+        )
+        log_and_print(f"[Datawrapper] Counterfactuals blog — publish: {dw_info['public_url']}")
+        log_and_print(f"[Datawrapper] Counterfactuals blog — edit: {dw_info['edit_url']}")
+
 counterfactuals_presentation
 ```
 

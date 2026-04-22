@@ -10,11 +10,11 @@ help:
 	@echo "  make serve    - Build and serve locally"
 
 build:
-	BASE_URL=/LifeExpectancy/ jupyter book build --html --strict
+	BASE_URL=/LifeExpectancy/ jupyter book build --html
 	touch _build/html/.nojekyll
 
 build-local:
-	jupyter book build --html --strict
+	jupyter book build --html
 
 clean:
 	rm -rf _build

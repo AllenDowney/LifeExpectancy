@@ -11,6 +11,7 @@ This project explores differences in life expectancy and health-adjusted life ex
 - [Executive Summary](summary.md) - **Start here**: A concise, accessible summary of the project's motivation, methodology, key findings, and policy implications. Answers the question: "Why do women live longer than men, and what could be done about it?"
 
 - [Bayesian Panel Data Model (2023, IHME HALE & OWID LE)](bayesian_model_report_2023.md) - **Primary analysis**: Bayesian hierarchical panel model analyzing HALE and Life Expectancy gender gaps using both temporal variation (2000-2023 for both outcomes) and cross-country variation simultaneously. Uses IHME HALE and OWID LE data for extended temporal coverage and methodological consistency. Provides posterior distributions for all parameters with uncertainty quantification and enables temporal counterfactual analysis.
+- [Causal model note (CausalPy Models 1 & 1b)](causal_results.md) - Minimal DAGs; **Model 1** (country FE) and **Model 1b** (country + year FE); comparison of standardized `Gap_*` slopes to the Bayesian **LE** model and **1 vs 1b** contrast (`beta_coefficients_le_ihme_nomid_nogrw_y2023_covid`).
 - [Bayesian Panel Data Model (2021, WHO HALE)](bayesian_model_report_2021.md) - **Legacy analysis**: Previous version using WHO HALE data (2000-2021). Retained for comparison and historical reference.
 
 - [Technical Report](tech_report.md) - Exploratory analysis using Elastic Net regression, developed as part of the model development process. Includes methodology, results, and counterfactual analysis using cross-sectional models.
@@ -28,6 +29,10 @@ This project explores differences in life expectancy and health-adjusted life ex
 - [Temporal Analysis](temporal.md) - Evolution of health patterns and gender gaps over time (2000-2019). Runs predictive models at five-year intervals (2000, 2005, 2010, 2015, 2019) and compares results to examine how indicator importance and intervention opportunities have changed.
 
 - [Blog Post 1: Time Series Analysis](blog1_time_series.md) - First in a series on gender gaps in life expectancy: variation across OECD countries and over time, with cause-specific death rate gaps (drug disorders, homicide, suicide, road traffic).
+- [Blog Post 2: Causal Modeling](blog2_model.md) - Second in the series: a model to estimate how cause-specific death rate gaps affect the life expectancy gap, with coefficients and importance rankings.
+- [Blog Post 3: Counterfactuals](blog3_counterfactual.md) - Third in the series: counterfactual analysis for the United States—how much the gap could close if each cause-specific death rate gap were reduced to the best observed level—and how contributions have changed over time.
+- [Blog Post 4: International patterns and policy](blog4_international.md) - Fourth in the series: leading factors by country and region, European road-safety success, evidence that alcohol, smoking, cancer, suicide, and homicide are amenable to policy, and a technical note on country intercepts.
+- [Blog Post 5: HALE and the gender gap (draft)](blog5_hale.md) - Fifth in the series (draft for review): healthy life expectancy gap—coefficients, importance, USA counterfactuals, and HALE intercepts, alongside LE for comparison.
 
 ## Methodology
 

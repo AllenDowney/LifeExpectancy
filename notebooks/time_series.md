@@ -97,6 +97,91 @@ def compute_temporal_gaps(df, value_col, sexes=['Male', 'Female']):
         DataFrame with Gap and Mid columns for all years
     """
     return compute_gender_gap(df, value_col, sexes)
+
+
+def trend_slope_classify(years, values, alpha=0.05):
+    """
+    Linear trend of values on years; classify slope using two-sided p-value from linregress.
+
+    Returns direction 'positive' / 'negative' / 'not_significant' / 'insufficient_data'.
+    """
+    years = np.asarray(years, dtype=float)
+    values = np.asarray(values, dtype=float)
+    mask = np.isfinite(years) & np.isfinite(values)
+    years = years[mask]
+    values = values[mask]
+    n = len(years)
+    if n < 2:
+        return {
+            'slope': np.nan,
+            'intercept': np.nan,
+            'pvalue': np.nan,
+            'stderr': np.nan,
+            'n_obs': n,
+            'significant': False,
+            'direction': 'insufficient_data',
+        }
+    res = linregress(years, values)
+    p = float(res.pvalue)
+    significant = p < alpha
+    if (not significant) or np.isnan(p):
+        direction = 'not_significant'
+    elif res.slope > 0:
+        direction = 'positive'
+    elif res.slope < 0:
+        direction = 'negative'
+    else:
+        direction = 'not_significant'
+    return {
+        'slope': float(res.slope),
+        'intercept': float(res.intercept),
+        'pvalue': p,
+        'stderr': float(res.stderr) if res.stderr is not None and np.isfinite(res.stderr) else np.nan,
+        'n_obs': n,
+        'significant': significant,
+        'direction': direction,
+    }
+
+
+def compute_hale_trend_significance_by_country(
+    df_hale_wide,
+    alpha=0.05,
+    male_col='HALE_Years_Male',
+    female_col='HALE_Years_Female',
+    gap_col='HALE_gap',
+):
+    """
+    One row per country: slopes and p-value-based direction for male HALE, female HALE, HALE gap.
+    Expects output of compute_temporal_gaps(..., 'HALE_Years') plus HALE_gap column.
+    """
+    df = df_hale_wide.reset_index() if 'Code' in df_hale_wide.index.names else df_hale_wide.copy()
+    df_temp = df.set_index('Code')
+    df_oecd = get_oecd(df_temp).reset_index()
+
+    rows = []
+    for code in sorted(df_oecd['Code'].unique()):
+        g = df_oecd[df_oecd['Code'] == code].sort_values('Year')
+        if len(g) < 2:
+            continue
+        years = g['Year'].values
+        tm = trend_slope_classify(years, g[male_col].values, alpha=alpha)
+        tf = trend_slope_classify(years, g[female_col].values, alpha=alpha)
+        tg = trend_slope_classify(years, g[gap_col].values, alpha=alpha)
+        rows.append({
+            'Code': code,
+            'Country': g['Country'].iloc[0],
+            'HALE_male_slope': tm['slope'],
+            'HALE_male_pvalue': tm['pvalue'],
+            'HALE_male_direction': tm['direction'],
+            'HALE_female_slope': tf['slope'],
+            'HALE_female_pvalue': tf['pvalue'],
+            'HALE_female_direction': tf['direction'],
+            'HALE_gap_slope': tg['slope'],
+            'HALE_gap_pvalue': tg['pvalue'],
+            'HALE_gap_direction': tg['direction'],
+            'n_years': tg['n_obs'],
+        })
+    return pd.DataFrame(rows)
 ```
 
 ## Load Target Variables
@@ -963,6 +1048,54 @@ le_stats.head()
 # Compute statistics for HALE gap
 hale_gap_stats = compute_target_stats(hale_temporal.reset_index(), 'HALE_gap')
 hale_gap_stats.head()
+```
+
+### HALE per-country trends (male, female, gap): slopes and significance
+
+Linear trend on calendar year; **direction** from two-sided **`linregress` p-value** at α = 0.05 (`positive` / `negative` / `not_significant`; `insufficient_data` if there are fewer than two valid points).
+
+```python
+hale_trend_sig_df = compute_hale_trend_significance_by_country(
+    hale_temporal.reset_index(),
+    alpha=0.05,
+)
+hale_trend_sig_df.head(10)
+```
+
+```python
+import os
+
+os.makedirs('tables', exist_ok=True)
+hale_trend_csv = 'tables/hale_gap_and_levels_slopes_by_country.csv'
+hale_trend_sig_df.to_csv(hale_trend_csv, index=False)
+print(f'Wrote {hale_trend_csv} ({len(hale_trend_sig_df)} rows)')
+```
+
+```python
+# Blog / Jupyter Book: compact HTML (slopes yr/yr; directions from linregress p < 0.05)
+hale_blog_tbl = (
+    hale_trend_sig_df[
+        [
+            'Country', 'Code', 'HALE_gap_slope', 'HALE_gap_direction',
+            'HALE_male_slope', 'HALE_male_direction',
+            'HALE_female_slope', 'HALE_female_direction',
+        ]
+    ]
+    .sort_values('Country')
+    .round({
+        'HALE_gap_slope': 3,
+        'HALE_male_slope': 3,
+        'HALE_female_slope': 3,
+    })
+)
+hale_blog_tbl.columns = [
+    'Country', 'Code', 'Gap slope (years/year)', 'Gap',
+    'Male HALE slope', 'Male HALE',
+    'Female HALE slope', 'Female HALE',
+]
+os.makedirs('../jb/tables', exist_ok=True)
+write_html_table(hale_blog_tbl, '../jb/tables/hale_gap_slopes_trends_by_country.html')
+print('Wrote ../jb/tables/hale_gap_slopes_trends_by_country.html')
 ```
 
 ```python

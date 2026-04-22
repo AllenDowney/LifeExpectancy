@@ -32,8 +32,12 @@ project:
       title: "Blog Post 1: Time Series Analysis"
     - file: blog2_model.md
       title: "Blog Post 2: Causal Modeling"
-    - file: blog3_outline.md
-      title: "Blog Post 3: Counterfactuals (Outline)"
+    - file: blog3_counterfactual.md
+      title: "Blog Post 3: Counterfactuals"
+    - file: blog4_international.md
+      title: "Blog Post 4: International patterns and policy"
+    - file: blog5_hale.md
+      title: "Blog Post 5: HALE and the gender gap (draft)"
 
 site:
   template: book-theme

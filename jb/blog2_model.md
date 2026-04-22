@@ -14,7 +14,7 @@ Now let's see how changes in cause-specific death rates affect the life expectan
 ## The Model
 
 We built a Bayesian hierarchical panel model that uses 24 years of data from 37 countries.
-It includes gender gaps in 13 cause-specific death rates from the [Global Burden of Disease (GBD)](https://www.healthdata.org/research-analysis/gbd) study: alcohol, suicide, homicide, road traffic injuries, cardiovascular disease, diabetes, cancer (neoplasms), chronic respiratory disease, liver disease, unintentional injury, drug disorders, childhood mortality (under-5), and COVID-19.
+It includes gender gaps in 13 cause-specific death rates from the [Global Burden of Disease (GBD)](https://www.healthdata.org/research-analysis/gbd) study: alcohol, suicide, homicide, road traffic injuries, cardiovascular disease, diabetes, cancer (neoplasms), lung disease, liver disease, unintentional injury, drug disorders, childhood mortality (under-5), and COVID-19.
 
 For each cause of death, the model estimates a coefficient (β) that shows how much the life expectancy gap changes for each standard-deviation increase in cause-specific gap.
 Positive coefficients mean that when a death rate gap is larger (men die at higher rates than women), the life expectancy gap is larger (women live longer).
@@ -28,8 +28,8 @@ Cause of death coefficients for life expectancy gender gap (2000–2023).
 Source: IHME cause-specific death rates, OWID Life Expectancy, analysis by Allen Downey.
 ```
 
-Road traffic deaths have the largest coefficient, about 0.6 years per standard deviation, which means that if a country is average in every way except that its gender gap in traffic deaths is one standard deviation above the mean, we expect its life expectancy gap to be 0.6 years above average.
-Other factors with large coefficients are homicide, suicide, cancer, chronic respiratory disease, and liver disease.
+Road traffic deaths have the largest coefficient, about 0.43 years per standard deviation, which means that if a country is average in every way except that its gender gap in traffic deaths is one standard deviation above the mean, we expect its life expectancy gap to be 0.43 years above average.
+Other factors with large coefficients are homicide, suicide, cancer, lung disease, and liver disease.
 
 The magnitudes of these coefficients depend on both death rates and the ages of the people affected.
 Cancer and respiratory disease have high rates, but they primarily affect older people, so their effect on life expectancy is attenuated.

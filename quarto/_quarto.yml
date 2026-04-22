@@ -10,6 +10,4 @@ website:
         text: Home
       - href: tech_report.qmd
         text: Technical Report
-      - href: bayesian_model_r.ipynb
-        text: R Model Notebook
 

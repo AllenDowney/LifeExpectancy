@@ -12,9 +12,9 @@ jupyter:
     name: python3
 ---
 
-# Bayesian LE Model: Figures for Blog Post 2
+# Bayesian LE / HALE Model: Figures for Blog
 
-This notebook loads the saved Life Expectancy model trace and produces figures for the second blog post (Causal Modeling — What Drives the Gender Gap?).
+This notebook loads saved LE and HALE model traces and produces bar-chart figures in the same style as [`jb/blog2_model.md`](../jb/blog2_model.md) (coefficients and importance). LE outputs keep legacy names (`blog2_*_le.png`). HALE outputs use neutral names without a post number: `coefficients_hale.png`, `importance_hale.png`.
 
 ## Setup
 
@@ -103,6 +103,53 @@ plt.savefig(figs_dir / 'blog2_importance_le.png', dpi=150, bbox_inches='tight')
 plt.show()
 ```
 
+## HALE: coefficient and importance bar charts
+
+Same plotting utilities as LE, using `trace_hale{MODEL_SUFFIX}.nc` and `metadata_hale{MODEL_SUFFIX}.json`.
+
+```python
+trace_hale_file = nc_dir / f'trace_hale{MODEL_SUFFIX}.nc'
+meta_hale_file = interim_dir / f'metadata_hale{MODEL_SUFFIX}.json'
+
+trace_hale = az.from_netcdf(trace_hale_file)
+with open(meta_hale_file) as f:
+    metadata_hale = json.load(f)
+
+predictors_hale = metadata_hale['predictors']
+beta_samples_hale = trace_hale.posterior['beta'].values.reshape(-1, len(predictors_hale))
+print(f"Loaded HALE trace: {trace_hale_file.name}, {len(predictors_hale)} predictors")
+```
+
+```python
+fig, ax = plot_coefficients_bar(
+    beta_samples_hale,
+    predictors_hale,
+    title='Predictor Coefficients: HALE Gender Gap',
+    subtitle='OECD countries, 2000–2023',
+    subtext='Source: Bayesian hierarchical panel model. IHME cause-specific mortality, IHME HALE.',
+    logo=True
+)
+plt.savefig(figs_dir / 'coefficients_hale.png', dpi=150, bbox_inches='tight')
+plt.show()
+```
+
+```python
+x_std_hale = np.array(metadata_hale['X_std'])
+
+fig, ax = plot_coefficients_bar(
+    beta_samples_hale,
+    predictors_hale,
+    metric='importance',
+    x_std=x_std_hale,
+    title='Predictor Importance: HALE Gender Gap',
+    subtitle='OECD countries, 2000–2023.',
+    subtext='Source: Bayesian hierarchical panel model. IHME cause-specific mortality, IHME HALE.',
+    logo=True
+)
+plt.savefig(figs_dir / 'importance_hale.png', dpi=150, bbox_inches='tight')
+plt.show()
+```
+
 ## Residual Time Series: Selected countries
 
 Fitted vs actual LE gap over time for selected countries on the same axes. Actual: line only, country signature color. Predicted: markers with 94% HDI error bars, gray. Direct labels on the right (no legend). AIBM style. Matches time_series_figs layout: figsize (8, 4), same xlim, no left spine, same label offset.
@@ -161,5 +208,69 @@ fig, ax = plot_residuals_by_country(
     logo=True
 )
 plt.savefig(figs_dir / 'blog2_residuals_by_country_le.png', dpi=150, bbox_inches='tight')
+plt.show()
+```
+
+## HALE: residual time series and by country
+
+Same diagnostics as for LE (`blog2_residuals_*_le.png`), using `trace_hale`, `metadata_hale`, and `panel_hale{MODEL_SUFFIX}.h5`. Outputs: `residuals_timeseries_hale.png`, `residuals_by_country_hale.png`.
+
+```python
+panel_hale_file = interim_dir / f'panel_hale{MODEL_SUFFIX}.h5'
+panel_df_hale = pd.read_hdf(panel_hale_file, key='panel_data')
+country_to_idx_hale = {c: i for i, c in enumerate(metadata_hale['countries'])}
+
+min_year_h = int(panel_df_hale['Year'].min())
+max_year_h = int(panel_df_hale['Year'].max())
+
+fig, ax = plt.subplots(figsize=(8, 4))
+label_data_hale = []
+for country in ['ISL', 'USA', 'LTU', 'FRA']:
+    info = plot_fitted_vs_actual_timeseries(
+        ax, country, trace_hale, metadata_hale, panel_df_hale, country_to_idx_hale,
+        target_col='HALE_gap', target_name='HALE gap',
+        add_predicted_to_legend=False
+    )
+    label_data_hale.append(info)
+add_direct_line_labels(ax, label_data_hale, x_min=min_year_h, x_max=max_year_h)
+ax.spines['left'].set_visible(False)
+year_range_h = max_year_h - min_year_h
+tick_step_h = 1 if year_range_h <= 5 else 5
+ax.set_xticks(np.arange(min_year_h, max_year_h + 1, tick_step_h))
+ax.set_xlabel('Year')
+ax.set_ylabel('HALE gap (years)')
+add_title(
+    'Predicted vs Actual HALE Gap',
+    'Selected countries; predicted markers show 94% credible interval',
+    pad=25, x=0, y=1.04
+)
+add_subtext(
+    'Source: Bayesian hierarchical panel model. IHME cause-specific mortality and HALE.',
+    x=0, y=-0.18, align_to_axes=True
+)
+if os.path.isfile('logo-hq-small.png'):
+    add_logo(filename='logo-hq-small.png', location=(0.99, -0.21), align_to_axes=True)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.savefig(figs_dir / 'residuals_timeseries_hale.png', dpi=150, bbox_inches='tight')
+plt.show()
+```
+
+```python
+residuals_df_hale = compute_residuals_panel(
+    trace_hale, metadata_hale, panel_df_hale, target_col='HALE_gap'
+)
+
+fig, ax = plot_residuals_by_country(
+    residuals_df_hale,
+    target_name='HALE gap',
+    country_labels=code_to_who_country,
+    output_filename=None,
+    title='Model residuals by country (HALE)',
+    subtitle='Sorted by IQR (best fit at top)',
+    subtext='Source: Bayesian hierarchical panel model. IHME cause-specific mortality and HALE.',
+    logo=True
+)
+plt.savefig(figs_dir / 'residuals_by_country_hale.png', dpi=150, bbox_inches='tight')
 plt.show()
 ```

@@ -16,6 +16,11 @@ jupyter:
 
 This minimal notebook loads life expectancy data and creates a plot showing selected countries with direct line labels.
 
+**Run headlessly** in a terminal (not in this notebook; from `notebooks/` so paths like `../data` resolve):
+
+    cd ~/LifeExpectancy/notebooks && conda activate LifeExpectancy && jupytext --to ipynb time_series_figs.md --output time_series_figs.ipynb && papermill time_series_figs.ipynb time_series_figs_executed.ipynb
+
+
 ## Setup
 
 ```python
@@ -36,9 +41,14 @@ from utils import (
     configure_plot_style, get_oecd, compute_gender_gap,
     oecd_codes, code_to_who_country, load_ihme_indicator,
     load_ihme_indicator_temporal,
-    column_name_mapping
+    column_name_mapping,
+    eu_oecd_iso3_codes,
 )
-from fig_utils import plot_gap_timeseries
+from fig_utils import (
+    plot_gap_timeseries,
+    plot_male_female_levels_timeseries,
+    plot_rate_timeseries,
+)
 # AIBM style: each figure uses title (left-aligned), subtitle (OECD countries, years), subtext (source), logo
 
 configure_plot_style()
@@ -283,6 +293,86 @@ plt.savefig('figs/le_gap_timeseries_selected.png', dpi=150, bbox_inches='tight')
 plt.show()
 ```
 
+### HALE gap: match LE blog figure (AIBM, same highlights, gray others)
+
+Uses IHME HALE through 2023 and the **same** `selected_countries` as the LE panel above. Saves `figs/hale_gap_timeseries_blog_match.png` (parallel to `le_gap_timeseries_selected.png`).
+
+```python
+# IHME HALE → temporal Code, Year, Sex, HALE_Years (OECD only)
+ihme_hale_file = '../data/IHME-GBD_2023_DATA-fc42b373-1.csv'
+ihme_hale_raw = pd.read_csv(ihme_hale_file)
+
+def convert_ihme_hale_to_temporal_format(df, min_year=2000, max_year=2023):
+    who_country_to_code = {country: code for code, country in code_to_who_country.items()}
+    ihme_country_name_mapping = {
+        'Republic of Korea': 'South Korea',
+        'United States of America': 'United States',
+        'Türkiye': 'Turkey',
+    }
+    df = df.copy()
+    df = df[(df['year'] >= min_year) & (df['year'] <= max_year)].copy()
+    df['location_name'] = df['location_name'].replace(ihme_country_name_mapping)
+    df['Code'] = df['location_name'].map(who_country_to_code)
+    df = df[df['Code'].notna()].copy()
+    df = df[df['Code'].isin(oecd_codes)].copy()
+    df['Sex'] = df['sex_name'].map({'Male': 'Male', 'Female': 'Female', 'Both': 'Both'})
+    df = df.rename(columns={'year': 'Year', 'val': 'HALE_Years'})
+    df_temporal = df[['Code', 'Year', 'Sex', 'HALE_Years']].copy()
+    return df_temporal.sort_values(['Code', 'Sex', 'Year']).reset_index(drop=True)
+
+hale_temporal = convert_ihme_hale_to_temporal_format(ihme_hale_raw, min_year=min_year, max_year=max_year)
+hale_temporal = compute_temporal_gaps(hale_temporal, 'HALE_Years', sexes=['Male', 'Female'])
+hale_temporal['HALE_gap'] = -hale_temporal['Gap_HALE_Years']
+
+# HALE only: nudge end-of-line labels (y-axis years) where UK/Norway crowd
+label_y_nudge_hale = {'GBR': 0.06, 'NOR': -0.06}
+
+fig, ax = plot_gap_timeseries(
+    hale_temporal.reset_index(),
+    'HALE_gap',
+    selected_countries=selected_countries,
+    label_y_nudge=label_y_nudge_hale,
+    label_lines=True,
+    title='Healthy Life Expectancy Gender Gap',
+    subtitle='OECD countries, 2000–2023',
+    ylabel='HALE gap (years)',
+    subtext='Source: IHME Global Burden of Disease (GBD 2023), healthy life expectancy.',
+    logo=True
+)
+plt.savefig('figs/hale_gap_timeseries_blog_match.png', dpi=150, bbox_inches='tight')
+plt.show()
+```
+
+### HALE levels: male and female (highlights Lithuania and Norway)
+
+Background OECD countries: low-alpha **AIBM green** (male) and **purple** (female). **Lithuania** and **Norway** use darker/lighter tints of each country’s `COUNTRY_COLORS` signature, with direct labels on the right (`Name (M)` / `Name (F)`). Y-axis ticks every 3 years from 57 to 75.
+
+```python
+hale_levels_highlight = ['LTU', 'NOR']
+
+label_y_nudge_hale_levels = {
+    'NOR_M': -0.1,
+    'NOR_F': 0.1,
+}
+
+fig, ax = plot_male_female_levels_timeseries(
+    hale_temporal,
+    'HALE_Years',
+    selected_countries=hale_levels_highlight,
+    selected_color_mode='aibm',
+    label_lines=True,
+    label_y_nudge=label_y_nudge_hale_levels,
+    yticks=np.arange(57, 76, 3),
+    ylim=(55, 75),
+    title='Healthy life expectancy by sex',
+    subtitle='OECD countries, 2000–2023',
+    ylabel='HALE (years)',
+    subtext='Source: IHME Global Burden of Disease, healthy life expectancy.',
+    logo=True,
+)
+plt.savefig('figs/hale_levels_male_female_timeseries.png', dpi=150, bbox_inches='tight')
+plt.show()
+```
 
 
 ## Load Alcohol Death Rate Data
@@ -383,7 +473,7 @@ road_injuries_temporal.query('Year == 2023').sort_values(by='Gap_RoadTraffic')
 
 ```python
 # Selected countries to highlight
-selected_countries = ['USA', 'NOR', 'CRI', 'CAN', 'LTU', 'MEX']
+selected_countries = ['USA', 'NLD', 'DEU', 'CRI', 'CAN', 'LTU', 'MEX']
 
 
 # Plot Road Traffic gap for selected countries
@@ -399,6 +489,59 @@ fig, ax = plot_gap_timeseries(
     logo=True
 )
 plt.savefig('figs/road_traffic_gap_timeseries_selected.png', dpi=150, bbox_inches='tight')
+plt.show()
+```
+
+### Presentation: EU ∩ OECD road traffic (gap + overall death rates)
+
+Universe: **EU ∩ OECD** ISO3 codes (via ``eu_oecd_iso3_codes()``), plus **GBR** for the UK. Default highlights: **Lithuania, France, UK, Germany**, plus **Ireland** (lowest overall EU road death rate in 2023 on this metric). **Math:** ``Gap_RoadTraffic`` = male − female rate; ``Mid_RoadTraffic`` = (male + female) / 2 (same units: per 100,000). The gap is not a share of the overall level—**the gap can be larger than the mid (overall) rate** when the male rate is high relative to the female rate (roughly when male > 3× female), which is common for road deaths. Figures saved at **150 dpi** with ``_eu_oecd_selected`` suffix.
+
+```python
+# EU ∩ OECD (+ UK); IRL = lowest overall rate among EU codes in 2023 (mean male/female)
+EU_ROAD_PRESENTATION_SELECTED = ['LTU', 'FRA', 'DEU', 'IRL']
+COUNTRIES_ROAD_EU_OECD = sorted(
+    set(eu_oecd_iso3_codes(include_gbr=True)) | set(EU_ROAD_PRESENTATION_SELECTED)
+)
+
+road_pres_df = road_injuries_temporal.reset_index()
+road_pres_df = road_pres_df[road_pres_df['Code'].isin(COUNTRIES_ROAD_EU_OECD)].copy()
+
+_sub_rt_eu = (
+    'European Union '
+    f'{min_year}–{max_year}'
+)
+
+fig, ax = plot_gap_timeseries(
+    road_pres_df,
+    'Gap_RoadTraffic',
+    selected_countries=EU_ROAD_PRESENTATION_SELECTED,
+    label_lines=True,
+    oecd_avg=False,
+    title='Road traffic, death rate gender gap',
+    subtitle=_sub_rt_eu,
+    ylabel='Road traffic death rate gap (per 100,000)',
+    subtext='Source: Global Burden of Disease from IHME',
+    logo=True,
+)
+plt.savefig('figs/road_traffic_gap_eu_oecd_selected.png', dpi=150, bbox_inches='tight')
+plt.show()
+```
+
+```python
+# Sex-averaged rate = Mid_RoadTraffic from compute_gender_gap (same as (M+F)/2)
+fig2, ax2 = plot_rate_timeseries(
+    road_pres_df,
+    'Mid_RoadTraffic',
+    selected_countries=EU_ROAD_PRESENTATION_SELECTED,
+    oecd_avg=False,
+    label_lines=True,
+    title='Road traffic death rates',
+    subtitle=_sub_rt_eu,
+    ylabel='Death rate per 100,000',
+    subtext='Source: Global Burden of Disease from IHME',
+    logo=True,
+)
+plt.savefig('figs/road_traffic_rates_eu_oecd_selected.png', dpi=150, bbox_inches='tight')
 plt.show()
 ```
 

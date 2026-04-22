@@ -20,6 +20,15 @@ This notebook processes life expectancy and mortality indicator data to create t
 - `interim/panel_hale.h5` — HALE panel (all predictors, for bayesian_model)
 - `interim/panel_le.h5` — LE panel (all predictors, for bayesian_model)
 
+**Run headlessly (jupytext + papermill):** from a terminal (adjust `~/LifeExpectancy` if your clone is elsewhere). Paste into a shell; do not add this as an executable notebook cell.
+
+```
+cd ~/LifeExpectancy/notebooks && conda activate LifeExpectancy && \
+  jupytext --to ipynb process.md --output process.ipynb && \
+  papermill process.ipynb process_executed.ipynb
+```
+
+The executed notebook is `notebooks/process_executed.ipynb`.
 
 ```python
 %load_ext autoreload
@@ -1100,8 +1109,14 @@ predictor_gaps = predictor_df[['Indicator', 'Median Gap', 'Min Gap', 'Max Gap']]
 # Calculate correlations with target variables
 # For rates: use Mid_ columns, for gaps: use Gap_ columns
 # Special case: MaternalDisorders uses Female column for both
+# Corr LE = LE gender gap vs predictor (gap or female rate); Corr LE male/female = LE at birth vs Mid (rates)
+le_male_level = analysis_complete['LifeExpectancy_Years_Male']
+le_female_level = analysis_complete['LifeExpectancy_Years_Female']
+
 predictor_rates['Corr HALE'] = np.nan
 predictor_rates['Corr LE'] = np.nan
+predictor_rates['Corr LE male'] = np.nan
+predictor_rates['Corr LE female'] = np.nan
 predictor_gaps['Corr HALE'] = np.nan
 predictor_gaps['Corr LE'] = np.nan
 
@@ -1111,11 +1126,15 @@ for idx, indicator in enumerate(predictor_rates['Indicator']):
         if female_col in predictors.columns:
             predictor_rates.loc[idx, 'Corr HALE'] = predictors[female_col].corr(target_hale)
             predictor_rates.loc[idx, 'Corr LE'] = predictors[female_col].corr(target_le)
+            predictor_rates.loc[idx, 'Corr LE male'] = predictors[female_col].corr(le_male_level)
+            predictor_rates.loc[idx, 'Corr LE female'] = predictors[female_col].corr(le_female_level)
             predictor_gaps.loc[idx, 'Corr HALE'] = predictors[female_col].corr(target_hale)
             predictor_gaps.loc[idx, 'Corr LE'] = predictors[female_col].corr(target_le)
         else:
             predictor_rates.loc[idx, 'Corr HALE'] = np.nan
             predictor_rates.loc[idx, 'Corr LE'] = np.nan
+            predictor_rates.loc[idx, 'Corr LE male'] = np.nan
+            predictor_rates.loc[idx, 'Corr LE female'] = np.nan
             predictor_gaps.loc[idx, 'Corr HALE'] = np.nan
             predictor_gaps.loc[idx, 'Corr LE'] = np.nan
     else:
@@ -1127,9 +1146,13 @@ for idx, indicator in enumerate(predictor_rates['Indicator']):
         if mid_col in predictors.columns:
             predictor_rates.loc[idx, 'Corr HALE'] = predictors[mid_col].corr(target_hale)
             predictor_rates.loc[idx, 'Corr LE'] = predictors[mid_col].corr(target_le)
+            predictor_rates.loc[idx, 'Corr LE male'] = predictors[mid_col].corr(le_male_level)
+            predictor_rates.loc[idx, 'Corr LE female'] = predictors[mid_col].corr(le_female_level)
         else:
             predictor_rates.loc[idx, 'Corr HALE'] = np.nan
             predictor_rates.loc[idx, 'Corr LE'] = np.nan
+            predictor_rates.loc[idx, 'Corr LE male'] = np.nan
+            predictor_rates.loc[idx, 'Corr LE female'] = np.nan
         
         # Calculate correlations for gaps (using Gap_ columns)
         if gap_col in predictors.columns:

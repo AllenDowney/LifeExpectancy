@@ -1145,6 +1145,54 @@ oecd_codes = ['AUS', 'AUT', 'BEL', 'CAN', 'CHE', 'CHL', 'COL', 'CRI', 'CZE',
               'ISL', 'ISR', 'ITA', 'JPN', 'KOR', 'LTU', 'LUX', 'LVA', 'MEX',
               'NLD', 'NOR', 'NZL', 'POL', 'PRT', 'SVK', 'SVN', 'SWE', 'TUR', 'USA']
 
+# EU member states (ISO 3166-1 alpha-3), EU-27 post-Brexit (excludes GBR)
+EU_27_MEMBER_CODES = frozenset(
+    {
+        "AUT",
+        "BEL",
+        "BGR",
+        "HRV",
+        "CYP",
+        "CZE",
+        "DNK",
+        "EST",
+        "FIN",
+        "FRA",
+        "DEU",
+        "GRC",
+        "HUN",
+        "IRL",
+        "ITA",
+        "LVA",
+        "LTU",
+        "LUX",
+        "MLT",
+        "NLD",
+        "POL",
+        "PRT",
+        "ROU",
+        "SVK",
+        "SVN",
+        "ESP",
+        "SWE",
+    }
+)
+
+
+def eu_oecd_iso3_codes(include_gbr: bool = True) -> list[str]:
+    """
+    ISO3 codes that are in both the **EU (27)** and **OECD**, optionally plus **GBR**.
+
+    The UK is in OECD but not the EU; include it when ``include_gbr`` so slides can
+    compare the UK with EU OECD peers. Intersection is computed from ``oecd_codes`` and
+    ``EU_27_MEMBER_CODES`` (only EU members that are also OECD appear—e.g. not all EU
+    states are OECD members in our list).
+    """
+    xs = sorted(set(oecd_codes) & EU_27_MEMBER_CODES)
+    if include_gbr and "GBR" in oecd_codes:
+        xs = sorted(set(xs) | {"GBR"})
+    return xs
+
 
 def codes_to_country_names(codes, mapping=None):
     """Convert country codes to country names.
@@ -1597,6 +1645,14 @@ def compute_gender_gap(df, value_col, sexes):
         Contains columns for each available sex, a gap column (Gap_{value_col} = first - second, i.e., Male - Female),
         and a midpoint column (Mid_{value_col} = average of first and second) if both sexes
         are present. Also includes 'Country' (added via mapping) and 'Year'.
+
+    Notes
+    -----
+    Gap and Mid use the **same units** as the sex-specific rates (e.g. deaths per 100,000).
+    The gap is **not** a fraction of the overall level. ``Gap > Mid`` is possible whenever
+    the first sex's rate exceeds about **three times** the second's (for Male vs Female,
+    when Male > 3 × Female), since ``Gap = M - F`` and ``Mid = (M + F) / 2`` implies
+    ``Gap > Mid`` iff ``M > 3F``.
     """
     # Determine which columns to keep
     # Base columns: Code (country codes), Year, and the value column (which will be renamed)
@@ -1935,6 +1991,74 @@ column_name_mapping = {
     'COVID19DeathRate': 'COVID',  # Map to 'COVID' for compatibility with model notebooks
     'ConflictAndTerrorismDeathRate': 'ConflictTerrorism',
 }
+
+# Gap columns that are outcome definitions, not IHME cause predictors (if present in a panel)
+_GAP_PREDICTOR_EXCLUDE_DEFAULT = frozenset(
+    {
+        "Gap_HALE_Years",
+        "Gap_LifeExpectancy_Years",
+    }
+)
+
+# Human-readable labels for ``Gap_*`` columns (slides, DAGs, tables). Single source of truth.
+GAP_PREDICTOR_DISPLAY_LABELS = {
+    "Gap_Alcohol": "Alcohol",
+    "Gap_Suicide": "Suicide",
+    "Gap_Homicide": "Homicide",
+    "Gap_RoadTraffic": "Road traffic",
+    "Gap_Cardiovascular": "Cardiovascular disease",
+    "Gap_Diabetes": "Diabetes",
+    "Gap_Neoplasms": "Cancer",
+    "Gap_ChronicRespiratory": "Chronic respiratory",
+    "Gap_LiverDisease": "Liver disease",
+    "Gap_UnintentionalInjury": "Unintentional injury",
+    "Gap_DrugDisorder": "Drug disorders",
+    "Gap_Childhood": "Child mortality",
+    "Gap_COVID": "COVID-19",
+    "Gap_MaternalDisorders": "Maternal disorders",
+    "Gap_ConflictTerrorism": "Conflict and terrorism",
+}
+
+
+def gap_predictor_display_label(column_name: str) -> str:
+    """
+    Return a short presentation label for a ``Gap_*`` column name.
+
+    Unknown ``Gap_*`` names fall back to stripping the ``Gap_`` prefix and
+    replacing underscores with spaces.
+    """
+    if column_name in GAP_PREDICTOR_DISPLAY_LABELS:
+        return GAP_PREDICTOR_DISPLAY_LABELS[column_name]
+    if column_name.startswith("Gap_"):
+        return column_name[4:].replace("_", " ")
+    return column_name
+
+
+def gap_predictor_columns(
+    df: pd.DataFrame,
+    extra_exclude: frozenset | None = None,
+) -> list[str]:
+    """
+    Return ``Gap_*`` column names in ``df`` that are cause-specific predictors.
+
+    Excludes raw outcome gap columns (e.g. ``Gap_HALE_Years``) when present. Sorted
+    for stable ordering. Matches the pattern used in ``counterfactual_utils`` (all
+    ``Gap_*`` predictors) while centralizing exclusions for notebooks.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Panel with merged IHME predictors (e.g. from ``interim/panel_le.h5``).
+    extra_exclude : frozenset of str, optional
+        Additional column names to omit.
+
+    Returns
+    -------
+    list of str
+        Sorted predictor column names.
+    """
+    ex = _GAP_PREDICTOR_EXCLUDE_DEFAULT | (extra_exclude or frozenset())
+    return sorted(c for c in df.columns if c.startswith("Gap_") and c not in ex)
 
 
 def load_ihme_indicator(filename_male, filename_female, value_col_name, indicator_code, indicator_name, min_year=2000, max_year=2019, age_filter='All ages'):

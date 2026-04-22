@@ -1,10 +1,12 @@
 """Figure utilities for time series plotting."""
 
 import os
+import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import arviz as az
+from scipy import stats
 from utils import get_oecd, code_to_who_country, add_title, add_subtext, add_logo, AIBM_COLORS
 
 # Map Gap_* column names to human-readable labels for coefficient/importance plots
@@ -21,7 +23,324 @@ PREDICTOR_LABELS = {
     'Gap_UnintentionalInjury': 'Injury',
     'Gap_DrugDisorder': 'Drug Disorders',
     'Gap_COVID': 'COVID-19',
+    'Gap_Childhood': 'Childhood (under-five)',
 }
+
+# Point colors for talk / EDA scatters by relationship type (AIBM brand palette)
+CORRELATION_SCATTER_KIND_COLORS = {
+    'rate_gap': AIBM_COLORS['green'],      # Mid (level) vs Gap
+    'gap_gap': AIBM_COLORS['purple'],
+    'level_level': AIBM_COLORS['orange'],
+}
+
+
+def plot_correlation_scatter_aibm(
+    df,
+    x_col,
+    y_col,
+    title,
+    subtitle,
+    xlabel,
+    ylabel,
+    subtext,
+    trend_line=True,
+    logo=True,
+    point_color=None,
+    correlation_kind=None,
+    figsize=(8, 5),
+    annotate_stats=True,
+):
+    """
+    Scatter of two columns (e.g. IHME Mid/Gap predictors) with AIBM title block and branding.
+
+    ``df`` should share an index (e.g. country ``Code``); rows with NA in either column are dropped.
+
+    ``correlation_kind`` — if set and ``point_color`` is omitted, uses
+    ``CORRELATION_SCATTER_KIND_COLORS``: ``'rate_gap'``, ``'gap_gap'``, ``'level_level'``.
+    """
+    if point_color is None:
+        if correlation_kind is not None:
+            if correlation_kind not in CORRELATION_SCATTER_KIND_COLORS:
+                raise ValueError(
+                    f"correlation_kind must be one of {list(CORRELATION_SCATTER_KIND_COLORS)!r}"
+                )
+            point_color = CORRELATION_SCATTER_KIND_COLORS[correlation_kind]
+        else:
+            point_color = AIBM_COLORS['crimson']
+    xy = df[[x_col, y_col]].dropna()
+    x = xy[x_col].values
+    y = xy[y_col].values
+    n = len(x)
+    if n < 2:
+        raise ValueError(f'Need at least 2 complete rows; got {n}')
+
+    r_pearson = float(np.corrcoef(x, y)[0, 1]) if n > 1 else float('nan')
+    lr = stats.linregress(x, y)
+
+    fig, ax = plt.subplots(figsize=figsize)
+    ax.scatter(x, y, s=36, alpha=0.75, color=point_color, edgecolors='white', linewidths=0.4, zorder=2)
+
+    if trend_line:
+        xs = np.linspace(np.nanmin(x), np.nanmax(x), 50)
+        ax.plot(xs, lr.intercept + lr.slope * xs, color=AIBM_COLORS['dark_gray'],
+                linewidth=1.8, linestyle='-', zorder=1, alpha=0.9)
+
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.grid(True, alpha=0.3)
+    add_title(title, subtitle, pad=22, x=0, y=1.02)
+
+    if annotate_stats:
+        stat_txt = f'$r$ = {r_pearson:.2f}\n$n$ = {n}'
+        ax.text(0.03, 0.97, stat_txt, transform=ax.transAxes, fontsize=10,
+                verticalalignment='top', color=AIBM_COLORS['dark_gray'])
+
+    if subtext:
+        add_subtext(subtext, x=0, y=-0.22, align_to_axes=True)
+    if logo:
+        logo_path = 'logo-hq-small.png'
+        if os.path.isfile(logo_path):
+            add_logo(filename=logo_path, location=(0.99, -0.24), align_to_axes=True)
+
+    plt.tight_layout()
+    return fig, ax
+
+
+def plot_beta_posterior_correlation_heatmap(
+    corr_df,
+    title,
+    subtitle,
+    subtext,
+    display_labels=None,
+    logo=True,
+    figsize=(6.5, 5.5),
+):
+    """
+    Heatmap of Pearson correlations (typically a subset of ``beta_samples_df.corr()``).
+
+    Parameters
+    ----------
+    corr_df : pandas.DataFrame
+        Square correlation matrix with predictor names as index/columns (e.g. ``Gap_RoadTraffic``).
+    display_labels : list of str, optional
+        Y-axis / X-axis labels in column order; default ``PREDICTOR_LABELS`` short names.
+    """
+    import seaborn as sns
+
+    cols = list(corr_df.columns)
+    if list(corr_df.index) != cols:
+        corr_df = corr_df.loc[cols, cols]
+    if display_labels is None:
+        display_labels = [PREDICTOR_LABELS.get(c, c.replace('Gap_', '').replace('_', ' ')) for c in cols]
+
+    fig, ax = plt.subplots(figsize=figsize)
+    sns.heatmap(
+        corr_df,
+        annot=True,
+        fmt='.2f',
+        cmap='RdBu_r',
+        center=0.0,
+        vmin=-1.0,
+        vmax=1.0,
+        square=True,
+        linewidths=0.5,
+        linecolor=AIBM_COLORS['light_gray'],
+        xticklabels=display_labels,
+        yticklabels=display_labels,
+        ax=ax,
+        cbar_kws={'shrink': 0.85, 'label': 'Posterior correlation (r)'},
+    )
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=30, ha='right')
+    ax.set_yticklabels(ax.get_yticklabels(), rotation=0)
+    add_title(title, subtitle, pad=24, x=0, y=1.05)
+    if subtext:
+        add_subtext(subtext, x=0, y=-0.32, align_to_axes=True)
+    if logo:
+        logo_path = 'logo-hq-small.png'
+        if os.path.isfile(logo_path):
+            add_logo(filename=logo_path, location=(0.99, -0.34), align_to_axes=True)
+    plt.tight_layout()
+    return fig, ax
+
+
+def plot_beta_posterior_pair_scatter(
+    beta_samples_df,
+    cols,
+    title,
+    subtitle,
+    subtext,
+    display_labels=None,
+    logo=True,
+    figsize=None,
+    scatter_kwargs=None,
+    kde_kwargs=None,
+):
+    """
+    ArviZ-style pair plot: KDE on the diagonal, scatter below diagonal for β posterior draws.
+
+    Parameters
+    ----------
+    beta_samples_df : pandas.DataFrame
+        Columns are Gap_* predictor ids; values are flattened posterior draws (e.g. from ``az.extract``).
+    cols : list of str
+        Subset of column names, defining order of rows/columns in the pair grid.
+    display_labels : list of str, optional
+        Axis labels in the same order as ``cols``; default uses ``PREDICTOR_LABELS`` short names.
+    scatter_kwargs, kde_kwargs : dict, optional
+        Passed to ArviZ ``plot_pair`` (merged with defaults for scatter).
+    """
+    scatter_kwargs = dict(scatter_kwargs or {})
+    scatter_defaults = {"alpha": 0.22, "s": 5, "color": AIBM_COLORS["crimson"]}
+    scatter_defaults.update(scatter_kwargs)
+
+    missing = [c for c in cols if c not in beta_samples_df.columns]
+    if missing:
+        raise ValueError(f"Missing columns in beta_samples_df: {missing}")
+    sub = beta_samples_df[cols]
+    if display_labels is None:
+        display_labels = [
+            PREDICTOR_LABELS.get(c, c.replace("Gap_", "").replace("_", " ")) for c in cols
+        ]
+    if len(display_labels) != len(cols):
+        raise ValueError("display_labels must match cols length")
+
+    # One ArviZ variable per cause (flat over chain × draw)
+    posterior = {
+        display_labels[i]: sub[cols[i]].values[np.newaxis, :] for i in range(len(cols))
+    }
+    idata = az.from_dict(posterior=posterior)
+
+    n = len(cols)
+    if figsize is None:
+        figsize = (max(7.0, 1.85 * n), max(7.0, 1.85 * n))
+
+    az.plot_pair(
+        idata,
+        var_names=display_labels,
+        kind=["scatter", "kde"],
+        divergences=False,
+        figsize=figsize,
+        textsize=8,
+        scatter_kwargs=scatter_defaults,
+        kde_kwargs=dict(kde_kwargs or {}),
+    )
+    fig = plt.gcf()
+    fig.subplots_adjust(top=0.92, bottom=0.07)
+    fig.suptitle(
+        title,
+        fontsize=13,
+        fontweight="bold",
+        x=0.02,
+        y=0.98,
+        ha="left",
+        va="top",
+    )
+    fig.text(0.02, 0.935, subtitle, fontsize=10, ha="left", va="top", color="0.25")
+    if subtext:
+        fig.text(0.02, 0.01, subtext, fontsize=8, ha="left", va="bottom", color="0.35", wrap=True)
+    if logo:
+        logo_path = "logo-hq-small.png"
+        if os.path.isfile(logo_path):
+            plt.sca(fig.axes[-1])
+            add_logo(filename=logo_path, location=(1.0, 0.02), align_to_axes=False)
+    return fig
+
+
+def plot_beta_posterior_joint_grid_strongest_negative(
+    beta_samples_df,
+    n_panels=9,
+    n_rows=3,
+    n_cols=3,
+    title="",
+    subtitle="",
+    subtext="",
+    label_map=None,
+    logo=True,
+    figsize=(8, 8),
+    scatter_kwargs=None,
+):
+    """
+    3×3 (or ``n_rows``×``n_cols``) grid of scatter plots for the most negative Pearson
+    correlations between distinct β posterior draws (upper triangle of ``.corr()``).
+
+    Parameters
+    ----------
+    beta_samples_df : pandas.DataFrame
+        Columns are predictor ids; each row is one posterior draw (stacked chains).
+    n_panels : int
+        Number of pairs to show (default 9 for a 3×3 grid).
+    label_map : dict, optional
+        Maps column name -> axis label; defaults to ``PREDICTOR_LABELS``-style short names.
+
+    Returns
+    -------
+    fig : matplotlib.figure.Figure
+    pairs : list of tuple
+        ``(col_a, col_b, r)`` for each panel, in plot order (most negative ``r`` first).
+    """
+    scatter_kw = {"alpha": 0.2, "s": 5, "color": AIBM_COLORS["crimson"], **(scatter_kwargs or {})}
+
+    corr = beta_samples_df.corr()
+    cols = list(beta_samples_df.columns)
+    neg_pairs = []
+    for i in range(len(cols)):
+        for j in range(i + 1, len(cols)):
+            r = float(corr.iloc[i, j])
+            if r < 0.0 and not np.isnan(r):
+                neg_pairs.append((cols[i], cols[j], r))
+    neg_pairs.sort(key=lambda t: t[2])
+
+    if len(neg_pairs) < n_panels:
+        raise ValueError(
+            f"Need at least {n_panels} negatively correlated β pairs; found {len(neg_pairs)}."
+        )
+    top = neg_pairs[:n_panels]
+
+    def _lbl(c):
+        if label_map is not None and c in label_map:
+            return label_map[c]
+        return PREDICTOR_LABELS.get(c, c.replace("Gap_", "").replace("_", " "))
+
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=figsize, squeeze=False)
+    axes = axes.ravel()
+
+    for ax, (c1, c2, r) in zip(axes, top):
+        x = beta_samples_df[c1].values
+        y = beta_samples_df[c2].values
+        ax.scatter(x, y, **scatter_kw)
+        ax.set_xlabel(_lbl(c1))
+        ax.set_ylabel(_lbl(c2))
+        ax.text(
+            0.04,
+            0.96,
+            f"r = {r:.2f}",
+            transform=ax.transAxes,
+            va="top",
+            color="0.25",
+        )
+
+    for k in range(len(top), len(axes)):
+        axes[k].set_visible(False)
+
+    fig.subplots_adjust(left=0.09, right=0.98, top=0.88, bottom=0.07, wspace=0.4, hspace=0.42)
+    fig.suptitle(
+        title,
+        fontweight="bold",
+        x=0.02,
+        y=0.98,
+        ha="left",
+        va="top",
+    )
+    fig.text(0.02, 0.95, subtitle, ha="left", va="top", color="0.25")
+    if subtext:
+        fig.text(0.02, -0.02, subtext, ha="left", va="bottom", color="0.35", wrap=True)
+    if logo:
+        logo_path = "logo-hq-small.png"
+        if os.path.isfile(logo_path):
+            plt.sca(fig.axes[len(top) - 1])
+            add_logo(filename=logo_path, location=(1.0, -0.02), align_to_axes=False)
+    return fig, top
+
 
 # Color mapping for countries - ensures consistent colors across plots
 COUNTRY_COLORS = {
@@ -29,7 +348,7 @@ COUNTRY_COLORS = {
     'USA': '#002868',      # USA flag blue
     'GBR': '#C8102E',      # UK flag red
     'JPN': '#2ca02c',      # Green
-    'DEU': '#ff7f0e',      # Orange
+    'DEU': '#FFCC00',      # Germany (presentation)
     'FRA': '#9467bd',      # Purple
     'CAN': '#8c564b',      # Brown
     'AUS': '#e377c2',      # Pink
@@ -66,7 +385,8 @@ COUNTRY_COLORS = {
     'TUR': '#C8102E',      # Flag red
 }
 
-def add_direct_line_labels(ax, label_data, extension_frac=0.12, min_extension=2.5, x_min=None, x_max=None):
+def add_direct_line_labels(ax, label_data, extension_frac=0.12, min_extension=2.5, x_min=None, x_max=None,
+                           label_y_nudge=None):
     """
     Add direct labels on the right side of a time series plot.
     
@@ -75,7 +395,8 @@ def add_direct_line_labels(ax, label_data, extension_frac=0.12, min_extension=2.
     ax : matplotlib.axes.Axes
         Axes to add labels to
     label_data : list of dict
-        Each dict has keys: x, y, text, color (e.g. endpoint of each line)
+        Each dict has keys: x, y, text, color (e.g. endpoint of each line). Optional key
+        ``code`` (ISO 3-letter) for ``label_y_nudge`` lookup.
     extension_frac : float
         Fraction of x-range to extend for label space
     min_extension : float
@@ -83,6 +404,9 @@ def add_direct_line_labels(ax, label_data, extension_frac=0.12, min_extension=2.
     x_min, x_max : float, optional
         Data range for axis and spine. If None, use current axes limits (avoids bug when
         all label points share the same x, e.g. last year only).
+    label_y_nudge : dict, optional
+        Map country code -> vertical offset in **y-axis data units** (e.g. years for a gap plot).
+        Applied when ``label_data`` entries include ``code``.
     """
     if not label_data:
         return
@@ -92,12 +416,25 @@ def add_direct_line_labels(ax, label_data, extension_frac=0.12, min_extension=2.
     extension = max(x_range * extension_frac, min_extension)
     ax.set_xlim(x_min, x_max + extension)
     label_x = x_max + extension * 0.1
-    sorted_data = sorted(label_data, key=lambda d: d['y'], reverse=True)
+    nudge = label_y_nudge or {}
+    sorted_data = sorted(label_data, key=lambda d: d['y'] + nudge.get(d.get('code'), 0), reverse=True)
     for d in sorted_data:
-        ax.text(label_x, d['y'], f'  {d["text"]}', color=d['color'], fontsize=9,
+        dy = nudge.get(d.get('code'), 0)
+        ax.text(label_x, d['y'] + dy, f'  {d["text"]}', color=d['color'], fontsize=9,
                 va='center', ha='left', zorder=3)
     # Restrict bottom spine to data range (not extended area)
     ax.spines['bottom'].set_bounds(x_min, x_max)
+
+
+def male_female_colors_from_country(code):
+    """
+    Male = darker tint, female = lighter tint of the country's signature color
+    (same hue family as ``COUNTRY_COLORS``).
+    """
+    base = mcolors.to_rgb(get_country_color(code))
+    male = tuple(min(1.0, c * 0.68) for c in base)
+    female = tuple(min(1.0, c + (1.0 - c) * 0.42) for c in base)
+    return mcolors.to_hex(male), mcolors.to_hex(female)
 
 
 def get_country_color(code, default_color='gray'):
@@ -121,7 +458,7 @@ def get_country_color(code, default_color='gray'):
 
 def plot_gap_timeseries(df, gap_col, countries=None, oecd_avg=True, title=None, ylabel=None, 
                         selected_countries=None, label_lines=True, subtitle=None, subtext=None,
-                        logo=None):
+                        logo=None, label_y_nudge=None):
     """
     Plot gap time series for selected countries and OECD average.
     
@@ -152,6 +489,9 @@ def plot_gap_timeseries(df, gap_col, countries=None, oecd_avg=True, title=None, 
     logo : str or bool, optional
         If True, add logo from logo-hq-small.png. If str, path to logo file.
         Skipped if file does not exist.
+    label_y_nudge : dict, optional
+        Country code -> vertical shift for end-of-line labels (y-axis data units), e.g.
+        ``{'GBR': 0.04, 'NOR': -0.04}``.
     """
     # Filter to OECD countries
     # get_oecd expects Code as index, so set it temporarily
@@ -206,7 +546,8 @@ def plot_gap_timeseries(df, gap_col, countries=None, oecd_avg=True, title=None, 
                     'x': last_year,
                     'y': last_value,
                     'text': country_name,
-                    'color': color
+                    'color': color,
+                    'code': code,
                 })
     
     # Plot OECD average (no direct label)
@@ -233,7 +574,7 @@ def plot_gap_timeseries(df, gap_col, countries=None, oecd_avg=True, title=None, 
     else:
         max_year = df_oecd['Year'].max()
         min_year = df_oecd['Year'].min()
-        add_direct_line_labels(ax, label_data, x_min=min_year, x_max=max_year)
+        add_direct_line_labels(ax, label_data, x_min=min_year, x_max=max_year, label_y_nudge=label_y_nudge)
         year_range = max_year - min_year
         tick_step = 1 if year_range <= 5 else 5
         ax.set_xticks(np.arange(min_year, max_year + 1, tick_step))
@@ -251,9 +592,179 @@ def plot_gap_timeseries(df, gap_col, countries=None, oecd_avg=True, title=None, 
     return fig, ax
 
 
+def plot_male_female_levels_timeseries(
+    df,
+    value_col,
+    countries=None,
+    selected_countries=None,
+    label_lines=True,
+    title=None,
+    subtitle=None,
+    ylabel=None,
+    subtext=None,
+    logo=None,
+    label_y_nudge=None,
+    background_alpha=0.22,
+    line_width_bg=0.85,
+    line_width_hi=1.55,
+    male_color=None,
+    female_color=None,
+    selected_color_mode='aibm',
+    yticks=None,
+    ylim=None,
+):
+    """
+    Plot male and female level time series (one line per sex per country).
+
+    Non-selected countries are drawn in AIBM green (male) and purple (female) at low alpha.
+    Selected countries use full opacity; optional direct labels on the right (no legend).
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Wide OECD-style frame: ``Code``, ``Year``, ``Country``,
+        ``{value_col}_Male``, ``{value_col}_Female``.
+    value_col : str
+        Base name, e.g. ``'HALE_Years'`` → columns ``HALE_Years_Male``, ``HALE_Years_Female``.
+    countries : list, optional
+        Country codes to include; default all OECD in ``df``.
+    selected_countries : list, optional
+        Highlight these codes (alpha 1, labels if ``label_lines``).
+    label_lines : bool
+        If True, label endpoints on the right with sex-colored text (``Name (M)`` / ``Name (F)``).
+    background_alpha : float
+        Alpha for non-highlighted country lines.
+    male_color, female_color : str, optional
+        Colors for **background** countries only. Defaults: ``AIBM_COLORS['green']``, ``AIBM_COLORS['purple']``.
+    selected_color_mode : str
+        ``'aibm'`` — highlighted lines use the same green/purple as background (full alpha).
+        ``'country'`` — male/female lines use darker/lighter tints of ``COUNTRY_COLORS[code]``.
+    yticks : array-like, optional
+        If set, ``ax.set_yticks(yticks)`` and integer tick labels (no decimal places).
+    ylim : tuple, optional
+        ``(ymin, ymax)`` passed to ``ax.set_ylim``.
+    label_y_nudge : dict, optional
+        Vertical nudge in y-axis units, keyed by label ``code`` (e.g. ``'NOR_M'``, ``'NOR_F'``).
+    """
+    if selected_color_mode not in ('aibm', 'country'):
+        raise ValueError("selected_color_mode must be 'aibm' or 'country'")
+
+    bg_male = male_color or AIBM_COLORS['green']
+    bg_female = female_color or AIBM_COLORS['purple']
+    male_col = f'{value_col}_Male'
+    female_col = f'{value_col}_Female'
+    for c in (male_col, female_col):
+        if c not in df.columns:
+            raise ValueError(f"Expected column {c!r} in dataframe.")
+
+    df = df.reset_index() if 'Code' in df.index.names else df.copy()
+    df_temp = df.set_index('Code')
+    df_oecd = get_oecd(df_temp).reset_index()
+
+    if 'Country' not in df_oecd.columns:
+        df_oecd['Country'] = df_oecd['Code'].map(code_to_who_country)
+
+    if countries is None:
+        countries = df_oecd['Code'].unique()
+    if selected_countries is None:
+        selected_countries = list(countries)
+
+    all_oecd = df_oecd['Code'].unique()
+    fig, ax = plt.subplots(figsize=(8, 4))
+    non_selected = [c for c in all_oecd if c not in selected_countries]
+
+    for code in non_selected:
+        block = df_oecd[df_oecd['Code'] == code]
+        if block.empty:
+            continue
+        ax.plot(
+            block['Year'], block[male_col],
+            color=bg_male, alpha=background_alpha, linewidth=line_width_bg, zorder=1,
+        )
+        ax.plot(
+            block['Year'], block[female_col],
+            color=bg_female, alpha=background_alpha, linewidth=line_width_bg, zorder=1,
+        )
+
+    label_data = []
+
+    for code in selected_countries:
+        block = df_oecd[df_oecd['Code'] == code]
+        if block.empty:
+            continue
+        country_name = block['Country'].iloc[0]
+        last_year = block['Year'].max()
+        last_m = block[block['Year'] == last_year][male_col].iloc[0]
+        last_f = block[block['Year'] == last_year][female_col].iloc[0]
+
+        if selected_color_mode == 'country':
+            hi_male, hi_female = male_female_colors_from_country(code)
+        else:
+            hi_male, hi_female = bg_male, bg_female
+
+        ax.plot(
+            block['Year'], block[male_col],
+            color=hi_male, alpha=1.0, linewidth=line_width_hi, zorder=2,
+        )
+        ax.plot(
+            block['Year'], block[female_col],
+            color=hi_female, alpha=1.0, linewidth=line_width_hi, zorder=2,
+        )
+
+        if label_lines:
+            label_data.append({
+                'x': last_year,
+                'y': last_m,
+                'text': f'{country_name} (M)',
+                'color': hi_male,
+                'code': f'{code}_M',
+            })
+            label_data.append({
+                'x': last_year,
+                'y': last_f,
+                'text': f'{country_name} (F)',
+                'color': hi_female,
+                'code': f'{code}_F',
+            })
+
+    if label_lines and label_data:
+        max_year = df_oecd['Year'].max()
+        min_year = df_oecd['Year'].min()
+        add_direct_line_labels(ax, label_data, x_min=min_year, x_max=max_year, label_y_nudge=label_y_nudge)
+        year_range = max_year - min_year
+        tick_step = 1 if year_range <= 5 else 5
+        ax.set_xticks(np.arange(min_year, max_year + 1, tick_step))
+        ax.spines['left'].set_visible(False)
+
+    if ylim is not None:
+        ax.set_ylim(ylim)
+    if yticks is not None:
+        ax.set_yticks(yticks)
+        ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, _p: f'{int(round(x))}'))
+
+    ax.set_xlabel('Year')
+    ax.set_ylabel(ylabel or value_col)
+    plot_title = title or f'{value_col} over time'
+    if subtitle is not None:
+        add_title(plot_title, subtitle, pad=25, x=0, y=1.04)
+    else:
+        ax.set_title(plot_title, loc='left')
+    ax.grid(True, alpha=0.3)
+
+    if subtext:
+        add_subtext(subtext, x=0, y=-0.18, align_to_axes=True)
+    if logo:
+        logo_path = logo if isinstance(logo, str) else 'logo-hq-small.png'
+        if os.path.isfile(logo_path):
+            add_logo(filename=logo_path, location=(0.99, -0.21), align_to_axes=True)
+
+    plt.tight_layout()
+    return fig, ax
+
+
 def plot_rate_timeseries(df, rate_col, countries=None, oecd_avg=True, title=None, ylabel=None,
                          selected_countries=None, label_lines=True, subtitle=None, subtext=None,
-                         logo=None):
+                         logo=None, label_y_nudge=None):
     """
     Plot rate time series for selected countries and OECD average.
     
@@ -277,6 +788,10 @@ def plot_rate_timeseries(df, rate_col, countries=None, oecd_avg=True, title=None
     label_lines : bool
         If True, label lines directly on the right side instead of using a legend.
         If False, use a traditional legend.
+    subtitle, subtext, logo : optional
+        AIBM-style title block and branding (same as ``plot_gap_timeseries``).
+    label_y_nudge : dict, optional
+        Country code -> vertical shift for end-of-line labels in y-axis data units.
     """
     # Filter to OECD countries
     df = df.reset_index() if 'Code' in df.index.names else df
@@ -330,7 +845,8 @@ def plot_rate_timeseries(df, rate_col, countries=None, oecd_avg=True, title=None
                     'x': last_year,
                     'y': last_value,
                     'text': country_name,
-                    'color': color
+                    'color': color,
+                    'code': code,
                 })
     
     # Plot OECD average (no direct label)
@@ -357,7 +873,7 @@ def plot_rate_timeseries(df, rate_col, countries=None, oecd_avg=True, title=None
     else:
         max_year = df_oecd['Year'].max()
         min_year = df_oecd['Year'].min()
-        add_direct_line_labels(ax, label_data, x_min=min_year, x_max=max_year)
+        add_direct_line_labels(ax, label_data, x_min=min_year, x_max=max_year, label_y_nudge=label_y_nudge)
         year_range = max_year - min_year
         tick_step = 1 if year_range <= 5 else 5
         ax.set_xticks(np.arange(min_year, max_year + 1, tick_step))

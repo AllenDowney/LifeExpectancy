@@ -6,10 +6,7 @@ Exploring causes of gender differences in life expectancy across OECD countries.
 
 This project analyzes the gender gap in life expectancy using data from WHO and IHME. It identifies which mortality factors (cardiovascular disease, alcohol, suicide, etc.) explain the most variation in the life expectancy gap between men and women.
 
-The analysis uses:
-- **PyMC (Python)**: Bayesian hierarchical panel model implementation
-- **brms (R/Stan)**: Bayesian hierarchical panel model implementation
-- **Model comparison**: Validation that both implementations produce identical results
+The analysis uses PyMC (Python) for Bayesian hierarchical panel modeling.
 
 A [Quarto website](https://allendowney.github.io/LifeExpectancy/) provides a concise summary of the methodology, results, and findings.
 
@@ -81,13 +78,9 @@ jupyter lab
 Run the notebooks in order:
 
 1. **`process.ipynb`** — Load raw data, compute gender gaps, filter to OECD countries, save to HDF5/CSV
-2. **`bayesian_model_py.ipynb`** or **`bayesian_model.ipynb`** — Fit Bayesian hierarchical panel model using PyMC
-3. **`bayesian_model_r.Rmd`** — Fit Bayesian hierarchical panel model using brms
-4. **`compare_pymc_brms.ipynb`** — Compare results between PyMC and brms implementations
+2. **`bayesian_model.ipynb`** — Fit Bayesian hierarchical panel model using PyMC
 
 ### Additional Analyses
-
-- **`eda.ipynb`** — Exploratory data analysis
 - **`bayes_counter_hale.ipynb`** — Counterfactual analysis for HALE gap
 - **`bayes_counter_le.ipynb`** — Counterfactual analysis for Life Expectancy gap
 - **`time_series.ipynb`** — Time series analysis of gaps and predictors

@@ -1417,3 +1417,103 @@ def plot_positive_contributions_percentage(
     
     return fig, ax, percentage_of_actual
 
+
+def publish_datawrapper_table(
+    df,
+    title='',
+    intro='',
+    access_token=None,
+    column_number_formats=None,
+    default_float_number_format='0.0',
+):
+    """
+    Create a Datawrapper table visualization, upload ``df``, and publish.
+
+    Requires the ``datawrapper`` package (``pip install datawrapper``) and
+    ``DATAWRAPPER_API_TOKEN`` in the environment unless ``access_token`` is
+    passed. Matches the workflow in ``datawrapper.md`` at the repo root.
+
+    For **table** charts, number formats live in ``metadata.visualize.columns``
+    (each column can set ``"format": "0.0"`` etc.), not in
+    ``metadata.data["column-format"]``. After ``add_data``, this function
+    ``PATCH``es ``metadata.visualize.columns`` with those strings (see Datawrapper
+    Academy: custom number formats).
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Table rows (column headers become Datawrapper columns).
+    title : str
+        Chart title (often left empty; use ``intro`` for caption text).
+    intro : str
+        Short description shown above the table (Datawrapper ``metadata.describe.intro``).
+    access_token : str, optional
+        API token; defaults to ``os.environ['DATAWRAPPER_API_TOKEN']``.
+    column_number_formats : dict mapping str to str, optional
+        Overrides for specific columns. These take precedence over
+        ``default_float_number_format`` for float columns (see Datawrapper
+        Academy: custom number formats).
+    default_float_number_format : str or None
+        If a string (default ``0.0``), every float column not listed in
+        ``column_number_formats`` gets that format. If ``None``, only columns
+        named in ``column_number_formats`` are patched.
+
+    Returns
+    -------
+    dict
+        ``chart_id``, ``public_url`` (embed page), and ``edit_url``.
+    """
+    import requests
+    from datawrapper import Datawrapper
+
+    token = access_token or os.getenv('DATAWRAPPER_API_TOKEN')
+    if not token:
+        raise RuntimeError(
+            'Set DATAWRAPPER_API_TOKEN or pass access_token= to publish_datawrapper_table'
+        )
+
+    dw = Datawrapper(access_token=token)
+    kwargs = dict(title=title or '', chart_type='tables')
+    if intro:
+        kwargs['metadata'] = {'describe': {'intro': intro}}
+    chart_info = dw.create_chart(**kwargs)
+    chart_id = chart_info['id']
+    dw.add_data(chart_id=chart_id, data=df)
+
+    headers = {
+        'Authorization': f'Bearer {token}',
+        'Content-Type': 'application/json',
+    }
+    merged_formats = dict(column_number_formats or {})
+    if default_float_number_format is not None:
+        for col in df.columns:
+            if col in merged_formats:
+                continue
+            if pd.api.types.is_float_dtype(df[col]):
+                merged_formats[col] = default_float_number_format
+
+    if merged_formats:
+        # Tables read formats from Refine (visualize), not Check (data.column-format).
+        patch_columns = {
+            col: {'format': fmt}
+            for col, fmt in merged_formats.items()
+            if col in df.columns
+        }
+        if patch_columns:
+            patch_url = f'https://api.datawrapper.de/v3/charts/{chart_id}'
+            patch = {'metadata': {'visualize': {'columns': patch_columns}}}
+            r = requests.patch(patch_url, headers=headers, json=patch)
+            r.raise_for_status()
+
+    publish_url = f'https://api.datawrapper.de/v3/charts/{chart_id}/publish'
+    response = requests.post(publish_url, headers=headers)
+    response.raise_for_status()
+    body = response.json()
+    public_url = body.get('url')
+    edit_url = f'https://www.datawrapper.de/_/{chart_id}/'
+    return {
+        'chart_id': chart_id,
+        'public_url': public_url,
+        'edit_url': edit_url,
+    }
+
