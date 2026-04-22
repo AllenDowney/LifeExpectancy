@@ -208,3 +208,31 @@ __marimo__/
 
 # Quarto build output
 quarto/_site/
+quarto/bayesian_model_r_cache/
+
+# --- LifeExpectancy: large inputs & pipeline outputs (regenerate or download) ---
+
+# Raw and derived analysis data (IHME, H5, samples, model fits)
+data/
+
+# Local PDF / reference material (re-fetch from publisher sites as needed)
+papers/
+
+# Word export if markdown is canonical (e.g. blog_plan.md)
+blog_plan.docx
+
+# MyST (Jupyter Book) static site build
+jb/_build/
+
+# Notebook: figures/tables, caches, and run logs
+notebooks/figs/
+notebooks/tables/
+notebooks/bayesian_model_cache/
+notebooks/bayesian_model_files/
+# Per-country counterfactual HTML export pairs (main bayes_counter_*.ipynb may still be tracked if used)
+notebooks/bayes_counter_le_*.ipynb
+notebooks/nc/
+notebooks/interim/
+notebooks/logs/
+notebooks/*_executed.ipynb
+notebooks/*.nbconvert.ipynb
