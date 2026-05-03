@@ -33,11 +33,22 @@ from pathlib import Path
 
 import arviz as az
 
-from utils import configure_plot_style, code_to_who_country, add_title, add_subtext, add_logo
-from fig_utils import plot_coefficients_bar, plot_fitted_vs_actual_timeseries, add_direct_line_labels
-from counterfactual_utils import compute_residuals_panel, plot_residuals_by_country
+from utils import configure_plot_style, code_to_who_country, add_title, add_subtext, add_logo, write_html_table
+from fig_utils import (
+    plot_coefficients_bar,
+    plot_fitted_vs_actual_timeseries,
+    add_direct_line_labels,
+    PREDICTOR_LABELS,
+)
+from counterfactual_utils import compute_residuals_panel, plot_residuals_by_country, publish_datawrapper_table
 
 configure_plot_style()
+```
+
+```python tags=["parameters"]
+# Papermill (from notebooks/): jupytext --to ipynb bayesian_le_figs.md &&
+#   papermill bayesian_le_figs.ipynb bayesian_le_figs_out.ipynb -k python3 -p UPLOAD_TO_DATAWRAPPER True
+UPLOAD_TO_DATAWRAPPER = False
 ```
 
 ## Load Model Results
@@ -131,6 +142,68 @@ fig, ax = plot_coefficients_bar(
 )
 plt.savefig(figs_dir / 'coefficients_hale.png', dpi=150, bbox_inches='tight')
 plt.show()
+```
+
+## Blog 5: coefficient ranks (HALE vs LE)
+
+HALE and LE posterior mean slopes, same predictor order as [`jb/blog5_hale.md`](../jb/blog5_hale.md). Ranks use **absolute** posterior mean (largest \|β\| is rank 1). Writes `../jb/tables/blog5_hale_coefficient_ranks_blog.html`. Optional Datawrapper upload appends publish and edit URLs to `logs/datawrapper_publish_urls.log`.
+
+```python
+assert predictors == predictors_hale, 'LE and HALE metadata predictor lists must match'
+
+mean_le = beta_samples.mean(axis=0)
+mean_hale = beta_samples_hale.mean(axis=0)
+rank_le = pd.Series(-np.abs(mean_le)).rank(method='min', ascending=True).astype(int).to_numpy()
+rank_hale = pd.Series(-np.abs(mean_hale)).rank(method='min', ascending=True).astype(int).to_numpy()
+
+coef_blog = pd.DataFrame({
+    'Cause': [
+        PREDICTOR_LABELS.get(p, p.replace('Gap_', '').replace('_', ' '))
+        for p in predictors_hale
+    ],
+    'Coefficient': np.round(mean_hale, 3),
+    'Rank (HALE)': rank_hale,
+    'Rank (LE)': rank_le,
+})
+coef_blog = coef_blog.iloc[np.argsort(-np.abs(mean_hale))].reset_index(drop=True)
+
+jb_coef_path = Path('../jb/tables/blog5_hale_coefficient_ranks_blog.html')
+write_html_table(coef_blog, str(jb_coef_path))
+print(f'Saved Blog 5 coefficient rank table to: {jb_coef_path}')
+
+coef_dw = coef_blog.copy()
+for col in ('Rank (HALE)', 'Rank (LE)'):
+    coef_dw[col] = coef_dw[col].astype(int)
+coef_dw['Coefficient'] = coef_dw['Coefficient'].astype(float)
+
+if UPLOAD_TO_DATAWRAPPER:
+    if not os.getenv('DATAWRAPPER_API_TOKEN'):
+        print('[Datawrapper] Skipping coefficient ranks: DATAWRAPPER_API_TOKEN not set')
+    else:
+        dw_info = publish_datawrapper_table(
+            coef_dw,
+            title='',
+            intro=(
+                'Posterior mean coefficients for the healthy life expectancy (HALE) gender gap vs ranks '
+                'for the life expectancy (LE) gap model. OECD panel, 2000–2023; same predictors. '
+                'Ranks by magnitude of posterior mean (|β|). Source: Bayesian hierarchical model, IHME.'
+            ),
+            column_number_formats={'Coefficient': '0.000'},
+            default_float_number_format=None,
+        )
+        log_dw = Path('logs/datawrapper_publish_urls.log')
+        log_dw.parent.mkdir(parents=True, exist_ok=True)
+        lines = (
+            f"{pd.Timestamp.now():%Y-%m-%d %H:%M:%S}  bayesian_le_figs blog5_hale_coefficient_ranks_blog\n"
+            f"  publish: {dw_info['public_url']}\n"
+            f"  edit:    {dw_info['edit_url']}\n"
+        )
+        print('[Datawrapper] Coefficient ranks — publish:', dw_info['public_url'])
+        print('[Datawrapper] Coefficient ranks — edit:', dw_info['edit_url'])
+        with open(log_dw, 'a', encoding='utf-8') as f:
+            f.write(lines)
+
+coef_blog
 ```
 
 ```python

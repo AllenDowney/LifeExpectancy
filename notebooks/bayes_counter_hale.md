@@ -69,9 +69,9 @@ configure_plot_style()
 ```python tags=["parameters"]
 # ============================================================================
 # MODEL CONFIGURATION: Override with papermill (run from notebooks/).
-#   jupytext --to ipynb bayes_counter_hale.md --output bayes_counter_hale.ipynb
-#   papermill bayes_counter_hale.ipynb bayes_counter_hale_<CC>.ipynb \
-#     -p COUNTRY_CODE USA -p MODEL_VERSION 2023_ihme -p UPLOAD_TO_DATAWRAPPER False
+#   jupytext --to ipynb bayes_counter_hale.md &&
+#   papermill bayes_counter_hale.ipynb bayes_counter_hale_<CC>.ipynb -k python3 \\
+#     -p COUNTRY_CODE USA -p MODEL_VERSION 2023_ihme -p UPLOAD_TO_DATAWRAPPER True
 # Papermill executes the notebook and writes the output to the second path (see plan.md).
 # ============================================================================
 # Options:
@@ -246,6 +246,14 @@ if UPLOAD_TO_DATAWRAPPER:
         )
         log_and_print(f"[Datawrapper] Gap extremes — publish: {dw_info['public_url']}")
         log_and_print(f"[Datawrapper] Gap extremes — edit: {dw_info['edit_url']}")
+        _dw_log = Path('logs/datawrapper_publish_urls.log')
+        _dw_log.parent.mkdir(parents=True, exist_ok=True)
+        with open(_dw_log, 'a', encoding='utf-8') as _f:
+            _f.write(
+                f"{pd.Timestamp.now():%Y-%m-%d %H:%M:%S}  bayes_counter_hale gap_extremes_min_blog_hale\n"
+                f"  publish: {dw_info['public_url']}\n"
+                f"  edit:    {dw_info['edit_url']}\n"
+            )
 
 gap_extremes_blog_df
 ```
@@ -461,6 +469,15 @@ if UPLOAD_TO_DATAWRAPPER:
         )
         log_and_print(f"[Datawrapper] Counterfactuals blog — publish: {dw_info['public_url']}")
         log_and_print(f"[Datawrapper] Counterfactuals blog — edit: {dw_info['edit_url']}")
+        _dw_log = Path('logs/datawrapper_publish_urls.log')
+        _dw_log.parent.mkdir(parents=True, exist_ok=True)
+        with open(_dw_log, 'a', encoding='utf-8') as _f:
+            _f.write(
+                f"{pd.Timestamp.now():%Y-%m-%d %H:%M:%S}  bayes_counter_hale "
+                f"counterfactuals_{country_lower}_{latest_year}_hale_blog\n"
+                f"  publish: {dw_info['public_url']}\n"
+                f"  edit:    {dw_info['edit_url']}\n"
+            )
 
 counterfactuals_presentation
 ```
