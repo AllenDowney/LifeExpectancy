@@ -1,0 +1,289 @@
+year,series,series_type,value
+2000,Cancer,contribution,0.1806056612841104
+2000,Homicide,contribution,0.2064133070110035
+2000,Suicide,contribution,0.38963047010636864
+2000,Road Traffic,contribution,0.7561122023609517
+2000,Liver Disease,contribution,0.19898855431725018
+2000,Injury,contribution,0.051691164355339436
+2000,COVID-19,contribution,0.0
+2000,Childhood (under-five),contribution,0.1164559897093724
+2000,Alcohol,contribution,0.06974125702611049
+2000,Drug Disorders,contribution,0.14628018672601603
+2000,Predicted Total,total,5.158583384962622
+2000,Actual Total,total,5.30810000000001
+2001,Cancer,contribution,0.17483144281722657
+2001,Homicide,contribution,0.21301808105327133
+2001,Suicide,contribution,0.3945859137048264
+2001,Road Traffic,contribution,0.7806913418935119
+2001,Liver Disease,contribution,0.20059883540878093
+2001,Injury,contribution,0.049807848538785934
+2001,COVID-19,contribution,0.0
+2001,Childhood (under-five),contribution,0.11679046892821011
+2001,Alcohol,contribution,0.07014986136697896
+2001,Drug Disorders,contribution,0.1566045291135067
+2001,Predicted Total,total,5.152578237670928
+2001,Actual Total,total,5.25139999999999
+2002,Cancer,contribution,0.17608490950531752
+2002,Homicide,contribution,0.21842892322857574
+2002,Suicide,contribution,0.39690073833306894
+2002,Road Traffic,contribution,0.7967232959394527
+2002,Liver Disease,contribution,0.20761599140454756
+2002,Injury,contribution,0.049101159443797365
+2002,COVID-19,contribution,0.0
+2002,Childhood (under-five),contribution,0.1203450867485204
+2002,Alcohol,contribution,0.07209533589149936
+2002,Drug Disorders,contribution,0.16952657697392357
+2002,Predicted Total,total,5.165488792952548
+2002,Actual Total,total,5.234499999999997
+2003,Cancer,contribution,0.17164018533258268
+2003,Homicide,contribution,0.21883099441838944
+2003,Suicide,contribution,0.3880307042221292
+2003,Road Traffic,contribution,0.7882149814980021
+2003,Liver Disease,contribution,0.21229021661154462
+2003,Injury,contribution,0.04852157925469982
+2003,COVID-19,contribution,0.0
+2003,Childhood (under-five),contribution,0.12356659655187054
+2003,Alcohol,contribution,0.07032702324699508
+2003,Drug Disorders,contribution,0.1806336844817038
+2003,Predicted Total,total,5.11672058784046
+2003,Actual Total,total,5.174900000000008
+2004,Cancer,contribution,0.17242050209579185
+2004,Homicide,contribution,0.2184987433035247
+2004,Suicide,contribution,0.3711494924549521
+2004,Road Traffic,contribution,0.774972584941
+2004,Liver Disease,contribution,0.20729081778620803
+2004,Injury,contribution,0.049252471502926526
+2004,COVID-19,contribution,0.0
+2004,Childhood (under-five),contribution,0.11898488203525533
+2004,Alcohol,contribution,0.06978469114732494
+2004,Drug Disorders,contribution,0.1861206070913516
+2004,Predicted Total,total,5.041400401219093
+2004,Actual Total,total,5.0966999999999985
+2005,Cancer,contribution,0.17216515801656965
+2005,Homicide,contribution,0.23014237671407306
+2005,Suicide,contribution,0.3780725453323898
+2005,Road Traffic,contribution,0.810402364373317
+2005,Liver Disease,contribution,0.21406016692896218
+2005,Injury,contribution,0.046961205442584614
+2005,COVID-19,contribution,0.0
+2005,Childhood (under-five),contribution,0.11605615158978295
+2005,Alcohol,contribution,0.07083837580362351
+2005,Drug Disorders,contribution,0.19907439764245702
+2005,Predicted Total,total,5.074255219390158
+2005,Actual Total,total,5.117200000000011
+2006,Cancer,contribution,0.172968686343684
+2006,Homicide,contribution,0.2379703633369282
+2006,Suicide,contribution,0.3824450698102759
+2006,Road Traffic,contribution,0.812749967842296
+2006,Liver Disease,contribution,0.21314536787224922
+2006,Injury,contribution,0.04948886996251824
+2006,COVID-19,contribution,0.0
+2006,Childhood (under-five),contribution,0.11132749410047955
+2006,Alcohol,contribution,0.07094088792776276
+2006,Drug Disorders,contribution,0.21008740013085297
+2006,Predicted Total,total,5.056902468768423
+2006,Actual Total,total,5.090899999999991
+2007,Cancer,contribution,0.18271255916782486
+2007,Homicide,contribution,0.2310065611217299
+2007,Suicide,contribution,0.38934123318717545
+2007,Road Traffic,contribution,0.7888261584594065
+2007,Liver Disease,contribution,0.2197536536568662
+2007,Injury,contribution,0.046635164673525124
+2007,COVID-19,contribution,0.0
+2007,Childhood (under-five),contribution,0.10837552997735733
+2007,Alcohol,contribution,0.06869332672203003
+2007,Drug Disorders,contribution,0.2109747215983981
+2007,Predicted Total,total,5.026791957657335
+2007,Actual Total,total,5.047800000000009
+2008,Cancer,contribution,0.1871359683304648
+2008,Homicide,contribution,0.22033275456239562
+2008,Suicide,contribution,0.40455867747925156
+2008,Road Traffic,contribution,0.7285985755953357
+2008,Liver Disease,contribution,0.22363848803496808
+2008,Injury,contribution,0.04388469865917149
+2008,COVID-19,contribution,0.0
+2008,Childhood (under-five),contribution,0.10622955120213023
+2008,Alcohol,contribution,0.07053641161076792
+2008,Drug Disorders,contribution,0.21187039700324442
+2008,Predicted Total,total,4.949552051197812
+2008,Actual Total,total,4.942400000000006
+2009,Cancer,contribution,0.19880877703115557
+2009,Homicide,contribution,0.20385311714879786
+2009,Suicide,contribution,0.4132035071030998
+2009,Road Traffic,contribution,0.6440774979654377
+2009,Liver Disease,contribution,0.22466614369082014
+2009,Injury,contribution,0.04417674145205768
+2009,COVID-19,contribution,0.0
+2009,Childhood (under-five),contribution,0.10094557171305336
+2009,Alcohol,contribution,0.06990217250716906
+2009,Drug Disorders,contribution,0.21124834232763448
+2009,Predicted Total,total,4.80889499517088
+2009,Actual Total,total,4.890100000000004
+2010,Cancer,contribution,0.19414912964444386
+2010,Homicide,contribution,0.19359920670968347
+2010,Suicide,contribution,0.4219937634520297
+2010,Road Traffic,contribution,0.5968132099349819
+2010,Liver Disease,contribution,0.22951130071559486
+2010,Injury,contribution,0.04334244807597406
+2010,COVID-19,contribution,0.0
+2010,Childhood (under-five),contribution,0.09274911282207757
+2010,Alcohol,contribution,0.07277521050242428
+2010,Drug Disorders,contribution,0.21189547567784286
+2010,Predicted Total,total,4.737261947579924
+2010,Actual Total,total,4.821899999999999
+2011,Cancer,contribution,0.1944969278306811
+2011,Homicide,contribution,0.19146123112259125
+2011,Suicide,contribution,0.431618295495672
+2011,Road Traffic,contribution,0.5999300538746388
+2011,Liver Disease,contribution,0.23115221438617925
+2011,Injury,contribution,0.039474625783250596
+2011,COVID-19,contribution,0.0
+2011,Childhood (under-five),contribution,0.08810721103952227
+2011,Alcohol,contribution,0.07377699245708005
+2011,Drug Disorders,contribution,0.22158409255956474
+2011,Predicted Total,total,4.72328705075841
+2011,Actual Total,total,4.744399999999999
+2012,Cancer,contribution,0.19990297270628224
+2012,Homicide,contribution,0.19682049122386497
+2012,Suicide,contribution,0.4350388398817693
+2012,Road Traffic,contribution,0.6025079926700082
+2012,Liver Disease,contribution,0.23780693837348457
+2012,Injury,contribution,0.03930018443598791
+2012,COVID-19,contribution,0.0
+2012,Childhood (under-five),contribution,0.0889955675291603
+2012,Alcohol,contribution,0.07584755378928482
+2012,Drug Disorders,contribution,0.23233354307877582
+2012,Predicted Total,total,4.733490066239432
+2012,Actual Total,total,4.736200000000011
+2013,Cancer,contribution,0.2088807933224831
+2013,Homicide,contribution,0.18422989024199632
+2013,Suicide,contribution,0.4352963256370948
+2013,Road Traffic,contribution,0.5953611737762528
+2013,Liver Disease,contribution,0.24150989359803857
+2013,Injury,contribution,0.03926032190278515
+2013,COVID-19,contribution,0.0
+2013,Childhood (under-five),contribution,0.09049393483338529
+2013,Alcohol,contribution,0.07940163967402364
+2013,Drug Disorders,contribution,0.25140623258860917
+2013,Predicted Total,total,4.7241790950013565
+2013,Actual Total,total,4.747599999999991
+2014,Cancer,contribution,0.21299910691852397
+2014,Homicide,contribution,0.18502425693218863
+2014,Suicide,contribution,0.4401948711526951
+2014,Road Traffic,contribution,0.6039012542996818
+2014,Liver Disease,contribution,0.23800550655538227
+2014,Injury,contribution,0.040879890942576776
+2014,COVID-19,contribution,0.0
+2014,Childhood (under-five),contribution,0.08772943550906157
+2014,Alcohol,contribution,0.08255240301330878
+2014,Drug Disorders,contribution,0.27730373713714573
+2014,Predicted Total,total,4.735373281824303
+2014,Actual Total,total,4.769300000000001
+2015,Cancer,contribution,0.2055352991250204
+2015,Homicide,contribution,0.20950593720546365
+2015,Suicide,contribution,0.4536087299774107
+2015,Road Traffic,contribution,0.6513924048027223
+2015,Liver Disease,contribution,0.23515718196328883
+2015,Injury,contribution,0.0426844037094891
+2015,COVID-19,contribution,0.0
+2015,Childhood (under-five),contribution,0.0857207539040675
+2015,Alcohol,contribution,0.08833865694864719
+2015,Drug Disorders,contribution,0.32468991376178513
+2015,Predicted Total,total,4.833697010042663
+2015,Actual Total,total,4.810900000000004
+2016,Cancer,contribution,0.20349906794676742
+2016,Homicide,contribution,0.22886455100976585
+2016,Suicide,contribution,0.48357993253922327
+2016,Road Traffic,contribution,0.6991138384003811
+2016,Liver Disease,contribution,0.22835801457281474
+2016,Injury,contribution,0.04666223338125527
+2016,COVID-19,contribution,0.0
+2016,Childhood (under-five),contribution,0.08664776060823398
+2016,Alcohol,contribution,0.0968926535186956
+2016,Drug Disorders,contribution,0.3915689204484703
+2016,Predicted Total,total,4.973257610499462
+2016,Actual Total,total,4.958500000000001
+2017,Cancer,contribution,0.20151313810650595
+2017,Homicide,contribution,0.2294885410809135
+2017,Suicide,contribution,0.5081204518086494
+2017,Road Traffic,contribution,0.6969424200685835
+2017,Liver Disease,contribution,0.2205169587426215
+2017,Injury,contribution,0.04748854087399779
+2017,COVID-19,contribution,0.0
+2017,Childhood (under-five),contribution,0.08921640448607523
+2017,Alcohol,contribution,0.1013151490463145
+2017,Drug Disorders,contribution,0.43977433696701806
+2017,Predicted Total,total,4.99131626260513
+2017,Actual Total,total,4.997900000000001
+2018,Cancer,contribution,0.20339321491496662
+2018,Homicide,contribution,0.21457425561788596
+2018,Suicide,contribution,0.5049849601553212
+2018,Road Traffic,contribution,0.6596638635143702
+2018,Liver Disease,contribution,0.21733731353106
+2018,Injury,contribution,0.04726158335149379
+2018,COVID-19,contribution,0.0
+2018,Childhood (under-five),contribution,0.09036160557724932
+2018,Alcohol,contribution,0.10273575570959867
+2018,Drug Disorders,contribution,0.46734069255929434
+2018,Predicted Total,total,4.927167128665909
+2018,Actual Total,total,5.012200000000007
+2019,Cancer,contribution,0.21497213112631422
+2019,Homicide,contribution,0.22773595727771148
+2019,Suicide,contribution,0.5024716281733081
+2019,Road Traffic,contribution,0.6750431684807522
+2019,Liver Disease,contribution,0.21744580178210765
+2019,Injury,contribution,0.052416031327749336
+2019,COVID-19,contribution,0.0
+2019,Childhood (under-five),contribution,0.08429085123486334
+2019,Alcohol,contribution,0.11116011608673991
+2019,Drug Disorders,contribution,0.5239491263219541
+2019,Predicted Total,total,5.016932185379843
+2019,Actual Total,total,5.0146000000000015
+2020,Cancer,contribution,0.2148081071104037
+2020,Homicide,contribution,0.2907373973599008
+2020,Suicide,contribution,0.5372691900378054
+2020,Road Traffic,contribution,0.7852357100590831
+2020,Liver Disease,contribution,0.22635379276761364
+2020,Injury,contribution,0.056710402527029906
+2020,COVID-19,contribution,0.21822011098529714
+2020,Childhood (under-five),contribution,0.07590900319982073
+2020,Alcohol,contribution,0.13817272772374137
+2020,Drug Disorders,contribution,0.6377253330052131
+2020,Predicted Total,total,5.593577484684775
+2020,Actual Total,total,5.534999999999997
+2021,Cancer,contribution,0.21644391804639646
+2021,Homicide,contribution,0.3100327444125621
+2021,Suicide,contribution,0.5525096628637324
+2021,Road Traffic,contribution,0.839954975343333
+2021,Liver Disease,contribution,0.2319885417993964
+2021,Injury,contribution,0.06181046300227243
+2021,COVID-19,contribution,0.4272900195840641
+2021,Childhood (under-five),contribution,0.06377029251904363
+2021,Alcohol,contribution,0.1528790083324151
+2021,Drug Disorders,contribution,0.7370918314764011
+2021,Predicted Total,total,5.958622477040301
+2021,Actual Total,total,5.74499999999999
+2022,Cancer,contribution,0.2052251119473513
+2022,Homicide,contribution,0.29428766985542143
+2022,Suicide,contribution,0.5516432843061837
+2022,Road Traffic,contribution,0.834129879766986
+2022,Liver Disease,contribution,0.22233080378705175
+2022,Injury,contribution,0.0579037449337911
+2022,COVID-19,contribution,0.15610420906329292
+2022,Childhood (under-five),contribution,0.07872085926854112
+2022,Alcohol,contribution,0.15289532963758418
+2022,Drug Disorders,contribution,0.7816809479908225
+2022,Predicted Total,total,5.65287787121619
+2022,Actual Total,total,5.460700000000003
+2023,Cancer,contribution,0.19659864674673588
+2023,Homicide,contribution,0.2764244741882585
+2023,Suicide,contribution,0.5200798790220631
+2023,Road Traffic,contribution,0.8058728364989293
+2023,Liver Disease,contribution,0.2175650022200141
+2023,Injury,contribution,0.0588682494328752
+2023,COVID-19,contribution,0.0136345033241726
+2023,Childhood (under-five),contribution,0.07896367369919156
+2023,Alcohol,contribution,0.14943640810814315
+2023,Drug Disorders,contribution,0.7724275536695115
+2023,Predicted Total,total,5.369790880058072
+2023,Actual Total,total,4.984800000000007

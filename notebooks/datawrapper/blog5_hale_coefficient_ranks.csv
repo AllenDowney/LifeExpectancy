@@ -1,0 +1,14 @@
+Cause,Coefficient,Rank (HALE),Rank (LE)
+Road Traffic,0.463,1,1
+Lung Disease,0.367,2,5
+Suicide,0.364,3,3
+Homicide,0.307,4,2
+Cardiovascular,-0.273,5,7
+Cancer,0.238,6,4
+Injury,0.194,7,8
+Liver Disease,0.191,8,6
+Alcohol,0.13,9,9
+Diabetes,-0.128,10,12
+COVID-19,0.06,11,10
+Drug Disorders,0.055,12,11
+Childhood (under-five),0.005,13,13
