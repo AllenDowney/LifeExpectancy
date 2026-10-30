@@ -214,6 +214,7 @@ quarto/bayesian_model_r_cache/
 
 # Raw and derived analysis data (IHME, H5, samples, model fits)
 data/
+!examples/python-to-r/data/
 
 # Local PDF / reference material (re-fetch from publisher sites as needed)
 papers/

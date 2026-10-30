@@ -98,6 +98,10 @@ Notebooks write outputs to subdirectories within `notebooks/`:
 
 Data files are read from `../data/` (relative to notebooks directory).
 
+## Python to R example
+
+[`examples/python-to-r/`](examples/python-to-r/) has an early version of the model written twice, in PyMC and in R with brms, and a notebook that shows the two posteriors agree.
+
 ## Data Sources
 
 - **WHO Global Health Observatory**: Life expectancy, HALE, mortality indicators

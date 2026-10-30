@@ -6,7 +6,7 @@ PROJECT_NAME = LifeExpectancy
 env:
 	mamba env create -f environment.yml
 	@echo "Installing R kernel for Jupyter..."
-	mamba run -n $(PROJECT_NAME) R -e "IRkernel::installspec()"
+	mamba run -n $(PROJECT_NAME) R -e "IRkernel::installspec(name = 'lifeexpectancy_r', displayname = 'R (LifeExpectancy)')"
 	@echo ""
 	@echo ">>> Environment ready. Activate with:"
 	@echo ">>> conda activate $(PROJECT_NAME)"
