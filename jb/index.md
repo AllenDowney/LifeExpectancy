@@ -10,6 +10,8 @@ This project explores differences in life expectancy and health-adjusted life ex
 
 - [Executive Summary](summary.md) - **Start here**: A concise, accessible summary of the project's motivation, methodology, key findings, and policy implications. Answers the question: "Why do women live longer than men, and what could be done about it?"
 
+- [Policy Report](policy_report.md) - Evidence and policy narrative built from the Bayesian panel analysis, OECD time series, counterfactuals, and international examples (road safety, substances, violence, cancer).
+
 - [Bayesian Panel Data Model (2023, IHME HALE & OWID LE)](bayesian_model_report_2023.md) - **Primary analysis**: Bayesian hierarchical panel model analyzing HALE and Life Expectancy gender gaps using both temporal variation (2000-2023 for both outcomes) and cross-country variation simultaneously. Uses IHME HALE and OWID LE data for extended temporal coverage and methodological consistency. Provides posterior distributions for all parameters with uncertainty quantification and enables temporal counterfactual analysis.
 - [Causal model note (CausalPy Models 1 & 1b)](causal_results.md) - Minimal DAGs; **Model 1** (country FE) and **Model 1b** (country + year FE); comparison of standardized `Gap_*` slopes to the Bayesian **LE** model and **1 vs 1b** contrast (`beta_coefficients_le_ihme_nomid_nogrw_y2023_covid`).
 - [Bayesian Panel Data Model (2021, WHO HALE)](bayesian_model_report_2021.md) - **Legacy analysis**: Previous version using WHO HALE data (2000-2021). Retained for comparison and historical reference.

@@ -62,6 +62,9 @@ from counterfactual_utils import (
 )
 
 configure_plot_style()
+
+datawrapper_dir = Path('datawrapper')
+datawrapper_dir.mkdir(parents=True, exist_ok=True)
 ```
 
 ## Load Saved Model Results
@@ -230,6 +233,8 @@ gap_extremes_blog_df = pd.DataFrame(gap_extremes_presentation).sort_values('Mini
 gap_extremes_blog_df = gap_extremes_blog_df.reset_index(drop=True)
 write_html_table(gap_extremes_blog_df, 'tables/gap_extremes_min_blog_le.html')
 log_and_print(f"Saved presentation table to: tables/gap_extremes_min_blog_le.html")
+gap_extremes_blog_df.to_csv(datawrapper_dir / 'gap_extremes_min_le.csv', index=False)
+log_and_print(f"Saved Datawrapper CSV: {datawrapper_dir / 'gap_extremes_min_le.csv'}")
 
 if UPLOAD_TO_DATAWRAPPER:
     if not os.getenv('DATAWRAPPER_API_TOKEN'):
@@ -442,6 +447,9 @@ counterfactuals_presentation[change_col] = counterfactuals_presentation[change_c
 counterfactuals_blog_filename = f'tables/counterfactuals_{country_lower}_{latest_year}_le_blog.html'
 write_html_table(counterfactuals_presentation.reset_index(drop=True), counterfactuals_blog_filename)
 log_and_print(f"Saved presentation table to: {counterfactuals_blog_filename}")
+cf_csv = datawrapper_dir / f'counterfactuals_{country_lower}_{latest_year}_le.csv'
+counterfactuals_for_datawrapper.reset_index(drop=True).to_csv(cf_csv, index=False)
+log_and_print(f"Saved Datawrapper CSV: {cf_csv}")
 
 # Upload presentation table for whichever country this run uses (see datawrapper.md for token).
 if UPLOAD_TO_DATAWRAPPER:
@@ -475,6 +483,17 @@ plot_counterfactual_forest(
     subtext='Source: Bayesian hierarchical panel model. IHME cause-specific mortality, OWID Life Expectancy.',
     logo=True
 )
+forest_rows = []
+for r in counterfactual_results:
+    forest_rows.append({
+        'cause': PREDICTOR_LABELS.get(f"Gap_{r['indicator']}", r['indicator']),
+        'change_mean': r['change_summary']['mean'],
+        'hdi_lo': r['change_summary']['hdi_3%'],
+        'hdi_hi': r['change_summary']['hdi_97%'],
+    })
+forest_csv = datawrapper_dir / f'counterfactual_effects_{country_lower}_{latest_year}_le.csv'
+pd.DataFrame(forest_rows).sort_values('change_mean', ascending=False).to_csv(forest_csv, index=False)
+log_and_print(f"Saved Datawrapper CSV: {forest_csv}")
 ```
 
 ```python
@@ -803,6 +822,27 @@ plot_positive_contributions_stacked_area(
     subtext='Source: Bayesian hierarchical panel model. IHME cause-specific mortality, OWID Life Expectancy.',
     logo=True
 )
+factor_cols = [c for c in contributions_df.columns if c not in ['Predicted Total', 'Actual Total']]
+stacked_rows = []
+for year in contributions_df.index:
+    for col in factor_cols:
+        stacked_rows.append({
+            'year': int(year),
+            'series': PREDICTOR_LABELS.get(f'Gap_{col}', col.replace('_', ' ')),
+            'series_type': 'contribution',
+            'value': contributions_df.loc[year, col],
+        })
+    stacked_rows.append({
+        'year': int(year), 'series': 'Predicted Total', 'series_type': 'total',
+        'value': contributions_df.loc[year, 'Predicted Total'],
+    })
+    stacked_rows.append({
+        'year': int(year), 'series': 'Actual Total', 'series_type': 'total',
+        'value': contributions_df.loc[year, 'Actual Total'],
+    })
+stacked_csv = datawrapper_dir / f'positive_contributions_stacked_area_{country_lower}_le.csv'
+pd.DataFrame(stacked_rows).to_csv(stacked_csv, index=False)
+log_and_print(f"Saved Datawrapper CSV: {stacked_csv}")
 ```
 
 ```python

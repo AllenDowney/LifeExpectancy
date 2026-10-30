@@ -58,7 +58,9 @@ UPLOAD_TO_DATAWRAPPER = False
 nc_dir = Path('nc')
 interim_dir = Path('interim')
 figs_dir = Path('figs')
-
+datawrapper_dir = Path('datawrapper')
+datawrapper_dir.mkdir(parents=True, exist_ok=True)
+ 
 # Model suffix for 2023 IHME model with COVID
 MODEL_SUFFIX = '_ihme_nomid_nogrw_y2023_covid'
 
@@ -89,6 +91,15 @@ fig, ax = plot_coefficients_bar(
     logo=True
 )
 plt.savefig(figs_dir / 'blog2_coefficients_le.png', dpi=150, bbox_inches='tight')
+coef_le_dw = pd.DataFrame({
+    'cause': [PREDICTOR_LABELS.get(p, p.replace('Gap_', '').replace('_', ' ')) for p in predictors],
+    'coefficient': beta_samples.mean(axis=0),
+    'hdi_lo': np.percentile(beta_samples, 3, axis=0),
+    'hdi_hi': np.percentile(beta_samples, 97, axis=0),
+})
+coef_le_dw = coef_le_dw.iloc[np.argsort(-np.abs(coef_le_dw['coefficient']))].reset_index(drop=True)
+coef_le_dw.to_csv(datawrapper_dir / 'blog2_coefficients_le.csv', index=False)
+print(f'Saved Datawrapper CSV: {datawrapper_dir / "blog2_coefficients_le.csv"}')
 plt.show()
 ```
 
@@ -170,6 +181,8 @@ coef_blog = coef_blog.iloc[np.argsort(-np.abs(mean_hale))].reset_index(drop=True
 jb_coef_path = Path('../jb/tables/blog5_hale_coefficient_ranks_blog.html')
 write_html_table(coef_blog, str(jb_coef_path))
 print(f'Saved Blog 5 coefficient rank table to: {jb_coef_path}')
+coef_blog.to_csv(datawrapper_dir / 'blog5_hale_coefficient_ranks.csv', index=False)
+print(f'Saved Datawrapper CSV: {datawrapper_dir / "blog5_hale_coefficient_ranks.csv"}')
 
 coef_dw = coef_blog.copy()
 for col in ('Rank (HALE)', 'Rank (LE)'):

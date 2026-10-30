@@ -12,6 +12,8 @@ project:
     - file: index.md
     - file: summary.md
       title: Executive Summary
+    - file: policy_report.md
+      title: Policy Report
     - file: tech_report.md
       title: Technical Report
     - file: data_inventory.md

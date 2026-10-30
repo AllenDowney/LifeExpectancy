@@ -32,6 +32,7 @@ This minimal notebook loads life expectancy data and creates a plot showing sele
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from pathlib import Path
 
 from empiricaldist import Cdf
 from scipy.stats import linregress
@@ -56,6 +57,9 @@ configure_plot_style()
 # Set maximum year for analysis (includes COVID-19 period 2020-2023)
 max_year = 2023
 min_year = 2000
+
+DATAWRAPPER_DIR = Path('datawrapper')
+DATAWRAPPER_DIR.mkdir(parents=True, exist_ok=True)
 ```
 
 ## Helper Functions
@@ -214,6 +218,68 @@ def get_extremes_for_cause(df, gap_col, slopes_df, year_ref=2023):
 # Tables to collect slopes and extremes for each cause (populated as notebook executes)
 slopes_table = []
 extremes_table = []
+
+
+def export_gap_timeseries_csv(df, gap_col, selected_countries, csv_name, include_oecd_average=True):
+    """Long-format CSV matching gap time-series plots (all OECD countries + OECD average)."""
+    df = df.reset_index() if 'Code' in df.index.names else df.copy()
+    df_oecd = get_oecd(df.set_index('Code')).reset_index()
+    if 'Country' not in df_oecd.columns:
+        df_oecd['Country'] = df_oecd['Code'].map(code_to_who_country)
+    selected = set(selected_countries or [])
+    rows = []
+    for _, row in df_oecd.iterrows():
+        rows.append({
+            'year': int(row['Year']),
+            'code': row['Code'],
+            'country': row['Country'],
+            'gap': row[gap_col],
+            'highlighted': row['Code'] in selected,
+            'series': row['Country'],
+        })
+    out = pd.DataFrame(rows)
+    if include_oecd_average:
+        avg = df_oecd.groupby('Year')[gap_col].mean().reset_index()
+        out = pd.concat([
+            out,
+            pd.DataFrame({
+                'year': avg['Year'].astype(int),
+                'code': 'OECD',
+                'country': 'OECD average',
+                'gap': avg[gap_col],
+                'highlighted': False,
+                'series': 'OECD average',
+            }),
+        ], ignore_index=True)
+    path = DATAWRAPPER_DIR / csv_name
+    out.to_csv(path, index=False)
+    print(f'Saved Datawrapper CSV: {path}')
+    return path
+
+
+def export_hale_levels_csv(df, value_col, selected_countries, csv_name):
+    """Long-format CSV for male/female HALE level time series."""
+    df = df.copy()
+    if 'Country' not in df.columns:
+        df['Country'] = df['Code'].map(code_to_who_country)
+    male_col = f'{value_col}_Male'
+    female_col = f'{value_col}_Female'
+    selected = set(selected_countries or [])
+    rows = []
+    for _, row in df.iterrows():
+        for sex, col in [('Male', male_col), ('Female', female_col)]:
+            rows.append({
+                'year': int(row['Year']),
+                'code': row['Code'],
+                'country': row['Country'],
+                'sex': sex,
+                'value': row[col],
+                'highlighted': row['Code'] in selected,
+            })
+    path = DATAWRAPPER_DIR / csv_name
+    pd.DataFrame(rows).to_csv(path, index=False)
+    print(f'Saved Datawrapper CSV: {path}')
+    return path
 ```
 
 ## Load Life Expectancy Data
@@ -290,6 +356,7 @@ fig, ax = plot_gap_timeseries(
     logo=True
 )
 plt.savefig('figs/le_gap_timeseries_selected.png', dpi=150, bbox_inches='tight')
+export_gap_timeseries_csv(le_temporal, 'LE_gap', selected_countries, 'le_gap_timeseries_selected.csv')
 plt.show()
 ```
 
@@ -340,6 +407,7 @@ fig, ax = plot_gap_timeseries(
     logo=True
 )
 plt.savefig('figs/hale_gap_timeseries_blog_match.png', dpi=150, bbox_inches='tight')
+export_gap_timeseries_csv(hale_temporal, 'HALE_gap', selected_countries, 'hale_gap_timeseries_blog_match.csv')
 plt.show()
 ```
 
@@ -371,6 +439,7 @@ fig, ax = plot_male_female_levels_timeseries(
     logo=True,
 )
 plt.savefig('figs/hale_levels_male_female_timeseries.png', dpi=150, bbox_inches='tight')
+export_hale_levels_csv(hale_temporal, 'HALE_Years', hale_levels_highlight, 'hale_levels_male_female_timeseries.csv')
 plt.show()
 ```
 
@@ -489,6 +558,30 @@ fig, ax = plot_gap_timeseries(
     logo=True
 )
 plt.savefig('figs/road_traffic_gap_timeseries_selected.png', dpi=150, bbox_inches='tight')
+export_gap_timeseries_csv(
+    road_injuries_temporal, 'Gap_RoadTraffic', selected_countries,
+    'road_traffic_gap_timeseries_selected.csv',
+)
+plt.show()
+```
+
+### Road Traffic death rates (same highlights)
+
+Sex-averaged rate = ``Mid_RoadTraffic`` (male + female) / 2, per 100,000.
+
+```python
+fig, ax = plot_rate_timeseries(
+    road_injuries_temporal.reset_index(),
+    'Mid_RoadTraffic',
+    selected_countries=selected_countries,
+    label_lines=True,
+    title='Road Traffic Death Rates',
+    subtitle='OECD countries, 2000–2023',
+    ylabel='Road Traffic Death Rate (per 100,000)',
+    subtext='Source: Global Burden of Disease from IHME',
+    logo=True,
+)
+plt.savefig('figs/road_traffic_rates_timeseries_selected.png', dpi=150, bbox_inches='tight')
 plt.show()
 ```
 
@@ -698,6 +791,10 @@ fig, ax = plot_gap_timeseries(
 )
 plt.ylim(-1, 65)
 plt.savefig('figs/homicide_gap_timeseries_selected.png', dpi=150, bbox_inches='tight')
+export_gap_timeseries_csv(
+    homicide_temporal, 'Gap_Homicide', selected_countries,
+    'homicide_gap_timeseries_selected.csv',
+)
 plt.show()
 ```
 
@@ -783,6 +880,10 @@ fig, ax = plot_gap_timeseries(
     logo=True
 )
 plt.savefig('figs/suicide_gap_timeseries_selected.png', dpi=150, bbox_inches='tight')
+export_gap_timeseries_csv(
+    suicide_temporal, 'Gap_Suicide', selected_countries,
+    'suicide_gap_timeseries_selected.csv',
+)
 plt.show()
 ```
 
@@ -1247,6 +1348,10 @@ fig, ax = plot_gap_timeseries(
     logo=True
 )
 plt.savefig('figs/drug_disorders_gap_timeseries_selected.png', dpi=150, bbox_inches='tight')
+export_gap_timeseries_csv(
+    drug_disorders_temporal, 'Gap_DrugDisorder', selected_countries,
+    'drug_disorders_gap_timeseries_selected.csv',
+)
 plt.show()
 ```
 

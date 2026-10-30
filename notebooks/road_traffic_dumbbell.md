@@ -95,6 +95,12 @@ output_path.parent.mkdir(exist_ok=True)
 plt.savefig(output_path, dpi=150, bbox_inches='tight')
 plt.show()
 print(f"Saved: {output_path}")
+
+datawrapper_dir = Path('datawrapper')
+datawrapper_dir.mkdir(parents=True, exist_ok=True)
+dw_csv = datawrapper_dir / 'road_traffic_dumbbell_europe.csv'
+df.to_csv(dw_csv, index=False)
+print(f"Saved Datawrapper CSV: {dw_csv}")
 ```
 
 ```python
