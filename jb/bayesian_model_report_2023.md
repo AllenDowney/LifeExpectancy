@@ -657,4 +657,6 @@ Percentage of actual Life Expectancy gap explained by positive-contributing (gap
 
 7. **Age-Dependent Effects**: Counterfactual analysis reveals that causes affecting younger individuals (drug disorders, homicide) have larger effects on LE than HALE, while competing-risk causes in older age (diabetes, cardiovascular) have larger effects on HALE than LE. This pattern provides insights into how different causes affect lifespan vs healthy lifespan across the life course.
 
+---
 
+<small>Source: Institute for Health Metrics and Evaluation. Used with permission. All rights reserved.</small>

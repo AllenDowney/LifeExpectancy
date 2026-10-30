@@ -26,3 +26,7 @@ Both versions use the same priors: Normal(0, 1) for the coefficients, Normal(0, 
 The two fits agree to within Monte Carlo error. The posterior means of the coefficients differ by less than 0.002 on the standardized scale, and the country intercepts correlate at r = 0.99999.
 
 To run the notebooks yourself, see the [README](https://github.com/AllenDowney/LifeExpectancy/tree/main/examples/python-to-r) in that folder.
+
+---
+
+<small>Source: Institute for Health Metrics and Evaluation. Used with permission. All rights reserved.</small>

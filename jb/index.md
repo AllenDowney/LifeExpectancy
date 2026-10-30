@@ -21,6 +21,7 @@ This site has the technical details behind the published work. The code and data
   3. [How Much of the Life Expectancy Gap Could We Close?](blog3_counterfactual.md)
   4. [International Patterns in the Life Expectancy Gap](blog4_international.md)
   5. [Healthy Life Expectancy and the Gender Gap](blog5_hale.md)
+- **Talk:** "Counterfactual Analysis with Bayesian Models: What Drives the Life Expectancy Gap?", ODSC East 2026: [notes](https://www.allendowney.com/blog/2026/05/01/planning-for-your-midlife-crisis/) and [slides](https://docs.google.com/presentation/d/e/2PACX-1vSiwjA6Mi95poqGQJiXw7Mdy0BgPa-aEmVhJHXwP35QRjt2dduEEN53yZi4fnpAReVaS-EDWS3CwMt1/pub?start=false&loop=false&delayms=3000).
 
 ## Contents
 
@@ -62,7 +63,7 @@ We validate our results by comparing models using WHO indicators with models usi
 
 ## Data Sources
 
-- **IHME Global Burden of Disease 2023**: HALE and cause-specific death rates by sex, 2000–2023
+- **IHME Global Burden of Disease 2023**: HALE and cause-specific death rates by sex, 2000–2023. IHME's terms don't allow redistributing the data, so it is not in the repository; see the [Data Inventory](data_inventory.md) for how to download it
 - **Our World in Data**: life expectancy by sex, 2000–2023, combining the Human Mortality Database and UN World Population Prospects
 - **WHO Global Health Observatory**: an earlier source for HALE, life expectancy, and death rates (2000–2021), used in the [Validation Experiments](validation.md)
 
@@ -93,3 +94,7 @@ For detailed findings, counterfactual analysis, and uncertainty quantification, 
 ## License
 
 The text of this site is under [Creative Commons Attribution 4.0 (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/); the [code](https://github.com/AllenDowney/LifeExpectancy) is under the MIT License.
+
+---
+
+<small>Source: Institute for Health Metrics and Evaluation. Used with permission. All rights reserved.</small>

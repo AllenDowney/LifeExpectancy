@@ -457,3 +457,6 @@ These differences suggest that:
 
 5. **Alcohol-related interventions** remain important but have lower importance than in previous analyses, reflecting the use of IHME data which defines alcohol-related mortality more narrowly than WHO's broader "alcohol-attributable" definition.
 
+---
+
+<small>Source: Institute for Health Metrics and Evaluation. Used with permission. All rights reserved.</small>

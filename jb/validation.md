@@ -1602,4 +1602,6 @@ The removal of Childhood has **minimal impacts** on model results:
 
 4. **Accept the model simplification**: The minimal impact on model performance confirms that removing Childhood is a reasonable simplification that does not harm model fit.
 
+---
 
+<small>Source: Institute for Health Metrics and Evaluation. Used with permission. All rights reserved.</small>

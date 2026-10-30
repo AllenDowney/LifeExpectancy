@@ -168,3 +168,7 @@ In the next article, we'll present a similar analysis for health life expectancy
 ---
 
 *Next: [Healthy life expectancy: quality, not just quantity]*
+
+---
+
+<small>Source: Institute for Health Metrics and Evaluation. Used with permission. All rights reserved.</small>

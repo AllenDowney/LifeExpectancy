@@ -230,3 +230,7 @@ With this model, we can attribute changes in life expectancy to specific causes 
 *Next: [Causal modeling: what drives the life expectancy gap?]*
 
 [^iceland]: Corrected October 2026. An earlier version said Israel; the smallest gap was in Iceland. Israel's smallest gap was 3.4 years, in 2013.
+
+---
+
+<small>Source: Institute for Health Metrics and Evaluation. Used with permission. All rights reserved.</small>

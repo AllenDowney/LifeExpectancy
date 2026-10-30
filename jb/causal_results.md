@@ -215,3 +215,7 @@ Comparing **`resid_*`** to **Bayesian `Gap_*`** posteriors below is **not** appl
 | Forest: Model 1c | `notebooks/figs/causalpy_le_linear_forest_model1c_resid_gap_betas.png` |
 | Forest: Model 1b | `notebooks/figs/causalpy_le_linear_forest_model1b_gap_betas.png` |
 | Bayesian LE β (reference) | `notebooks/tables/beta_coefficients_le_ihme_nomid_nogrw_y2023_covid.html` |
+
+---
+
+<small>Source: Institute for Health Metrics and Evaluation. Used with permission. All rights reserved.</small>

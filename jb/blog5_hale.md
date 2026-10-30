@@ -169,3 +169,7 @@ Public health and safety policies can mitigate the consequences of natural vulne
 Generalizing from this example, let me suggest the principle that if a particular group suffers harm at higher rates, we should allocate resources to identify causes and look for solutions.
 Further, a policy to address that harm should include general efforts to help everyone as well as targeted efforts to help groups with the highest rates -- in proportions that depend on their effectiveness.
 And finally, we should avoid taking an observed difference in the present and making it a benchmark for the future.
+
+---
+
+<small>Source: Institute for Health Metrics and Evaluation. Used with permission. All rights reserved.</small>

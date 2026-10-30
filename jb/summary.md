@@ -304,3 +304,6 @@ The gender gap in life expectancy and healthy life expectancy is substantially e
 
 The persistent nature of the gap across countries and time suggests that **structural and cultural factors**—not just individual choices—drive these patterns. Addressing the gap requires both universal public health interventions and targeted efforts to engage men in prevention and treatment services, recognizing that masculine norms and structural barriers can limit men's access to help.
 
+---
+
+<small>Source: Institute for Health Metrics and Evaluation. Used with permission. All rights reserved.</small>

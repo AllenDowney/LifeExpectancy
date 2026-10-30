@@ -665,3 +665,6 @@ The changes in indicator importance and counterfactual effects indicate:
 - Earlier cutoff years may result in using older data for some countries, which may affect model performance and indicator importance
 - Each analysis uses one year of data per country (the most recent year ≤ cutoff year)
 
+---
+
+<small>Source: Institute for Health Metrics and Evaluation. Used with permission. All rights reserved.</small>

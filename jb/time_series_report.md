@@ -695,3 +695,7 @@ The following tables summarize which countries have the highest and lowest means
 - Gender gaps are calculated as Male - Female for predictors, Female - Male for targets (HALE/LE)
 - Linear trends (slopes) provide a simple summary but may not capture non-linear patterns
 - Mean values provide overall burden but may mask important temporal variation
+
+---
+
+<small>Source: Institute for Health Metrics and Evaluation. Used with permission. All rights reserved.</small>

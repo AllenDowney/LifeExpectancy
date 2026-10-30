@@ -1169,3 +1169,6 @@ This table shows how WHO and IHME indicators correspond to each other, helping i
 
 5. **Target variables**: HALE and Life Expectancy are only available from WHO and serve as the primary target variables for the analysis.
 
+---
+
+<small>Source: Institute for Health Metrics and Evaluation. Used with permission. All rights reserved.</small>

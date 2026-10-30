@@ -474,3 +474,6 @@ The percentage plots show what proportion of the actual gap is accounted for by 
 
 4. **Consider pandemic-specific models**: Future work could develop models that explicitly account for pandemic effects, such as interactions between COVID-19 and other causes or time-varying coefficients during the pandemic period.
 
+---
+
+<small>Source: Institute for Health Metrics and Evaluation. Used with permission. All rights reserved.</small>

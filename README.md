@@ -37,6 +37,10 @@ The main model is a Bayesian hierarchical panel model, written in [PyMC](https:/
 - **Life expectancy by sex:** [Our World in Data](https://ourworldindata.org/grapher/life-expectation-at-birth-by-sex), downloaded by [`notebooks/download_owid_le.py`](notebooks/download_owid_le.py).
 - **WHO Global Health Observatory:** used to check the results against a second source ([`notebooks/who_data.py`](notebooks/who_data.py)).
 
+IHME's terms don't allow redistributing their data, so it is not included; download it from IHME. Results derived from it carry IHME's required notice:
+
+> Source: Institute for Health Metrics and Evaluation. Used with permission. All rights reserved.
+
 The raw data goes in `data/`, which is not in the repository. Notebooks write intermediate files, model traces, figures, and tables to `notebooks/interim/`, `nc/`, `figs/`, and `tables/`, which are not tracked either.
 
 ## Running the analysis

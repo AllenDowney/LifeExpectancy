@@ -95,3 +95,7 @@ But this pattern is unusual; in most OECD countries, the total contribution decr
 ---
 
 *Next: [Blog Post 4: International patterns and policy](blog4_international.md)*
+
+---
+
+<small>Source: Institute for Health Metrics and Evaluation. Used with permission. All rights reserved.</small>

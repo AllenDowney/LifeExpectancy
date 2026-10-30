@@ -54,4 +54,6 @@ This table shows how the gender gap for each cancer type is allocated across the
 ## Conclusion
 The "attributable" gender gap in cancer is largely a story of Behavioral and Metabolic risks. The USA and OECD gaps are dominated by lung cancer (Behavioral/Smoking), while Iceland's gap is more evenly distributed across liver, esophageal, and lung cancers. In all regions, breast cancer remains the primary driver of higher female cancer mortality.
 
+---
 
+<small>Source: Institute for Health Metrics and Evaluation. Used with permission. All rights reserved.</small>

@@ -288,3 +288,6 @@ This exploratory analysis provides the foundation for:
 2. **Counterfactual Analysis**: Understanding how changes in predictor values would affect gender gaps
 3. **Policy Implications**: Identifying which factors are most important for reducing gender gaps in healthy life expectancy
 
+---
+
+<small>Source: Institute for Health Metrics and Evaluation. Used with permission. All rights reserved.</small>
