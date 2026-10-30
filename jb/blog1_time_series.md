@@ -40,7 +40,7 @@ A positive gap means women live longer. The dashed line shows the OECD average.
 
 The differences between countries are large.
 The largest gap in the dataset was 12.7 years in Lithuania in 2007.
-The smallest was just 2.5 years in Israel in 2015.
+The smallest was just 2.5 years in Iceland in 2015.[^iceland]
 
 In 2023 the largest gaps are in Lithuania, Latvia, and Estonia, all greater than 8 years.
 The smallest gaps are in Norway, the Netherlands, Luxembourg, and New Zealand, all less than 3.5 years.
@@ -229,4 +229,4 @@ With this model, we can attribute changes in life expectancy to specific causes 
 
 *Next: [Causal modeling: what drives the life expectancy gap?]*
 
-
+[^iceland]: Corrected October 2026. An earlier version said Israel; the smallest gap was in Iceland. Israel's smallest gap was 3.4 years, in 2013.

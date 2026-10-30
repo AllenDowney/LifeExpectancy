@@ -44,8 +44,6 @@ project:
       children:
         - file: bayesian_model_report_2023.md
           title: Bayesian Panel Data Model
-        - file: causal_results.md
-          title: Causal Assumptions
         - file: validation.md
           title: Validation Experiments
         - file: data_inventory.md
@@ -64,6 +62,8 @@ project:
           title: Temporal Analysis
         - file: tech_report.md
           title: Elastic Net Models
+        - file: causal_results.md
+          title: Causal Assumptions
         - file: neoplasms_report.md
           title: Cancer Drilldown
 

@@ -949,12 +949,12 @@ Data for investigating specific drivers of gender gaps within broader categories
 
 **Relevance**: HALE measures the average number of years that a person can expect to live in "full health" by taking into account years lived in less than full health due to disease and/or injury. This is the **primary target variable** for the analysis. The gender gap (Female HALE - Male HALE) measures the difference in healthy life expectancy between women and men.
 
-### IHME HALE (Healthy Life Expectancy) - Alternative Target Variable Source
+### IHME HALE (Healthy Life Expectancy) - Target Variable Source
 
 **Indicator**: HALE (Healthy life expectancy)  
 **Source**: IHME Global Burden of Disease (GBD) 2023  
 **File**: `data/IHME-GBD_2023_DATA-fc42b373-1.csv`  
-**Status**: ⚠️ Downloaded, exploration pending
+**Status**: ✅ Used as the HALE outcome in the main model (2000–2023)
 
 **Data Details**:
 - **Records**: 13,872 (HALE data only)

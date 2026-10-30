@@ -8,7 +8,7 @@ description: "Which causes of death drive the life expectancy gender gap? A Baye
 
 ---
 
-In the [previous article](https://allendowney.substack.com/p/the-gender-gap-in-life-expectancy), we showed that the gender gap in life expectancy varies between countries, from 2.5 years in Israel to 12.7 years in Lithuania, and in some countries it has changed substantially over time.
+In the [previous article](https://allendowney.substack.com/p/the-gender-gap-in-life-expectancy), we showed that the gender gap in life expectancy varies between countries, from 2.5 years in Iceland[^iceland] to 12.7 years in Lithuania, and in some countries it has changed substantially over time.
 
 As a first step toward understanding these differences, we looked at death rates from several causes with large gender gaps: drug disorders, homicide, suicide, and road traffic.
 We concluded that gender gaps in these death rates are contingent — that is, they are driven by history, economics, culture, and public policy.
@@ -178,3 +178,5 @@ But it complicates the model without improving fit, so we removed it for parsimo
 ---
 
 *Next: [Counterfactuals: How much of the gap could we close?]*
+
+[^iceland]: Corrected October 2026. An earlier version said Israel; the smallest gap was in Iceland. Israel's smallest gap was 3.4 years, in 2013.

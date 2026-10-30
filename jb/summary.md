@@ -6,11 +6,11 @@ description: "Why do women live longer than men? A summary of what drives the li
 
 ## Executive Summary
 
-Across all high-income countries, women live longer than men—both in total lifespan (Life Expectancy) and in years lived in good health (Healthy Life Expectancy or HALE). In OECD countries, women live an average of **5.7 years longer** than men, and enjoy **2.9 more years of healthy life**. 
+Across all high-income countries, women live longer than men—both in total lifespan (Life Expectancy) and in years lived in good health (Healthy Life Expectancy or HALE). In OECD countries, women live an average of **5.1 years longer** than men, and enjoy **2.2 more years of healthy life** (2023). 
 
 This report analyzes what drives these gender gaps by examining the relationship between cause-specific mortality rates and longevity outcomes across 37 OECD countries from 2000-2023. We find that the gap is primarily explained by **external causes of death where men have substantially higher mortality rates**: road traffic accidents, suicide, homicide, and drug overdoses. Together, these behavioral and injury-related factors account for the majority of the observed gender gap in both lifespan and healthy years.
 
-**Key Finding**: In the United States, addressing just **four factors** could reduce the gender gap by approximately **2.5 years in Life Expectancy** and **2.1 years in Healthy Life Expectancy**: road traffic safety, suicide prevention, drug overdose reduction, and homicide reduction.
+**Key Finding**: In the United States, addressing just **four factors** could reduce the gender gap by approximately **2.4 years in Life Expectancy** and **2.1 years in Healthy Life Expectancy**: road traffic safety, suicide prevention, drug overdose reduction, and homicide reduction.
 
 ## Motivation
 
@@ -57,24 +57,24 @@ The analysis reveals that **external causes of death** are the primary drivers o
 
 **Top Contributors to the Gap** (larger male excess mortality → larger gap favoring women):
 
-1. **Road Traffic Accidents** (β = 0.46 for HALE, 0.45 for LE): The single strongest predictor. Countries where men die in traffic accidents at much higher rates than women have substantially larger gender gaps in longevity.
+1. **Road Traffic Accidents** (β = 0.46 for HALE, 0.43 for LE): The single strongest predictor. Countries where men die in traffic accidents at much higher rates than women have substantially larger gender gaps in longevity.
 
 2. **Suicide** (β = 0.36 for HALE, 0.36 for LE): The second or third strongest factor. Higher male suicide rates are strongly associated with larger longevity gaps.
 
-3. **Homicide** (β = 0.31 for HALE, 0.44 for LE): Higher male homicide victimization contributes substantially to the gap, especially for total lifespan.
+3. **Homicide** (β = 0.31 for HALE, 0.42 for LE): Higher male homicide victimization contributes substantially to the gap, especially for total lifespan.
 
 4. **Chronic Respiratory Disease** (β = 0.37 for HALE, 0.30 for LE): A significant contributor, possibly reflecting smoking-related differences.
 
-5. **Cancer/Neoplasms** (β = 0.24 for HALE, 0.31 for LE): Gender differences in cancer mortality contribute moderately to longevity gaps.
+5. **Cancer/Neoplasms** (β = 0.24 for HALE, 0.32 for LE): Gender differences in cancer mortality contribute moderately to longevity gaps.
 
 **Factors with "Competing Risk" Effects** (counterintuitive negative relationships):
 
 - **Cardiovascular Disease** (β = -0.27 for HALE, -0.19 for LE): Countries with larger male cardiovascular mortality *excess* actually have *smaller* longevity gaps. This reflects a "competing risks" phenomenon: in populations where people survive other causes (road traffic, suicide, etc.) to reach older ages, cardiovascular disease becomes the dominant cause of death, and gender differences in CVD narrow.
 
-- **Diabetes** (β = -0.13 for HALE, -0.11 for LE): Similar competing risk pattern.
+- **Diabetes** (β = -0.13 for HALE, -0.09 for LE): Similar competing risk pattern.
 
 **COVID-19's Impact**:
-- Small positive effect (β = 0.06 for HALE, 0.11 for LE)
+- Small positive effect (β = 0.06 for HALE, 0.09 for LE)
 - By 2023, COVID's contribution had largely resolved
 - Larger effect on total lifespan than on healthy years
 
@@ -90,22 +90,22 @@ To illustrate the practical implications, we computed what would happen to the U
 
 | Factor | Potential Reduction (years) | Best-in-Class Example |
 |--------|------------------------------|----------------------|
-| **Road Traffic** | -0.83 | Iceland 2017 |
+| **Road Traffic** | -0.81 | Iceland 2017 |
 | **Drug Disorders** | -0.77 | Japan 2013 |
 | **Suicide** | -0.52 | Greece 2002 |
-| **Homicide** | -0.29 | Zero gap |
+| **Homicide** | -0.28 | Zero gap |
 | **Liver Disease** | -0.22 | Iceland 2001 |
-| **Cancer** | -0.19 | Zero gap |
-| **Alcohol** | -0.16 | Colombia 2016 |
+| **Cancer** | -0.20 | Zero gap |
+| **Alcohol** | -0.15 | Colombia 2016 |
 | **Unintentional Injury** | -0.06 | Zero gap |
 | **COVID-19** | -0.01 | Zero gap |
 
 **Gap-Widening Factors** (due to competing risks):
-- Diabetes: +0.23 years
+- Diabetes: +0.20 years
 - Chronic Respiratory: +0.18 years  
-- Cardiovascular: +0.16 years
+- Cardiovascular: +0.15 years
 
-**Net Potential Reduction: 2.5 years** in the Life Expectancy gap (currently 5.7 years globally)
+**Net Potential Reduction: 2.5 years** in the Life Expectancy gap (the US gap was 5.0 years in 2023)
 
 #### How These Factors Have Evolved Over Time: Life Expectancy
 
@@ -146,7 +146,7 @@ The static 2023 snapshot tells us where we are today, but the temporal analysis 
 - Cardiovascular: +0.23 years
 - Chronic Respiratory: +0.22 years
 
-**Net Potential Reduction: 1.7 years** in the HALE gap (currently ~2.9 years globally)
+**Net Potential Reduction: 1.9 years** in the HALE gap (the US gap was 2.0 years in 2023)
 
 #### How These Factors Have Evolved Over Time: Healthy Life Expectancy
 
@@ -209,7 +209,7 @@ Based on the magnitude of potential effects and feasibility of interventions:
 
 **Tier 1 - High Impact & High Feasibility:**
 
-1. **Road Traffic Safety** (potential: -0.83 years LE, -0.87 years HALE in USA)
+1. **Road Traffic Safety** (potential: -0.81 years LE, -0.87 years HALE in USA)
    - **Why it matters**: Single largest contributor across both HALE and LE
    - **Amenability to intervention**: Very high. Proven interventions include:
      - Infrastructure improvements (roundabouts, protected bike lanes, median barriers)
@@ -242,7 +242,7 @@ Based on the magnitude of potential effects and feasibility of interventions:
    - **Challenge**: Requires addressing underlying addiction, poverty, and despair
    - **Note**: Men account for ~70% of overdose deaths; both universal and targeted interventions needed
 
-4. **Violence Reduction** (potential: -0.29 years LE, -0.20 years HALE in USA)
+4. **Violence Reduction** (potential: -0.28 years LE, -0.20 years HALE in USA)
    - **Why it matters**: Substantial contributor, especially in countries with higher violence rates; larger effect on total lifespan as homicides affect younger individuals
    - **Amenability to intervention**: Moderate. Evidence-based approaches include:
      - Community violence intervention programs
@@ -254,7 +254,7 @@ Based on the magnitude of potential effects and feasibility of interventions:
 
 **Tier 3 - Moderate Impact:**
 
-5. **Alcohol-Related Harm** (potential: -0.16 years in USA)
+5. **Alcohol-Related Harm** (potential: -0.15 years in USA)
    - Interventions: Pricing policies, treatment access, drunk driving prevention
    - Note: Substantial overlap with road traffic (drunk driving) and liver disease (approximately 40-50% of liver disease deaths are alcohol-attributable). Reducing alcohol consumption would reduce multiple components simultaneously
 

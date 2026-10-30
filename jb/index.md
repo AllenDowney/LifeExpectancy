@@ -30,7 +30,6 @@ This site has the technical details behind the published work. The code and data
 **Methods and results**
 
 - [Bayesian Panel Data Model](bayesian_model_report_2023.md): the **primary analysis**, a Bayesian hierarchical panel model of the LE and HALE gender gaps in OECD countries, 2000–2023, using IHME HALE and OWID life expectancy data.
-- [Causal Assumptions](causal_results.md): minimal causal diagrams (DAGs) for the model, fixed-effects regressions that implement them, and a comparison with the Bayesian estimates.
 - [Validation Experiments](validation.md): checks that the conclusions hold when WHO indicators are replaced with IHME indicators.
 - [Data Inventory](data_inventory.md): data sources, indicators, and download settings.
 - [Python to R](python_to_r.md): an early version of the model written in both PyMC and R (brms), with a comparison showing the two agree.
@@ -44,6 +43,7 @@ These reports document earlier stages of the analysis. They are kept for referen
 - [Time Series Analysis](time_series_report.md): trends in the gaps and in cause-specific death rates.
 - [Temporal Analysis](temporal.md): cross-sectional models at five-year intervals, to see how the important factors changed.
 - [Elastic Net Models](tech_report.md): the cross-sectional regression models that preceded the Bayesian model.
+- [Causal Assumptions (working note)](causal_results.md): minimal causal diagrams (DAGs) for the model, fixed-effects regressions that implement them, and a comparison with the Bayesian estimates.
 - [Cancer Drilldown](neoplasms_report.md): the gender gap in cancer mortality by cancer type and risk factor.
 
 ## Methodology
@@ -62,8 +62,9 @@ We validate our results by comparing models using WHO indicators with models usi
 
 ## Data Sources
 
-- **WHO Global Health Observatory (GHO) API**: Provides HALE, life expectancy, and various cause-specific mortality indicators
-- **IHME Global Burden of Disease**: Provides additional cause-specific mortality indicators with better temporal coverage
+- **IHME Global Burden of Disease 2023**: HALE and cause-specific death rates by sex, 2000–2023
+- **Our World in Data**: life expectancy by sex, 2000–2023, combining the Human Mortality Database and UN World Population Prospects
+- **WHO Global Health Observatory**: an earlier source for HALE, life expectancy, and death rates (2000–2021), used in the [Validation Experiments](validation.md)
 
 ## Key Findings
 

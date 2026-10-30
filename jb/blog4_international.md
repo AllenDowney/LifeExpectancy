@@ -2,7 +2,7 @@
 description: "The leading causes of the life expectancy gender gap by OECD country and region, and policy lessons from road safety in Europe, alcohol, and violence."
 ---
 
-# International Patterns: Policies and Prevention
+# International Patterns in the Life Expectancy Gap
 
 *This is Part 4 in a series on gender gaps in life expectancy, what causes them, and what we can do about it.*
 
