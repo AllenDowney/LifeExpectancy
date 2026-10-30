@@ -2,4 +2,4 @@
 
 User-agent: *
 Allow: /
-Sitemap: http://localhost:3047/sitemap.xml
+Sitemap: https://allendowney.github.io/LifeExpectancy/sitemap.xml
