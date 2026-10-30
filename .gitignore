@@ -236,3 +236,35 @@ notebooks/interim/
 notebooks/logs/
 notebooks/*_executed.ipynb
 notebooks/*.nbconvert.ipynb
+
+# --- Private working files (planning, drafts, editor config); not part of the public repo ---
+/PROJECT_BOARD.md
+/CLAUDE.md
+/plan.md
+/blog_plan.md
+/blog2_outline.md
+/data_plan.md
+/datawrapper.md
+/migration_plan.md
+/model_development.md
+/planning/
+/report/
+/.cursor/
+/.vscode/
+jb/policy_report_planning.md
+jb/talk_ds_conference_outline.md
+jb/report.md
+jb/blog3_outline.md
+jb/contribution_changes_2000_2023.md
+quarto/QUARTO_SITE_PLAN.md
+
+# Pages written into jb/ by notebooks/extract_*.py (not in the site's table of contents)
+jb/*_gap_change_*.md
+jb/leading_factors_by_region.md
+
+# Notebooks: the jupytext .md files are canonical; .ipynb pairs are generated
+notebooks/*.ipynb
+!notebooks/process.ipynb
+
+# Partner logo, not redistributed; utils.add_logo uses it only with INCLUDE_LOGO=1
+notebooks/logo-hq*.png

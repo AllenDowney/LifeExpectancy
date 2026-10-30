@@ -659,8 +659,15 @@ def remove_spines():
     ax.yaxis.set_ticks_position("left")
 
 
+# The logo is not in the repo. To stamp it on figures, put the image in
+# notebooks/ and set INCLUDE_LOGO=1 in the environment (or utils.INCLUDE_LOGO = True).
+INCLUDE_LOGO = os.environ.get("INCLUDE_LOGO", "") == "1"
+
+
 def add_logo(filename="logo-hq-small.png", location=(1.0, -0.35), size=(0.5, 0.25), align_to_axes=False):
     """Add a logo inside an inset axis positioned relative to the main plot.
+
+    Does nothing unless INCLUDE_LOGO is true and the file exists.
 
     Args:
         filename: path to logo image
@@ -670,8 +677,11 @@ def add_logo(filename="logo-hq-small.png", location=(1.0, -0.35), size=(0.5, 0.2
             if False, position relative to figure (default)
 
     Returns:
-        The inset axis containing the logo
+        The inset axis containing the logo, or None if no logo was added
     """
+    if not INCLUDE_LOGO or not os.path.isfile(filename):
+        return None
+
     logo = mpimg.imread(filename)
 
     # Create an inset axis in the given location
