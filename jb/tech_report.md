@@ -1,3 +1,7 @@
+---
+description: "Cross-sectional Elastic Net regression models of the gender gaps in life expectancy and HALE, which came before the Bayesian panel model."
+---
+
 # Gender Gaps in Life Expectancy
 
 ## Introduction

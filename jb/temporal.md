@@ -1,3 +1,7 @@
+---
+description: "How the factors that explain the life expectancy gender gap changed over time, from cross-sectional models fit at five-year intervals, 2000 to 2019."
+---
+
 # Temporal Analysis: Evolution of Health Patterns Over Time
 
 ## Purpose

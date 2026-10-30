@@ -1,3 +1,7 @@
+---
+description: "The gender gap in healthy life expectancy (HALE): which causes of death drive it, how it compares with life expectancy, and counterfactuals for the US."
+---
+
 # Healthy Life Expectancy and the Gender Gap
 
 *This is Part 5 in a series on gender gaps in life expectancy, what causes them, and what we can do about it.*

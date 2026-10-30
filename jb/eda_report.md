@@ -1,3 +1,7 @@
+---
+description: "Exploratory data analysis of the life expectancy and HALE gender gaps in OECD countries, and of the cause-specific death rates used as predictors."
+---
+
 # Exploratory Data Analysis: Summary Report
 
 ## Purpose

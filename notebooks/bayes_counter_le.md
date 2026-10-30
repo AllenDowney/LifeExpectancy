@@ -50,6 +50,8 @@ from fig_utils import PREDICTOR_LABELS
 from counterfactual_utils import (
     compute_importance_summary,
     plot_counterfactual_forest,
+    plot_counterfactual_by_type,
+    plot_counterfactual_bar,
     plot_country_intercepts,
     format_counterfactual_table,
     compute_gap_extremes,
@@ -483,6 +485,17 @@ plot_counterfactual_forest(
     subtext='Source: Bayesian hierarchical panel model. IHME cause-specific mortality, OWID Life Expectancy.',
     logo=True
 )
+# By-type and bar versions of the same results (used in jb/bayesian_model_report_2023.md)
+for plot_fn in [plot_counterfactual_by_type, plot_counterfactual_bar]:
+    plot_fn(
+        counterfactual_results,
+        output_prefix=f'counterfactual_effects_{country_lower}_{latest_year}_le',
+        target_name='Life Expectancy gap',
+        country=COUNTRY_CODE,
+        year=latest_year,
+        subtext='Source: Bayesian hierarchical panel model. IHME cause-specific mortality, OWID Life Expectancy.',
+        logo=True
+    )
 forest_rows = []
 for r in counterfactual_results:
     forest_rows.append({

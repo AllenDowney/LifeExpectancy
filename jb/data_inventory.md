@@ -1,3 +1,7 @@
+---
+description: "Data sources for the life expectancy gender gap analysis: IHME Global Burden of Disease, Our World in Data, and WHO indicators, with download settings."
+---
+
 # Data Inventory
 
 ## Data Collection Summary

@@ -1,3 +1,7 @@
+---
+description: "How much of the US life expectancy gender gap could close if deaths from road traffic, drugs, suicide, and homicide fell to the best observed levels?"
+---
+
 # How Much of the Life Expectancy Gap Could We Close?
 
 *This is Part 3 in a series on gender gaps in life expectancy, what causes them, and what we can do about it. 

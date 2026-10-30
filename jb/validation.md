@@ -1,3 +1,7 @@
+---
+description: "Validation experiments: replacing WHO indicators with IHME indicators one at a time to check that conclusions about the gender gap are stable."
+---
+
 # Model Validation: Replacing WHO Indicators with IHME Indicators
 
 ## Purpose

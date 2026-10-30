@@ -1,3 +1,7 @@
+---
+description: "Causal diagrams (DAGs) for the life expectancy gap model, fixed-effects regressions that implement them, and a comparison with the Bayesian estimates."
+---
+
 # Causal framing and CausalPy Models 1 / 1b / 1c: results note
 
 This note summarizes **fixed-effects associational** regressions in **`notebooks/causal_model.md`**, framed by **minimal DAGs**, alongside the main **Bayesian hierarchical** LE model (`notebooks/bayesian_model.md`). It compares **standardized `Gap_*` slopes** (and **residualized** **`Gap_*_resid`** in Model 1c) to the **LE** posterior from the Bayesian notebook.

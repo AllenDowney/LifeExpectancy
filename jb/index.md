@@ -1,4 +1,8 @@
-# Gender Gaps in Life Expectancy
+---
+description: "Technical reports behind an analysis of the gender gap in life expectancy in OECD countries: a Bayesian panel model, counterfactuals, data, and code."
+title: "The Gender Gap in Life Expectancy: Technical Reports"
+thumbnail: figs/le_gap_timeseries_selected.png
+---
 
 ## About This Project
 
@@ -6,35 +10,41 @@ In most countries, women live longer than men. This difference is often assumed 
 
 This project explores differences in life expectancy and health-adjusted life expectancy (HALE) between countries, in order to identify the factors that contribute to the observed gender gaps and to understand what it would take to close those gaps by improving health outcomes for both men and women.
 
+This site has the technical details behind the published work. The code and data are on [GitHub](https://github.com/AllenDowney/LifeExpectancy).
+
+## Published work
+
+- **Policy paper:** [Is it inevitable that men die younger than women? Looking at evidence and policy solutions](https://aibm.org/research/is-it-inevitable-that-men-die-younger-than-women-looking-at-evidence-and-policy-solutions/), American Institute for Boys and Men, July 2026.
+- **Blog series** on [Probably Overthinking It](https://allendowney.substack.com/), February to May 2026, also on this site:
+  1. [The Gender Gap in Life Expectancy](blog1_time_series.md)
+  2. [What Drives the Life Expectancy Gender Gap?](blog2_model.md)
+  3. [How Much of the Life Expectancy Gap Could We Close?](blog3_counterfactual.md)
+  4. [International Patterns in the Life Expectancy Gap](blog4_international.md)
+  5. [Healthy Life Expectancy and the Gender Gap](blog5_hale.md)
+
 ## Contents
 
-- [Executive Summary](summary.md) - **Start here**: A concise, accessible summary of the project's motivation, methodology, key findings, and policy implications. Answers the question: "Why do women live longer than men, and what could be done about it?"
+- [Executive Summary](summary.md): **start here** for the motivation, methods, key findings, and policy implications.
+- [Policy paper](https://aibm.org/research/is-it-inevitable-that-men-die-younger-than-women-looking-at-evidence-and-policy-solutions/) (AIBM): the evidence and policy recommendations, as published.
 
-- [Policy Report](policy_report.md) - Evidence and policy narrative built from the Bayesian panel analysis, OECD time series, counterfactuals, and international examples (road safety, substances, violence, cancer).
+**Methods and results**
 
-- [Bayesian Panel Data Model (2023, IHME HALE & OWID LE)](bayesian_model_report_2023.md) - **Primary analysis**: Bayesian hierarchical panel model analyzing HALE and Life Expectancy gender gaps using both temporal variation (2000-2023 for both outcomes) and cross-country variation simultaneously. Uses IHME HALE and OWID LE data for extended temporal coverage and methodological consistency. Provides posterior distributions for all parameters with uncertainty quantification and enables temporal counterfactual analysis.
-- [Causal model note (CausalPy Models 1 & 1b)](causal_results.md) - Minimal DAGs; **Model 1** (country FE) and **Model 1b** (country + year FE); comparison of standardized `Gap_*` slopes to the Bayesian **LE** model and **1 vs 1b** contrast (`beta_coefficients_le_ihme_nomid_nogrw_y2023_covid`).
-- [Bayesian Panel Data Model (2021, WHO HALE)](bayesian_model_report_2021.md) - **Legacy analysis**: Previous version using WHO HALE data (2000-2021). Retained for comparison and historical reference.
+- [Bayesian Panel Data Model](bayesian_model_report_2023.md): the **primary analysis**, a Bayesian hierarchical panel model of the LE and HALE gender gaps in OECD countries, 2000–2023, using IHME HALE and OWID life expectancy data.
+- [Causal Assumptions](causal_results.md): minimal causal diagrams (DAGs) for the model, fixed-effects regressions that implement them, and a comparison with the Bayesian estimates.
+- [Validation Experiments](validation.md): checks that the conclusions hold when WHO indicators are replaced with IHME indicators.
+- [Data Inventory](data_inventory.md): data sources, indicators, and download settings.
+- [Python to R](python_to_r.md): an early version of the model written in both PyMC and R (brms), with a comparison showing the two agree.
 
-- [Technical Report](tech_report.md) - Exploratory analysis using Elastic Net regression, developed as part of the model development process. Includes methodology, results, and counterfactual analysis using cross-sectional models.
+**Archive: working notes**
 
-- [Data Inventory](data_inventory.md) - Data sources and metadata.
+These reports document earlier stages of the analysis. They are kept for reference; the results above supersede them.
 
-- [Neoplasms Drilldown Analysis](neoplasms_report.md) - Granular analysis of the cancer mortality gender gap, including specific cancer types and risk factor attribution (Behavioral, Metabolic, Environmental).
-
-- [Exploratory Data Analysis](eda_report.md) - Summary of exploratory data analysis of gender gaps in HALE and Life Expectancy, including target variables, predictors, summary statistics, and relationships between variables.
-
-- [Validation Experiments](validation.md) - Model validation comparing WHO and IHME indicators to ensure results remain stable across data sources.
-
-- [Time Series Analysis](time_series_report.md) - Trends in health indicators and gender gaps (2000-2019), visualizing how HALE, Life Expectancy, and cause-specific mortality indicators have evolved over time.
-
-- [Temporal Analysis](temporal.md) - Evolution of health patterns and gender gaps over time (2000-2019). Runs predictive models at five-year intervals (2000, 2005, 2010, 2015, 2019) and compares results to examine how indicator importance and intervention opportunities have changed.
-
-- [Blog Post 1: Time Series Analysis](blog1_time_series.md) - First in a series on gender gaps in life expectancy: variation across OECD countries and over time, with cause-specific death rate gaps (drug disorders, homicide, suicide, road traffic).
-- [Blog Post 2: Causal Modeling](blog2_model.md) - Second in the series: a model to estimate how cause-specific death rate gaps affect the life expectancy gap, with coefficients and importance rankings.
-- [Blog Post 3: Counterfactuals](blog3_counterfactual.md) - Third in the series: counterfactual analysis for the United States—how much the gap could close if each cause-specific death rate gap were reduced to the best observed level—and how contributions have changed over time.
-- [Blog Post 4: International patterns and policy](blog4_international.md) - Fourth in the series: leading factors by country and region, European road-safety success, evidence that alcohol, smoking, cancer, suicide, and homicide are amenable to policy, and a technical note on country intercepts.
-- [Blog Post 5: HALE and the gender gap (draft)](blog5_hale.md) - Fifth in the series (draft for review): healthy life expectancy gap—coefficients, importance, USA counterfactuals, and HALE intercepts, alongside LE for comparison.
+- [Bayesian Panel Data Model, 2000–2021](bayesian_model_report_2021.md): the previous version, using WHO HALE data.
+- [Exploratory Data Analysis](eda_report.md): the outcomes and predictors, summary statistics, and relationships between variables.
+- [Time Series Analysis](time_series_report.md): trends in the gaps and in cause-specific death rates.
+- [Temporal Analysis](temporal.md): cross-sectional models at five-year intervals, to see how the important factors changed.
+- [Elastic Net Models](tech_report.md): the cross-sectional regression models that preceded the Bayesian model.
+- [Cancer Drilldown](neoplasms_report.md): the gender gap in cancer mortality by cancer type and risk factor.
 
 ## Methodology
 
@@ -79,3 +89,6 @@ If the USA could achieve best-in-class levels for key factors, the Life Expectan
 
 For detailed findings, counterfactual analysis, and uncertainty quantification, see the [Executive Summary](summary.md) or the full [Bayesian Panel Data Model (2023)](bayesian_model_report_2023.md) report. For comparison with the previous WHO HALE-based analysis, see the [2021 Legacy Report](bayesian_model_report_2021.md). For exploratory analysis using Elastic Net regression, see the [Technical Report](tech_report.md).
 
+## License
+
+The text of this site is under [Creative Commons Attribution 4.0 (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/); the [code](https://github.com/AllenDowney/LifeExpectancy) is under the MIT License.

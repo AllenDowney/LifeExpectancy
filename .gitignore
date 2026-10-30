@@ -248,6 +248,7 @@ notebooks/*.nbconvert.ipynb
 /report/
 /.cursor/
 /.vscode/
+jb/policy_report.md
 jb/policy_report_planning.md
 jb/talk_ds_conference_outline.md
 jb/report.md

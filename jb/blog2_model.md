@@ -1,3 +1,7 @@
+---
+description: "Which causes of death drive the life expectancy gender gap? A Bayesian panel model of the gaps in road traffic, suicide, homicide, and drug deaths."
+---
+
 # What Drives the Life Expectancy Gender Gap?
 
 *This is Part 2 in a series on gender gaps in life expectancy, what causes them, and what we can do about it.*
@@ -83,7 +87,7 @@ If either one is small, the product tends to be small.
 
 The following table shows coefficients (years per SD), standard deviations, and importance for each cause.
 
-```{include} ../notebooks/tables/importance_measures_le_ihme_nomid_nogrw_y2023_covid.html
+```{include} tables/importance_measures_le_ihme_nomid_nogrw_y2023_covid.html
 ```
 
 The predictor with the highest coefficient, road traffic, has a relatively low standard deviation, so its importance is only moderate (6th out of 13). 

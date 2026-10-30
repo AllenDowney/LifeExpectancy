@@ -1,3 +1,7 @@
+---
+description: "The gender gap in life expectancy ranges from 2.5 to 12.7 years across OECD countries and has shrunk over time, so it is not natural or inevitable."
+---
+
 # The Gender Gap in Life Expectancy
 
 *This is Part 1 in a series on gender gaps in life expectancy, what causes them, and what we can do about it.*

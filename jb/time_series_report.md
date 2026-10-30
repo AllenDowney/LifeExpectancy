@@ -1,3 +1,7 @@
+---
+description: "Trends in the life expectancy and HALE gender gaps in OECD countries, and in cause-specific death rates for men and women, from 2000 to 2023."
+---
+
 # Time Series Analysis: Trends in Health Indicators and Gender Gaps (2000-2023)
 
 ## Purpose

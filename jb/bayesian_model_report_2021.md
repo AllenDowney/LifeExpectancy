@@ -1,3 +1,7 @@
+---
+description: "An earlier version of the Bayesian panel model of the life expectancy and HALE gender gaps, using WHO data for 2000 to 2021 and COVID-19 deaths."
+---
+
 # Bayesian Panel Data Model: Analysis of HALE and Life Expectancy Gender Gaps (Extended Through 2021 with COVID-19)
 
 ## Purpose

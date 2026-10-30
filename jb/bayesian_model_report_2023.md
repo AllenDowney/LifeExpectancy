@@ -1,3 +1,7 @@
+---
+description: "A Bayesian hierarchical panel model of the life expectancy and HALE gender gaps in OECD countries, 2000 to 2023: coefficients, fit, and counterfactuals."
+---
+
 # Bayesian Panel Data Model: Analysis of HALE and Life Expectancy Gender Gaps (Extended Through 2023 with IHME HALE)
 
 ## Purpose
