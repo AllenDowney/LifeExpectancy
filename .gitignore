@@ -206,10 +206,6 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 
-# Quarto build output
-quarto/_site/
-quarto/bayesian_model_r_cache/
-
 # --- LifeExpectancy: large inputs & pipeline outputs (regenerate or download) ---
 
 # Raw and derived analysis data (IHME, H5, samples, model fits)
@@ -257,7 +253,6 @@ jb/talk_ds_conference_outline.md
 jb/report.md
 jb/blog3_outline.md
 jb/contribution_changes_2000_2023.md
-quarto/QUARTO_SITE_PLAN.md
 
 # Pages written into jb/ by notebooks/extract_*.py (not in the site's table of contents)
 jb/*_gap_change_*.md
