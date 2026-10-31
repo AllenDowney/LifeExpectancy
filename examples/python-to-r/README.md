@@ -29,7 +29,7 @@ The two fits agree to within Monte Carlo error. The posterior means of the coeff
 ## Running them
 
 - The input is `data/panel_le.csv`: one row per country and year (888 rows), with the life expectancy gap and the cause-specific gaps. It is derived from IHME data, which IHME's terms don't allow us to redistribute, so it is not in the repository. To make it, run [`notebooks/process.md`](../../notebooks/process.md) (see the main [README](../../README.md)), then `python make_panel.py` in this folder. With the February 2026 data, this reproduces the input the saved outputs were made with.
-- `utils.py` and `utils.R` are the helper modules as they were in January; the notebooks in this folder use these copies, not the ones in `notebooks/`.
+- `utils.py` and `utils.R` are symbolic links to the helper modules in [`notebooks/`](../../notebooks/). On Windows, where git may check out a link as a small text file, copy those two files here instead.
 - The environment in the repo's [`environment.yml`](../../environment.yml) includes Python, R, brms, and CmdStan, plus a Jupyter kernel for R. Run `make env` at the top of the repo, then `conda activate LifeExpectancy`.
 - Run the two model notebooks first, then the comparison. Results are written to `output/` and logs to `logs/` (both ignored by git).
 

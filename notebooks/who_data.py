@@ -895,7 +895,7 @@ class WHOGHOClient:
         if not df.empty:
             print(f"Years: {df['Year'].min():.0f} - {df['Year'].max():.0f}")
             print(f"Countries: {df['Country'].nunique()}")
-            print(f"Note: Maternal mortality is inherently female-specific")
+            print("Note: Maternal mortality is inherently female-specific")
         
         return df
 
@@ -1124,7 +1124,7 @@ class WHOGHOClient:
         if not df.empty:
             print(f"Years: {df['Year'].min():.0f} - {df['Year'].max():.0f}")
             print(f"Countries: {df['Country'].nunique()}")
-            print(f"Note: Intimate partner violence is inherently female-specific (prevalence indicator, not a death rate)")
+            print("Note: Intimate partner violence is inherently female-specific (prevalence indicator, not a death rate)")
         
         return df
 
@@ -1963,11 +1963,11 @@ def main():
                 
                 if not latest_maternal.empty:
                     print(f"\n=== Countries with Highest/Lowest Maternal Mortality Ratio in {latest_year:.0f} ===")
-                    print(f"\nTop 10 countries with highest maternal mortality ratio:")
+                    print("\nTop 10 countries with highest maternal mortality ratio:")
                     top_10 = latest_maternal.nlargest(10, 'MaternalMortalityRatio')[['Country', 'MaternalMortalityRatio']]
                     print(top_10.to_string(index=False))
                     
-                    print(f"\nBottom 10 countries with lowest maternal mortality ratio:")
+                    print("\nBottom 10 countries with lowest maternal mortality ratio:")
                     bottom_10 = latest_maternal.nsmallest(10, 'MaternalMortalityRatio')[['Country', 'MaternalMortalityRatio']]
                     print(bottom_10.to_string(index=False))
         else:
@@ -2065,11 +2065,11 @@ def main():
                 
                 if not latest_ipv.empty:
                     print(f"\n=== Countries with Highest/Lowest IPV Prevalence in {latest_year:.0f} ===")
-                    print(f"\nTop 10 countries with highest IPV prevalence:")
+                    print("\nTop 10 countries with highest IPV prevalence:")
                     top_10 = latest_ipv.nlargest(10, 'IPVPrevalence')[['Country', 'IPVPrevalence']]
                     print(top_10.to_string(index=False))
                     
-                    print(f"\nBottom 10 countries with lowest IPV prevalence:")
+                    print("\nBottom 10 countries with lowest IPV prevalence:")
                     bottom_10 = latest_ipv.nsmallest(10, 'IPVPrevalence')[['Country', 'IPVPrevalence']]
                     print(bottom_10.to_string(index=False))
         else:

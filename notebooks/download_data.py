@@ -4,7 +4,6 @@ import argparse
 import os
 
 import pandas as pd
-import requests
 
 
 def download_life_expectancy_gap(output_dir="data", filename=None, force=False):

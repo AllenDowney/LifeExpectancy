@@ -533,7 +533,7 @@ def plot_gap_timeseries(df, gap_col, countries=None, oecd_avg=True, title=None, 
         if not country_data.empty:
             country_name = country_data['Country'].iloc[0]
             color = get_country_color(code)
-            line = ax.plot(country_data['Year'], country_data[gap_col], 
+            ax.plot(country_data['Year'], country_data[gap_col], 
                           color=color, alpha=0.9, linewidth=1.5, 
                           label=country_name, zorder=2)
             
@@ -832,7 +832,7 @@ def plot_rate_timeseries(df, rate_col, countries=None, oecd_avg=True, title=None
         if not country_data.empty:
             country_name = country_data['Country'].iloc[0]
             color = get_country_color(code)
-            line = ax.plot(country_data['Year'], country_data[rate_col], 
+            ax.plot(country_data['Year'], country_data[rate_col], 
                           color=color, alpha=0.9, linewidth=1.5, 
                           label=country_name, zorder=2)
             

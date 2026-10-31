@@ -10,10 +10,9 @@ import pandas as pd
 import arviz as az
 import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
-from matplotlib import colors as mcolors
 from matplotlib.ticker import MaxNLocator
 
-from utils import decorate, AIBM_COLORS, code_to_who_country, add_title, add_subtext, add_logo
+from utils import AIBM_COLORS, code_to_who_country, add_title, add_subtext, add_logo
 from fig_utils import get_country_color, add_direct_line_labels, PREDICTOR_LABELS
 
 
@@ -173,11 +172,9 @@ def counterfactual_predictions_bayesian(
     y_mean = metadata['y_mean']
     predictors = metadata['predictors']
     countries = np.array(metadata['countries'])
-    years = np.array(metadata['years'])
     
     # Get country and year indices
     country_idx = country_to_idx[country]
-    year_idx = year_to_idx[year]
     
     # Build original predictor vector (standardized)
     X_original = np.array([current_row[p] for p in predictors])
@@ -359,13 +356,6 @@ def plot_counterfactual_forest(
               pad=25, x=0, y=1.03)
     ax.grid(True, alpha=0.3, axis='x')
     
-    # Add legend
-    legend_elements = [
-        Patch(facecolor=AIBM_COLORS['crimson'], label='Gap-Closing (reduces gap)'),
-        Patch(facecolor=AIBM_COLORS['blue'], label='Gap-Widening (increases gap)')
-    ]
-    # ax.legend(handles=legend_elements, loc='lower right', fontsize=10)
-    
     if subtext:
         add_subtext(subtext, x=0, y=-0.18, align_to_axes=True)
     if logo and os.path.isfile('logo-hq-small.png'):
@@ -446,7 +436,7 @@ def plot_country_intercepts(
     ax.set_yticks(y_pos)
     ax.set_yticklabels([code_to_who_country.get(c, c) for c in countries_sorted])
     ax.set_ylim(len(countries_sorted) - 0.5, -0.5)  # Tighten y-axis to data (no extra margin)
-    ax.set_xlabel(f'Country intercept (years)')
+    ax.set_xlabel('Country intercept (years)')
     add_title('Country Intercepts', 
               f'{target_name} random effects by country, 94% credible intervals', 
               pad=25, x=0, y=1.01)
@@ -602,7 +592,7 @@ def plot_counterfactual_bar(
               for x in viz_df_abs['Change_mean']]
     
     # Create horizontal bar chart
-    bars = ax.barh(y_pos, viz_df_abs['Change_mean'], color=colors, alpha=0.7)
+    ax.barh(y_pos, viz_df_abs['Change_mean'], color=colors, alpha=0.7)
     
     # Add error bars
     for i, (idx, row) in enumerate(viz_df_abs.iterrows()):
@@ -962,7 +952,7 @@ def plot_residuals_by_country(residuals_df, target_name='Life Expectancy gap',
     
     fig, ax = plt.subplots(figsize=(8, 9))
     line_props = dict(color=AIBM_COLORS['dark_gray'], linewidth=0.8)
-    bp = ax.boxplot(
+    ax.boxplot(
         data, vert=False, patch_artist=True, labels=labels,
         boxprops=dict(facecolor=AIBM_COLORS['light_purple'], alpha=0.7, edgecolor=AIBM_COLORS['dark_gray'], linewidth=0.8),
         whiskerprops=line_props,
@@ -1071,7 +1061,7 @@ def compute_positive_contributions_over_time(
         # Filter to gap-closing factors (negative change = reduces gap)
         gap_closing = counterfactuals_full[counterfactuals_full['Change mean'] < 0].copy()
         gap_closing_factors = gap_closing['Indicator'].tolist()
-        print(f"Using pre-computed counterfactuals_full DataFrame to identify gap-closing factors")
+        print("Using pre-computed counterfactuals_full DataFrame to identify gap-closing factors")
     elif counterfactual_results is not None:
         # Use pre-computed counterfactual results
         # Filter to gap-closing factors (negative change = reduces gap)
@@ -1086,7 +1076,7 @@ def compute_positive_contributions_over_time(
             # Only include gap-closing factors (negative change)
             if r['change_summary']['mean'] < 0:
                 gap_closing_factors.append(indicator)
-        print(f"Using pre-computed counterfactual results to identify gap-closing factors")
+        print("Using pre-computed counterfactual results to identify gap-closing factors")
     else:
         # Compute counterfactual results for reference year
         gap_predictors = [col for col in panel_df.columns if col.startswith('Gap_')]
@@ -1306,14 +1296,9 @@ def plot_positive_contributions_stacked_area(
                 if show_predicted_actual else 'Stacked contributions (2000-2023)')
     add_title(f'Positive-Contributing Factors: {country_name}', 
               subtitle, pad=25, x=0, y=1.02)
-    if show_predicted_actual:
-        if direct_labels:
-            # Only legend for Predicted/Actual; areas are direct-labeled
-            handles, leg_labels = ax.get_legend_handles_labels()
-            keep = [h for h, l in zip(handles, leg_labels) if l in ('Predicted Total', 'Actual Total')]
-            # ax.legend(handles=keep, bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=9, ncol=1)
-        else:
-            ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=9, ncol=1)
+    # With direct labels, the areas are labeled on the plot, so no legend
+    if show_predicted_actual and not direct_labels:
+        ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=9, ncol=1)
     # Grid at integer ticks only, extend only to 2023 (not into label area)
     grid_color = AIBM_COLORS['light_gray']
     grid_alpha = 0.7
@@ -1409,7 +1394,7 @@ def plot_positive_contributions_percentage(
     plt.show()
     
     # Display summary statistics
-    print(f"\nSummary Statistics:")
+    print("\nSummary Statistics:")
     print(f"  Mean percentage: {mean_pct:.2f}%")
     print(f"  Min percentage: {percentage_of_actual.min():.2f}%")
     print(f"  Max percentage: {percentage_of_actual.max():.2f}%")

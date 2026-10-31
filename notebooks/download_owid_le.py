@@ -25,7 +25,7 @@ df = pd.read_csv(
 
 print(f"Data fetched: {df.shape[0]} rows, {df.shape[1]} columns")
 print(f"Columns: {list(df.columns)}")
-print(f"\nFirst few rows:")
+print("\nFirst few rows:")
 print(df.head())
 
 # Save data to CSV
