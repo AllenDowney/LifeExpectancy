@@ -1,4 +1,4 @@
-.PHONY: env delete_env update_env clean lint format ipynb md
+.PHONY: env delete_env update_env clean lint format check ipynb md
 
 PROJECT_NAME = LifeExpectancy
 
@@ -47,3 +47,8 @@ lint:
 
 format:
 	black notebooks/*.py
+
+# Checks that need no data (also run by CI)
+check:
+	pyflakes notebooks/*.py .github/scripts/*.py
+	python .github/scripts/check_notebooks.py

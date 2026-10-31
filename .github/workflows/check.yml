@@ -1,0 +1,22 @@
+name: Check code
+
+# Static checks that need no data: pyflakes on the helper modules and a
+# syntax check of every notebook. The analysis itself needs IHME data,
+# which isn't in the repository, so CI doesn't run the notebooks.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install pyflakes jupytext
+      - run: make check
