@@ -11,7 +11,7 @@ dependencies:
   - jupyter
   - jupyterlab
   - jupytext
-  - papermill         # Parameterized runs (make papermill-bayes-counter-le)
+  - papermill         # Parameterized runs
   
   # Data manipulation
   - numpy

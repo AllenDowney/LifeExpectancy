@@ -1,4 +1,4 @@
-.PHONY: env delete_env update_env clean lint format tests ipynb md
+.PHONY: env delete_env update_env clean lint format ipynb md
 
 PROJECT_NAME = LifeExpectancy
 
@@ -47,7 +47,3 @@ lint:
 
 format:
 	black notebooks/*.py
-
-# Testing
-tests:
-	pytest --nbmake notebooks/*.ipynb

@@ -75,7 +75,6 @@ datawrapper_dir.mkdir(parents=True, exist_ok=True)
 # ============================================================================
 # MODEL CONFIGURATION: Override with papermill, e.g.:
 #   papermill ... -p COUNTRY_CODE USA -p UPLOAD_TO_DATAWRAPPER True
-# Or: make papermill-bayes-counter-le
 # ============================================================================
 # Options:
 #   '2019_nocovid' - Pre-COVID baseline (2000-2019, no COVID-19 predictor)
